@@ -1,0 +1,117 @@
+/* =========================================================
+   SYSTEM MAP VISUALS + JOURNEY STORYBOARD
+   ========================================================= */
+
+/* ---------- master mind map of how Jainil thinks ---------- */
+D.sm_mind = {
+  title: 'Master mind map · how Jainil thinks', h: 680, open: ['forces', 'toolkit'],
+  intro: 'Everything on this page in one expandable map. Open a branch, then select any node for its detail.',
+  data: { id: 'root', label: 'How Jainil thinks', children: [
+    { id: 'forces', label: 'Six forces', body: 'The system every business decision lands in.', children: D.eco.nodes.filter(n => n.id !== 'core').map(n => ({ id: 'f-' + n.id, label: n.label, body: n.body })) },
+    { id: 'stages', label: 'Seven-stage framework', body: 'Discover → Diagnose → Design → Structure → Connect → Execute → Improve.', children: D.framework.steps.map((s, i) => ({ id: 'st' + i, label: s.t, body: `<strong>${s.meta['Key question']}</strong> ${s.b}` })) },
+    { id: 'toolkit', label: 'Mapping toolkit', focus: true, body: 'The diagrams used to make a business visible before deciding anything.', children: [
+      ['Mind maps', 'Unilever, CLIQUE'], ['Problem trees', 'Unilever'], ['Causal diagrams', 'Unilever'], ['Journey maps', 'Unilever, CLIQUE'], ['Service blueprints', 'CLIQUE'], ['Business Model Canvas', 'CLIQUE'], ['Positioning matrices', 'CLIQUE'], ['Stakeholder maps', 'CLIQUE, Hydra'], ['Funnels & CRM', 'Hydra']
+    ].map(([n, p], i) => ({ id: 'tk' + i, label: n, focus: true, body: `Used in: ${p}.` })) },
+    { id: 'research', label: 'Research techniques', body: 'How evidence is gathered.', children: D.sm_tech.rows.map((r, i) => ({ id: 'rt' + i, label: r.name, body: r.cells.filter(Boolean).map(c => c.e).join(' ') })) },
+    { id: 'projects', label: 'Projects', body: 'Where the thinking was applied.', children: [
+      { id: 'p-u', label: 'Unilever · systems on the factory floor', body: THINK.uni.standout },
+      { id: 'p-c', label: 'CLIQUE · ecosystem design', body: THINK.clq.standout },
+      { id: 'p-h', label: 'Hydra · strategy to shelf', body: THINK.hyd.standout },
+      { id: 'p-d', label: 'DraftDigger · in development', body: 'A strategy and execution partner for founders. Digging to the roots.' } ] },
+    { id: 'insights', label: 'Insights', body: 'What the work taught.', children: D.sm_insights.items.slice(0, 8).map(([t, th, p], i) => ({ id: 'in' + i, label: t, body: `${th} · ${p}` })) }
+  ] }
+};
+
+/* ---------- mapping technique gallery: mini visuals ---------- */
+const MINI = {
+  mind: `<g stroke="currentColor" stroke-width="1.6" fill="none"><path d="M100 60C80 60 72 30 50 30M100 60C80 60 72 90 50 90M100 60C120 60 128 25 152 25M100 60C120 60 128 60 152 60M100 60C120 60 128 95 152 95"/></g><rect x="78" y="50" width="44" height="20" rx="6" fill="currentColor"/><g fill="var(--card)" stroke="currentColor" stroke-width="1.6"><rect x="20" y="22" width="34" height="16" rx="5"/><rect x="20" y="82" width="34" height="16" rx="5"/><rect x="150" y="17" width="34" height="16" rx="5"/><rect x="150" y="52" width="34" height="16" rx="5" class="hl"/><rect x="150" y="87" width="34" height="16" rx="5"/></g>`,
+  tree: `<g fill="var(--card)" stroke="currentColor" stroke-width="1.6">${[0, 1, 2, 3].map(c => [0, 1, 2].map(r => `<rect x="${12 + c * 46}" y="${16 + r * 32}" width="36" height="22" rx="5" ${c === 1 && r === 1 ? 'class="hl"' : ''}/>`).join('')).join('')}</g><g stroke="var(--blue)" stroke-width="1.6" fill="none"><path d="M48 59H58M94 59H104M140 59H150"/></g>`,
+  causal: `<g stroke="currentColor" stroke-width="1.6" fill="none"><path d="M60 30Q100 10 140 30M150 45Q165 75 130 95M115 100Q80 112 55 95M45 80Q30 50 55 35" marker-end="url(#ah)"/></g><g fill="var(--card)" stroke="currentColor" stroke-width="1.6"><circle cx="50" cy="35" r="12"/><circle cx="148" cy="35" r="12" class="hl"/><circle cx="125" cy="100" r="12"/><circle cx="50" cy="92" r="12"/></g><text x="96" y="66" font-size="16" text-anchor="middle" fill="var(--blue)" font-family="Geist Mono,monospace">R</text>`,
+  journey: `<path d="M14 70C40 30 60 95 90 55S140 25 186 50" stroke="currentColor" stroke-width="1.6" fill="none"/>${[14, 52, 90, 138, 186].map((x, i) => `<circle cx="${x}" cy="${[70, 70, 55, 33, 50][i]}" r="6" fill="${i === 2 ? 'var(--blue)' : 'var(--card)'}" stroke="currentColor" stroke-width="1.6"/>`).join('')}<path d="M14 100H186" stroke="var(--line-2)" stroke-dasharray="3 3"/>`,
+  blueprint: `${[0, 1, 2, 3, 4].map(r => `<g>${[0, 1, 2, 3, 4].map(c => `<rect x="${12 + c * 36}" y="${10 + r * 20}" width="30" height="14" rx="3" fill="${c === 2 ? 'var(--blue-50)' : 'var(--card)'}" stroke="${c === 2 ? 'var(--blue)' : 'currentColor'}" stroke-width="1.2"/>`).join('')}</g>`).join('')}<path d="M8 47H192M8 67H192" stroke="var(--orange)" stroke-dasharray="4 3" stroke-width="1.4"/>`,
+  bmc: `<g fill="var(--card)" stroke="currentColor" stroke-width="1.4"><rect x="10" y="10" width="36" height="70"/><rect x="46" y="10" width="36" height="35"/><rect x="46" y="45" width="36" height="35"/><rect x="82" y="10" width="36" height="70" class="hl"/><rect x="118" y="10" width="36" height="35"/><rect x="118" y="45" width="36" height="35"/><rect x="154" y="10" width="36" height="70"/><rect x="10" y="80" width="90" height="30"/><rect x="100" y="80" width="90" height="30"/></g>`,
+  matrix: `<path d="M20 10V105H190" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M105 10V105M20 57H190" stroke="var(--line-2)"/><g fill="currentColor"><circle cx="45" cy="40" r="5"/><circle cx="150" cy="85" r="5"/><circle cx="120" cy="70" r="5"/><circle cx="60" cy="88" r="5"/></g><circle cx="160" cy="28" r="7" fill="var(--orange)"/>`,
+  stake: `<g stroke="currentColor" stroke-width="1.4">${[[40, 25], [160, 25], [180, 65], [150, 100], [50, 100], [20, 62]].map(([x, y]) => `<path d="M100 60L${x} ${y}"/>`).join('')}</g><circle cx="100" cy="60" r="15" fill="currentColor"/><g fill="var(--card)" stroke="currentColor" stroke-width="1.6">${[[40, 25], [160, 25], [180, 65], [150, 100], [50, 100], [20, 62]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="9" ${i === 1 ? 'class="hl"' : ''}/>`).join('')}</g>`,
+  funnel: `${[0, 1, 2, 3, 4].map(i => `<rect x="${20 + i * 14}" y="${10 + i * 20}" width="${160 - i * 28}" height="15" rx="4" fill="${i === 4 ? 'var(--blue)' : 'var(--blue-50)'}" stroke="var(--blue)" stroke-width="1.2"/>`).join('')}`,
+  swot: `<g fill="var(--card)" stroke="currentColor" stroke-width="1.4"><rect x="20" y="10" width="80" height="47"/><rect x="100" y="10" width="80" height="47"/><rect x="20" y="57" width="80" height="47"/><rect x="100" y="57" width="80" height="47"/></g><g font-family="Instrument Serif,serif" font-size="24"><text x="30" y="40" fill="var(--blue)">S</text><text x="110" y="40" fill="var(--orange-ink)">W</text><text x="30" y="88" fill="var(--blue)">O</text><text x="110" y="88" fill="var(--orange-ink)">T</text></g>`,
+  timeline: `<path d="M14 60H186" stroke="currentColor" stroke-width="1.6"/><path d="M14 60H110" stroke="var(--blue)" stroke-width="2.4"/>${[14, 48, 82, 116, 150, 186].map((x, i) => `<circle cx="${x}" cy="60" r="${i === 3 ? 8 : 5.5}" fill="${i < 3 ? 'var(--blue)' : i === 3 ? 'var(--blue)' : 'var(--card)'}" stroke="${i <= 3 ? 'var(--blue)' : 'currentColor'}" stroke-width="1.6"/>`).join('')}${[14, 82, 150].map(x => `<rect x="${x - 14}" y="22" width="28" height="12" rx="3" fill="var(--bg-3)"/>`).join('')}`,
+  canvas: `<g stroke="currentColor" stroke-width="1.6" fill="none"><rect x="20" y="15" width="160" height="90" rx="8"/><path d="M20 45H180M75 15V105"/></g><g fill="var(--blue)"><rect x="88" y="58" width="50" height="8" rx="4"/><rect x="88" y="74" width="72" height="8" rx="4" opacity=".5"/><rect x="88" y="90" width="38" height="8" rx="4" opacity=".3"/></g>`
+};
+D.sm_gallery = [
+  ['Mind map', 'mind', 'Lays out everything a product or venture connects to, from one centre.', 'Starting a new problem, before narrowing.', '#/work/unilever/6'],
+  ['Problem tree', 'tree', 'Separates root causes, visible problems, consequences and opportunities.', 'When the visible problem might not be the real one.', '#/work/unilever/4'],
+  ['Causal loop diagram', 'causal', 'Shows how forces reinforce each other: demand, visibility, perception.', 'When effects come back around as causes.', '#/work/unilever/6'],
+  ['Journey map', 'journey', 'Follows a customer or creator step by step through an experience.', 'When the experience matters as much as the product.', '#/work/clique/6'],
+  ['Service blueprint', 'blueprint', 'Five layers from what the customer sees to what supports it backstage.', 'When a service has many moving parts.', '#/work/clique/6'],
+  ['Business Model Canvas', 'bmc', 'Nine blocks that describe how a business creates and captures value.', 'When structuring a venture idea.', '#/work/clique/6'],
+  ['Positioning matrix', 'matrix', 'Places options on two axes to reveal the gap worth occupying.', 'When deciding where to compete.', '#/work/clique/3'],
+  ['Stakeholder map', 'stake', 'Shows everyone a plan depends on, and what each gives and gets.', 'Before approaching partners or institutions.', '#/work/clique/2'],
+  ['SWOT', 'swot', 'Strengths, weaknesses, opportunities and threats in one view.', 'When pressure-testing a concept.', '#/work/clique/4'],
+  ['Sales funnel & CRM', 'funnel', 'Tracks prospects from first contact to placement.', 'When outreach becomes a system.', '#/work/hydra/6'],
+  ['Timeline', 'timeline', 'Puts experiences in order so the thread between them shows.', 'When telling a story over time.', '#/about/0'],
+  ['Strategy explorer', 'canvas', 'Breaks a brand into positioning, personality, promise and placement.', 'When building a brand from scratch.', '#/work/hydra/5']
+];
+function galleryHTML() {
+  return `<div class="gal">${D.sm_gallery.map(([n, k, what, when, href], i) => `<a class="gal-c rv" href="${href}"><span class="gal-v" aria-hidden="true"><svg viewBox="0 0 200 120"><defs><marker id="ah${i}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>${MINI[k].replace('url(#ah)', `url(#ah${i})`)}</svg></span><span class="t-label">Technique ${String(i + 1).padStart(2, '0')}</span><strong>${n}</strong><span class="gal-d">${what}</span><span class="gal-w"><b>When:</b> ${when}</span><span class="lib-go">See it live <span class="arrow" aria-hidden="true">→</span></span></a>`).join('')}</div>`;
+}
+
+/* ---------- live diagram studio ---------- */
+function studioHTML() {
+  return tabs([
+    { t: 'Problem tree', html: W('ptree', 'uni_ptree') },
+    { t: 'Causal diagram', html: W('graph', 'causal') },
+    { t: 'Ecosystem mind map', html: W('mindmap', 'clique_mm') },
+    { t: 'Positioning matrix', html: W('matrix', 'clique_pos') },
+    { t: 'Service blueprint', html: W('blueprint', 'blueprint') },
+    { t: 'Business Model Canvas', html: W('bmc', 'bmc') },
+    { t: 'Stakeholder power map', html: W('matrix', 'hydra_stake') }
+  ], 'Live diagrams');
+}
+
+/* ---------- journey storyboard ---------- */
+const SCENES = [
+  `<rect x="96" y="70" width="128" height="58" rx="6" fill="#7A4A2A"/><path d="M96 86H224M128 70V128M160 70V128M192 70V128" stroke="#5C361E" stroke-width="2"/><rect x="132" y="88" width="56" height="22" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="2"/><text x="160" y="103" text-anchor="middle" font-size="10" font-family="Geist Mono,monospace" fill="var(--blue)">NEW!</text><g fill="var(--orange)"><path d="M240 52l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/></g><rect x="236" y="104" width="46" height="22" rx="11" fill="var(--blue)"/><text x="259" y="119" text-anchor="middle" font-size="11" fill="#fff" font-family="Inter,Arial" font-weight="700">₹5–10</text>`,
+  `<path d="M80 150V80H240V150" fill="var(--card)" stroke="currentColor" stroke-width="2.4"/><path d="M70 80L90 56H230L250 80Z" fill="var(--orange-50)" stroke="currentColor" stroke-width="2.4"/><path d="M90 80q10 12 20 0q10 12 20 0q10 12 20 0q10 12 20 0q10 12 20 0q10 12 20 0q10 12 20 0" stroke="var(--orange)" stroke-width="2.4" fill="none"/><rect x="104" y="98" width="40" height="52" fill="var(--bg-3)" stroke="currentColor" stroke-width="2"/><rect x="164" y="98" width="56" height="30" fill="var(--blue-50)" stroke="currentColor" stroke-width="2"/><path d="M196 18h80a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10h-52l-14 14v-14h-14a10 10 0 0 1-10-10V28a10 10 0 0 1 10-10z" fill="var(--card)" stroke="var(--blue)" stroke-width="2"/><circle cx="236" cy="38" r="9" fill="none" stroke="var(--blue)" stroke-width="2"/><path d="M232 50h8" stroke="var(--blue)" stroke-width="2"/>`,
+  `<path d="M60 40L100 56L140 40L180 56L220 40L260 56" stroke="currentColor" stroke-width="1.6" fill="none"/>${[80, 120, 160, 200, 240].map((x, i) => `<path d="M${x} ${i % 2 ? 54 : 46}l-7 14h14z" fill="${i % 2 ? 'var(--orange)' : 'var(--blue)'}"/>`).join('')}<rect x="76" y="96" width="168" height="54" rx="4" fill="var(--card)" stroke="currentColor" stroke-width="2.4"/><g fill="#7A4A2A" stroke="currentColor" stroke-width="2"><path d="M110 76h22l-3 20h-16z"/><path d="M150 72h22l-3 24h-16z" fill="var(--orange-50)"/><path d="M190 76h22l-3 20h-16z"/></g><path d="M262 104l14 14 14-6 16 22" stroke="var(--orange-ink)" stroke-width="2.4" fill="none"/><path d="M300 134l6 0 0-7" stroke="var(--orange-ink)" stroke-width="2.4" fill="none"/>`,
+  `<rect x="96" y="104" width="128" height="10" rx="3" fill="currentColor"/><path d="M110 114v40M210 114v40" stroke="currentColor" stroke-width="3"/><path d="M134 70h42v22a12 12 0 0 1-12 12h-18a12 12 0 0 1-12-12z" fill="var(--card)" stroke="currentColor" stroke-width="2.4"/><path d="M176 76h6a7 7 0 0 1 0 14h-6" stroke="currentColor" stroke-width="2.4" fill="none"/><path d="M146 48q4 6 0 12M158 44q4 7 0 14M170 48q4 6 0 12" stroke="var(--ink-3)" stroke-width="2" fill="none"/><text x="250" y="78" font-size="44" font-family="Instrument Serif,serif" fill="var(--blue)">?</text>`,
+  `<path d="M160 40L100 64L160 88L220 64Z" fill="currentColor"/><path d="M124 74v22c0 8 16 14 36 14s36-6 36-14V74" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M220 64v32" stroke="var(--orange)" stroke-width="2.4"/><circle cx="220" cy="100" r="4" fill="var(--orange)"/><rect x="232" y="104" width="56" height="44" rx="3" fill="var(--card)" stroke="currentColor" stroke-width="2"/><path d="M240 116h40M240 126h28M240 136h34" stroke="var(--blue)" stroke-width="2"/><path d="M60 140l30-30 6 6-30 30-8 2z" fill="var(--orange-50)" stroke="currentColor" stroke-width="2"/>`,
+  `${[[90, 60], [230, 60], [100, 132], [222, 132]].map(([x, y]) => `<path d="M160 96L${x} ${y}" stroke="currentColor" stroke-width="2"/>`).join('')}<circle cx="160" cy="96" r="20" fill="currentColor"/><text x="160" y="101" text-anchor="middle" font-size="12" fill="var(--card)" font-family="Inter,Arial" font-weight="700">JV</text><g font-family="Geist Mono,monospace" font-size="9" text-anchor="middle">${[[90, 60, 'UNILEVER', 'var(--blue-50)'], [230, 60, 'HYDRA', 'var(--bg-3)'], [100, 132, 'CLIQUE', 'var(--orange-50)'], [222, 132, 'DRAFTDIGGER', 'var(--orange-50)']].map(([x, y, t, f]) => `<rect x="${x - 38}" y="${y - 12}" width="76" height="24" rx="12" fill="${f}" stroke="currentColor" stroke-width="1.6"/><text x="${x}" y="${y + 3}" fill="currentColor">${t}</text>`).join('')}</g>`,
+  `<path d="M60 150H260" stroke="currentColor" stroke-width="2"/><rect x="190" y="50" width="56" height="100" rx="3" fill="var(--blue-50)" stroke="currentColor" stroke-width="2.4"/><circle cx="234" cy="102" r="3" fill="currentColor"/><path d="M70 110h90" stroke="var(--blue)" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/><path d="M150 100l14 10-14 10" stroke="var(--blue)" stroke-width="3" fill="none"/><circle cx="92" cy="74" r="16" fill="var(--card)" stroke="currentColor" stroke-width="2.4"/><path d="M104 86l12 12" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/><circle cx="92" cy="74" r="5" fill="var(--orange)"/>`
+];
+D.storyboard = {
+  frames: [
+    { when: 'Grade 8', t: 'The first selling experiment', scene: 'A school bag of chocolates. New stickers, better presentation, the same product.', caption: 'Repackaged chocolates and goodies with stickers and better presentation. Earnings of roughly ₹5–₹10.', thread: 'Presentation changes how a product is seen → brand & market strategy', tag: 'done' },
+    { when: 'Grade 9', t: 'Walking into local businesses', scene: 'A neighbourhood café. A student walks in with ideas.', caption: 'Approached nearby cafés, hotels and restaurants with observations and suggestions.', thread: 'Observe, then speak to the person who decides → research & business development', tag: 'done' },
+    { when: 'First year', t: 'Regal Vibes', scene: 'A festival stall: cocoa, cold cocoa and milkshakes. The numbers don\'t add up.', caption: 'A beverage venture for a college festival. It was not profitable.', thread: 'A good product is not the same as a working business model', tag: 'done' },
+    { when: 'College years', t: 'An independent café experiment', scene: 'One table, one cup, one open question.', caption: 'A café experiment, separate from CLIQUE and Taco Tango. ' + ph('ADD DETAILS'), thread: 'Testing ideas in the real world', tag: 'done' },
+    { when: 'Nirma University', t: 'Communication Design', scene: 'A sketchbook, a pen, and a new way of looking at problems.', caption: 'Bachelor of Communication Design, Nirma University, Ahmedabad.', thread: 'Human-centred thinking, storytelling, communication, problem-solving', tag: 'done' },
+    { when: 'Now', t: 'Strategy, systems, ventures', scene: 'One person at the centre of four connected projects.', caption: 'Unilever project internship, CMO at Hydra Enterprise, co-founder of CLIQUE FOODOVATION, founder of DraftDigger.', thread: 'Business is a system of connections', tag: 'ongoing' },
+    { when: 'Next', t: 'Britannia Industries', scene: 'A door, a path, a magnifier: the next room to understand.', caption: 'Upcoming Consumer Market Insights (CMI) internship.', thread: 'Deeper consumer and market insight', tag: 'upcoming' }
+  ]
+};
+function wStoryboard(el, cfg) {
+  const F = cfg.frames; let i = 0, timer = null;
+  const svg = k => `<svg viewBox="0 0 320 180" class="sb-svg" aria-hidden="true"><rect width="320" height="180" fill="var(--bg-2)"/>${SCENES[k]}</svg>`;
+  el.innerHTML = `<div class="sb">
+    <div class="sb-stage"><div class="sb-frame">${svg(0)}<span class="sb-n"></span></div><div class="sb-text" aria-live="polite"></div></div>
+    <div class="sb-ctl"><button class="btn btn-sm btn-secondary" data-sb="-1" aria-label="Previous scene">←</button><button class="btn btn-sm btn-primary sb-play" type="button" aria-pressed="false">Play the story</button><button class="btn btn-sm btn-secondary" data-sb="1" aria-label="Next scene">→</button><span class="t-label sb-c"></span></div>
+    <div class="sb-strip" role="tablist" aria-label="Storyboard frames">${F.map((f, k) => `<button role="tab" class="sb-thumb" data-k="${k}" aria-selected="${k === 0}" aria-label="Scene ${k + 1}: ${esc(f.when)}, ${esc(f.t)}"><span class="sb-tf">${svg(k)}</span><span class="sb-tl"><b>${String(k + 1).padStart(2, '0')}</b> ${esc(f.when)}</span></button>`).join('')}</div>
+  </div>`;
+  const frame = $('.sb-frame', el), text = $('.sb-text', el), play = $('.sb-play', el);
+  function go(k, user) {
+    i = (k + F.length) % F.length; const f = F[i];
+    frame.innerHTML = `${svg(i)}<span class="sb-n">Scene ${String(i + 1).padStart(2, '0')} / ${String(F.length).padStart(2, '0')}</span>`;
+    frame.classList.remove('sb-in'); void frame.offsetWidth; frame.classList.add('sb-in');
+    text.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(f.when)} ${tag(f.tag)}</span><h3 class="t-h3">${esc(f.t)}</h3><p class="sb-scene">${esc(f.scene)}</p><p>${f.caption}</p><p class="sb-thread"><b>Thread to today</b>${esc(f.thread)}</p></div>`;
+    $$('.sb-thumb', el).forEach((b, j) => b.setAttribute('aria-selected', j === i));
+    $('.sb-c', el).textContent = `${i + 1} / ${F.length}`;
+    if (user) stop();
+  }
+  function stop() { clearInterval(timer); timer = null; play.textContent = 'Play the story'; play.setAttribute('aria-pressed', 'false'); }
+  play.addEventListener('click', () => { if (timer) return stop(); play.textContent = 'Pause'; play.setAttribute('aria-pressed', 'true'); if (i === F.length - 1) go(0); timer = setInterval(() => { if (!el.isConnected || el.closest('[hidden]') || i === F.length - 1) { stop(); return; } go(i + 1); }, RM.matches ? 4000 : 3200); });
+  $$('[data-sb]', el).forEach(b => b.addEventListener('click', () => go(i + +b.dataset.sb, true)));
+  $$('.sb-thumb', el).forEach(b => b.addEventListener('click', () => go(+b.dataset.k, true)));
+  $('.sb-strip', el).addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); go(i + (e.key === 'ArrowRight' ? 1 : -1), true); $$('.sb-thumb', el)[i].focus(); } });
+  go(cfg.start || 0);
+}
+WIDGETS.storyboard = wStoryboard;

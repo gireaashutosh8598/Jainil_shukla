@@ -1,0 +1,141 @@
+/* =========================================================
+   UNILEVER DEEP DIVE
+   Mapping plan, market lens, consumer insights, strategy and
+   the intern contribution map. Built only on the documented
+   internship scope; illustrative diagrams are labelled.
+   ========================================================= */
+
+/* ---------- mapping plan (swimlane) ---------- */
+D.uni_plan = {
+  title: 'Mapping plan · how the two months were structured',
+  cols: ['Understand the system', 'Scope the problem', 'Analyse the mechanisms', 'Connect to the business'],
+  when: ['Month 1', 'Month 2', 'Month 2', 'Month 2'],
+  rows: [
+    { name: 'Key question', cells: ['How does this factory actually run?', 'Which problem is worth focusing on?', 'Where in the product and process do defects start?', 'What does this mean for cost, people and the consumer?'] },
+    { name: 'Method', cells: ['On-site observation, organisational mapping', 'Problem scoping on bottle production, packaging and dispensing', 'Mechanism analysis of caps and pumps; hypothesis framing', 'Systems tracing into labour, machinery and consumer usage'] },
+    { name: 'Map produced', cells: ['FMCG ecosystem mind map', 'Problem tree', 'Mechanism explorer', 'Causal diagram, consumer journey'] },
+    { name: 'Output', cells: ['A working picture of premises, hierarchy and functions', 'A focused problem statement', 'A vacuum dispensing concept and a temperature hypothesis', 'Recommendations: standardise, simplify, measure'] },
+    { name: 'Status', cells: ['done', 'done', 'concept', 'rec'] }
+  ]
+};
+function wSwimlane(el, cfg) {
+  const n = cfg.cols.length; let sel = null;
+  const cell = (r, v) => r.name === 'Status' ? tag(v) : esc(v);
+  let grid = `<div class="sl" style="grid-template-columns:150px repeat(${n},minmax(150px,1fr))"><div class="sl-l sl-corner">Lane / Phase</div>${cfg.cols.map((c, k) => `<button class="sl-h" data-col="${k}" aria-pressed="false"><span class="t-label">${esc(cfg.when[k])}</span>${String(k + 1).padStart(2, '0')} ${esc(c)}</button>`).join('')}`;
+  cfg.rows.forEach(r => { grid += `<div class="sl-l">${esc(r.name)}</div>${r.cells.map((v, k) => `<div class="sl-c" data-col="${k}">${cell(r, v)}</div>`).join('')}`; });
+  grid += '</div>';
+  const mob = `<div class="sl-mobile"><div class="chips" style="padding:14px 18px" role="group" aria-label="Phase">${cfg.cols.map((c, k) => `<button class="chip" data-m="${k}" aria-pressed="${k === 0}">${String(k + 1).padStart(2, '0')} ${esc(c)}</button>`).join('')}</div><div class="bp-stack"></div></div>`;
+  el.innerHTML = frame(cfg.title, tag('done'), `<div class="sl-wrap">${grid}</div>${mob}`, '<span>Select a phase to follow it down every lane</span><span>Read each column top to bottom: question → method → map → output.</span>');
+  const stack = $('.sl-mobile .bp-stack', el);
+  const pm = k => { stack.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(cfg.when[k])}</span><strong>${esc(cfg.cols[k])}</strong></div>` + cfg.rows.map(r => `<div class="fp-anim"><span class="t-label">${esc(r.name)}</span>${cell(r, r.cells[k])}</div>`).join(''); $$('[data-m]', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.m === k)); };
+  $$('[data-m]', el).forEach(b => b.addEventListener('click', () => pm(+b.dataset.m))); pm(0);
+  $$('.sl-h', el).forEach(b => b.addEventListener('click', () => { const k = +b.dataset.col; sel = sel === k ? null : k; $$('.sl-h', el).forEach(h => h.setAttribute('aria-pressed', +h.dataset.col === sel)); $$('.sl-c', el).forEach(c => c.classList.toggle('on', +c.dataset.col === sel)); }));
+}
+WIDGETS.swimlane = wSwimlane;
+
+/* ---------- market lens: dispensing format landscape ---------- */
+D.uni_formats = {
+  id: 'uni_formats', title: 'Market lens · personal-care dispensing formats', tag: ['illus', 'Illustrative'],
+  x: ['Simple to manufacture', 'Complex to manufacture'], y: ['Harder to dispense', 'Easy to dispense'],
+  q: ['Easy and simple', 'Easy but complex', 'Hard and simple', 'Hard and complex'],
+  intro: 'A general look at the dispensing formats used across personal care, placed by judgement rather than data. The question it asks: is there a format that is easy for the consumer and simple for the factory?',
+  points: [
+    { id: 'flip', label: 'Flip-top cap', x: 22, y: 52, desc: 'Few parts and quick to fit, but thicker products can be slow to come out.' },
+    { id: 'screw', label: 'Screw cap', x: 14, y: 26, desc: 'Simplest closure, least convenient for daily use.' },
+    { id: 'spring', label: 'Spring-loaded pump', x: 80, y: 74, desc: 'Convenient dose, but springs add parts, assembly steps and failure points. The format studied in the internship.' },
+    { id: 'tube', label: 'Squeeze tube', x: 34, y: 66, desc: 'Simple and easy to empty, but a different pack format altogether.' },
+    { id: 'vac', label: 'Vacuum dispensing (concept)', x: 50, y: 86, us: true, desc: 'The spring-free concept Jainil proposed. The aim: easy dispensing with fewer parts. Not prototyped or tested.' }
+  ]
+};
+
+/* ---------- consumer insight moments ---------- */
+D.uni_moments = {
+  title: 'Consumer insight map · five moments where the dispenser matters',
+  items: [
+    { t: 'First use', y: 30, d: 'The first press sets the expectation for the whole bottle.', i: 'If the pump or cap fights back on day one, the product feels cheaper than it is.', s: 'research' },
+    { t: 'Daily routine', y: 42, d: 'Used once or twice a day, often in a hurry.', i: 'Small frictions repeat every day. That repetition is what turns into an opinion of the brand.', s: 'research' },
+    { t: 'Cold mornings', y: 78, d: 'A possible seasonal change in how thick the product feels.', i: 'If colder temperatures thicken the product, dispensing may feel worse in winter. Unverified.', s: 'hyp' },
+    { t: 'The last of the bottle', y: 70, d: 'When the pump stops reaching product.', i: 'How fully and how quickly a bottle empties may shape the moment a consumer decides to buy again.', s: 'hyp' },
+    { t: 'Repurchase', y: 36, d: 'Standing at the shelf again.', i: 'Bottle-emptying duration could act as an early signal of repurchase timing.', s: 'hyp' }
+  ],
+  note: ph('ADD ANY CONSUMER FEEDBACK OR OBSERVATION YOU COLLECTED, IF APPROVED')
+};
+function wMoments(el, cfg) {
+  const it = cfg.items, n = it.length; let i = 0;
+  const X = k => 40 + k * (520 / (n - 1));
+  const pts = it.map((m, k) => [X(k), 20 + m.y * 1.4]);
+  let d = `M${pts[0][0]},${pts[0][1]}`; for (let k = 1; k < n; k++) { const [x0, y0] = pts[k - 1], [x1, y1] = pts[k]; const mx = (x0 + x1) / 2; d += ` C${mx},${y0} ${mx},${y1} ${x1},${y1}`; }
+  el.innerHTML = frame(cfg.title, tag('illus', 'Conceptual, not measured'), `<div class="mo"><svg class="mo-svg" viewBox="0 0 600 190" role="img" aria-label="Friction curve across five consumer moments"><text x="8" y="22" class="mo-ax">Smooth</text><text x="8" y="178" class="mo-ax">Friction</text><path d="M40 96H560" stroke="var(--line-2)" stroke-dasharray="4 4"/><path d="${d}" fill="none" stroke="var(--ink)" stroke-width="2.2"/>${pts.map(([x, y], k) => `<g class="mo-pt" data-k="${k}" tabindex="0" role="button" aria-label="${esc(it[k].t)}"><circle cx="${x}" cy="${y}" r="16" fill="transparent"/><circle class="mo-dot ${it[k].s}" cx="${x}" cy="${y}" r="8"/><text x="${x}" y="${y > 100 ? y - 16 : y + 26}" text-anchor="middle" class="mo-lb">${esc(it[k].t)}</text></g>`).join('')}</svg>
+    <div class="chips chips-row" role="group" aria-label="Moments">${it.map((m, k) => `<button class="chip" data-c="${k}" aria-pressed="${k === 0}">${esc(m.t)}</button>`).join('')}</div><div class="g-panel" aria-live="polite"></div></div>`,
+    `<span>Higher on the curve means smoother; lower means more friction. Select a moment.</span><span>${cfg.note}</span>`);
+  const panel = $('.g-panel', el);
+  const r = () => { const m = it[i]; $$('.mo-pt', el).forEach((g, k) => g.classList.toggle('on', k === i)); $$('[data-c]', el).forEach((b, k) => b.setAttribute('aria-pressed', k === i)); panel.innerHTML = `<div class="fp-anim"><div class="row between"><h4>${String(i + 1).padStart(2, '0')} · ${esc(m.t)}</h4>${tag(m.s)}</div><p style="margin-top:6px"><strong>Moment:</strong> ${esc(m.d)}</p><p style="margin-top:6px"><strong>Insight:</strong> ${esc(m.i)}</p></div>`; };
+  $$('.mo-pt', el).forEach(g => { g.addEventListener('click', () => { i = +g.dataset.k; r(); }); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); i = +g.dataset.k; r(); } }); });
+  $$('[data-c]', el).forEach(b => b.addEventListener('click', () => { i = +b.dataset.c; r(); }));
+  r();
+}
+WIDGETS.moments = wMoments;
+
+/* ---------- strategy: goal → levers → actions ---------- */
+D.uni_tree = {
+  goal: 'Consistent dispensing with simpler production',
+  levers: [
+    { t: 'Product design', a: [['Explore spring-free vacuum dispensing', 'concept'], ['Reduce closure complexity', 'rec']] },
+    { t: 'Manufacturing', a: [['Standardise bottle and cap formats', 'rec'], ['Simplify machine set-ups', 'rec']] },
+    { t: 'Evidence', a: [['Test the temperature hypothesis properly', 'hyp'], ['Track bottle-emptying duration', 'hyp']] }
+  ]
+};
+function strategyTreeHTML(T, l1 = 'Goal', l2 = 'Lever') {
+  return `<div class="stree"><div class="st-goal"><span class="t-label">${l1}</span><strong>${esc(T.goal)}</strong></div><div class="st-levers">${T.levers.map(l => `<div class="st-lever"><div class="st-lt"><span class="t-label">${l2}</span><strong>${esc(l.t)}</strong></div><ul>${l.a.map(([a, s]) => `<li><span>${esc(a)}</span>${tag(s)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+}
+D.uni_prio = {
+  id: 'uni_prio', title: 'Where to act first · impact vs effort', tag: ['illus', 'Illustrative prioritisation'],
+  x: ['Less effort', 'More effort'], y: ['Lower impact', 'Higher impact'],
+  q: ['Quick wins', 'Big bets', 'Fill-ins', 'Reconsider'],
+  intro: 'A judgement call, not a measurement: how each recommendation might compare on effort and expected impact. Drag to argue a different order.',
+  points: [
+    { id: 'temp', label: 'Test temperature hypothesis', x: 24, y: 58, desc: 'Low effort to test properly, and it decides whether a seasonal fix is needed at all.' },
+    { id: 'track', label: 'Track emptying duration', x: 30, y: 44, desc: 'Uses information that may already exist; links operations to consumer behaviour.' },
+    { id: 'std', label: 'Standardise formats', x: 70, y: 80, desc: 'Bigger change, but benefits machines, labour and quality together.' },
+    { id: 'setup', label: 'Simplify machine set-ups', x: 48, y: 64, desc: 'Follows naturally from fewer formats.' },
+    { id: 'vac', label: 'Vacuum dispensing concept', x: 84, y: 72, us: true, desc: 'Highest uncertainty: a new mechanism needs design work and testing.' }
+  ]
+};
+
+/* ---------- intern contribution map ---------- */
+D.uni_contrib = {
+  title: 'Intern contribution map · where I added value', h: 540, mh: 640,
+  intro: 'Everything Jainil worked on during the internship, and what he did in each area. Select a node.',
+  nodes: [
+    { id: 'j', label: 'Jainil', sub: 'project intern', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'A two-month project intern who learned the system first, then focused on one problem and traced it end to end.' },
+    { id: 'env', label: 'Manufacturing environment', x: 18, y: 18, m: [26, 9], body: '<strong>Observed.</strong> Walked the premises and manufacturing environments to see how production actually runs.', tags: ['done'] },
+    { id: 'org', label: 'Hierarchy & functions', x: 50, y: 10, m: [74, 9], body: '<strong>Mapped.</strong> Learned the organisational hierarchy and the functions involved in production.', tags: ['done'] },
+    { id: 'line', label: 'Bottle production & packaging', x: 82, y: 18, m: [80, 30], body: '<strong>Scoped.</strong> Focused on defective shampoo and body-lotion bottles in production and packaging.', tags: ['done'] },
+    { id: 'mech', label: 'Caps & pump mechanisms', x: 90, y: 54, m: [80, 52], body: '<strong>Analysed.</strong> Studied grooved caps and spring-loaded pumps, and proposed a spring-free vacuum concept.', tags: ['done', 'concept'] },
+    { id: 'mach', label: 'Machinery set-ups', x: 78, y: 86, m: [76, 76], body: '<strong>Traced.</strong> Looked at machinery configurations and adjustments, and the case for standardisation.', tags: ['done', 'rec'] },
+    { id: 'lab', label: 'Cap-fitting labour', x: 22, y: 86, m: [24, 76], body: '<strong>Traced.</strong> Considered the labour needed to fit caps and how simpler designs could reduce it.', tags: ['done'] },
+    { id: 'con', label: 'Consumer experience', x: 10, y: 54, m: [20, 52], body: '<strong>Connected.</strong> Linked dispensing to the consumer journey and raised emptying duration as a repurchase signal.', tags: ['hyp'] },
+    { id: 'team', label: 'Mentors & team', cls: 'c-orange', x: 50, y: 93, m: [50, 92], body: 'Who the work was shared with, and the feedback received. ' + ph('ADD MENTOR / TEAM AND FEEDBACK, IF APPROVED'), tags: ['research'] }
+  ],
+  edges: [['j', 'env', 'observed'], ['j', 'org', 'mapped'], ['j', 'line', 'scoped'], ['j', 'mech', 'analysed'], ['j', 'mach', 'traced'], ['j', 'lab', 'traced'], ['j', 'con', 'connected'], ['j', 'team', 'shared', 1], ['line', 'mech'], ['mech', 'mach'], ['mach', 'lab'], ['mech', 'con']]
+};
+
+const UNI_HELP = [
+  ['An extra pair of eyes on the floor', 'Spent the first month observing the premises, environments, hierarchy and functions before suggesting anything.', 'Observations from someone without assumptions about how things "have always been done".'],
+  ['A bridge between functions', 'Followed one problem across product design, the packaging line, machinery and labour.', 'A single view of an issue that is usually split between different teams.'],
+  ['Questions the team could test', 'Turned hunches into clear hypotheses, such as the temperature effect, instead of presenting them as facts.', 'Something specific to check, rather than an opinion to debate.'],
+  ['Concepts worth evaluating', 'Proposed a spring-free vacuum dispensing concept and the case for standardising formats.', 'Starting points for the teams that own design and production.'],
+  ['A consumer lens on a factory problem', 'Connected dispensing quality to daily use and raised emptying duration as a repurchase signal.', 'A reason to see a production defect as a commercial issue too.']
+];
+const UNI_VS = [
+  ['Report that bottles are defective', 'Trace why: caps, pumps, machine settings, manual fitting'],
+  ['Suggest a better part', 'Ask whether the part is needed at all (spring-free concept)'],
+  ['State that cold affects the product', 'Frame it as a hypothesis to be tested'],
+  ['Stay on the production line', 'Follow the problem to the consumer and repurchase'],
+  ['Claim a result', 'Say clearly: no prototype, no verified savings, nothing implemented']
+];
+function uniHelpHTML() {
+  return `<div class="help-grid">${UNI_HELP.map(([t, did, why], i) => `<article class="help-c rv"><span class="help-n">${String(i + 1).padStart(2, '0')}</span><h4 class="t-h4">${esc(t)}</h4><p class="t-sm"><b>What I did.</b> ${esc(did)}</p><p class="t-sm ink2"><b>How it helped.</b> ${esc(why)}</p></article>`).join('')}</div>
+  <div class="vs rv"><div class="vs-h"><span class="t-label">A typical intern approach</span><span></span><span class="t-label" style="color:var(--blue-ink)">My approach</span></div>${UNI_VS.map(([a, b]) => `<div class="vs-r"><span>${esc(a)}</span><span class="vs-a" aria-hidden="true">→</span><strong>${esc(b)}</strong></div>`).join('')}</div>
+  <p class="note" style="margin-top:14px"><strong>Mentor feedback.</strong> ${ph('ADD A LINE OF FEEDBACK FROM YOUR MENTOR OR MANAGER, IF APPROVED')}</p>`;
+}

@@ -1,0 +1,762 @@
+/* =========================================================
+   CONFIG
+   To send the contact form straight to an inbox, create a free
+   form endpoint (for example Formspree or Web3Forms) and paste its
+   POST URL below. Left empty, the form opens the visitor's email
+   app with the message filled in, so it still works.
+   ========================================================= */
+const FORM_ENDPOINT = '';
+const EMAIL = 'jainilvshukla@gmail.com';
+
+/* ---------- shared pieces ---------- */
+const secHead = (label, h, lead = '') => `<div class="sec-head rv"><span class="t-label">${label}</span><div><h2 class="t-h2">${h}</h2>${lead ? `<p class="t-lead">${lead}</p>` : ''}</div></div>`;
+const btn = (href, label, cls = 'btn-secondary') => { const op = href === '#/contact' && /talk/i.test(label) ? ' data-open="talk"' : href === '#/work' && /see the work/i.test(label) ? ' data-open="work"' : href === '#/thinking' && /how i think/i.test(label) ? ' data-open="think"' : href === '#/about' && /full story/i.test(label) ? ' data-open="story"' : ''; return `<a class="btn ${cls}" href="${href}"${op}>${label} <span class="arrow" aria-hidden="true">→</span></a>`; };
+
+const ART = {
+  unilever: `<svg class="art-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g fill="none" stroke="#315EFB" stroke-width="1.5"><rect x="160" y="92" width="80" height="170" rx="18"/><rect x="178" y="62" width="44" height="30" rx="4"/><path d="M188 62V40h24v22M212 46h28"/><path d="M178 72h44M178 80h44" stroke-dasharray="3 3"/><path d="M120 92v170M114 92h12M114 262h12" opacity=".6"/><path d="M160 290h80M160 284v12M240 284v12" opacity=".6"/><circle cx="200" cy="170" r="26" stroke-dasharray="4 4"/><path d="M262 77h60M262 77l-8-5M290 150h40" opacity=".7"/></g><g font-family="Geist Mono,monospace" font-size="10" fill="#2246D1"><text x="326" y="81">CLOSURE</text><text x="334" y="154">FILL</text><text x="80" y="180">170</text></g></svg>`,
+  clique: `<svg class="art-svg" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g stroke="#8A4718" stroke-width="1.2" fill="none" opacity=".7"><path d="M200 150L90 70M200 150L320 70M200 150L80 220M200 150L320 230M200 150L200 40M200 150L200 265"/></g><g stroke="#E89B62" stroke-width="1.5" fill="#FCF2EA" stroke-dasharray="4 3"><circle cx="90" cy="70" r="20"/><circle cx="320" cy="70" r="20"/><circle cx="80" cy="220" r="20"/><circle cx="320" cy="230" r="20"/><circle cx="200" cy="40" r="16"/><circle cx="200" cy="265" r="16"/></g><circle cx="200" cy="150" r="38" fill="#171717"/><circle cx="200" cy="150" r="10" fill="#E89B62"/><text x="200" y="306" text-anchor="middle" font-family="Instrument Serif,serif" font-style="italic" font-size="18" fill="#8A4718">every dish has a creator</text></svg>`,
+  hydra: `<svg class="art-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><g fill="none" stroke="#7A97FF" stroke-width="1.5"><path d="M0 200c50-30 100 30 150 0s100-30 150 0 100 30 150 0" opacity=".9"/><path d="M0 222c50-30 100 30 150 0s100-30 150 0 100 30 150 0" opacity=".5"/><path d="M0 244c50-30 100 30 150 0s100-30 150 0 100 30 150 0" opacity=".25"/></g><g fill="none" stroke="#F4F4F0" stroke-width="1.5" opacity=".85"><rect x="120" y="70" width="36" height="104" rx="10"/><rect x="182" y="58" width="36" height="116" rx="10"/><rect x="244" y="76" width="36" height="98" rx="10"/><path d="M131 70v-10h14v10M193 58v-10h14v10M255 76v-10h14v10"/></g><path d="M60 174h280" stroke="#3B3B38"/><text x="200" y="40" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" letter-spacing="2" fill="#A3A29C">CAMPUS SHELF</text></svg>`
+};
+
+function workCard(k, n, title, role, line, tags) {
+  return `<a class="work-card rv" href="#/work/${k}"><div class="wc-body"><span class="t-label">Case ${n} · ${role}</span><h3 class="t-h3">${title}</h3><p class="t-sm ink2 measure-n" style="margin:0">${line}</p><div class="legend">${tags}</div></div><div class="wc-art art-${k}">${ART[k]}</div></a>`;
+}
+const WORK_CARDS = () => workCard('unilever', '01', 'Understanding the system. Identifying the problem. Exploring solutions.', 'Unilever · project internship', 'Two months inside a personal-care factory, tracing defective bottles through design, machinery, labour and the consumer.', tag('done') + tag('hyp') + tag('concept'))
+  + workCard('clique', '02', 'Building a creator-first food entrepreneurship ecosystem.', 'CLIQUE FOODOVATION · co-founder', 'From an operating Taco Tango counter to a proposed ecosystem where every dish has a visible creator.', tag('done', 'Taco Tango: operating') + tag('concept', 'Ecosystem: proposed'))
+  + workCard('hydra', '03', 'From brand strategy to campus shelves.', 'Hydra Enterprise · CMO', 'Brand positioning for a beverage portfolio, and the institutional outreach that put it on university shelves.', tag('done') + tag('illus', 'Illustrative tools'));
+
+
+/* ---------- carousel / marquee helpers ---------- */
+function carousel(label, slides, kind) {
+  return `<div class="car car-${kind}" data-car>
+    <div class="car-track" role="region" aria-roledescription="carousel" aria-label="${esc(label)}" tabindex="0">${slides.map((sl, i) => `<div class="car-slide" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${slides.length}">${sl}</div>`).join('')}</div>
+    <div class="wrap car-foot"><div class="car-prog" aria-hidden="true"><span></span></div><span class="t-label car-count" aria-live="polite">01 / ${String(slides.length).padStart(2, '0')}</span><div class="row" style="gap:6px"><button class="btn btn-sm btn-icon btn-secondary" data-prev aria-label="Previous slide">←</button><button class="btn btn-sm btn-icon btn-secondary" data-next aria-label="Next slide">→</button></div></div>
+  </div>`;
+}
+function marquee(items) {
+  const row = items.map(t => `<span>${esc(t)}</span><i aria-hidden="true">✦</i>`).join('');
+  return `<div class="marquee"><p class="sr-only">Focus areas: ${items.join(', ')}</p><div class="mq-track" aria-hidden="true"><div class="mq-row">${row}</div><div class="mq-row">${row}</div></div><button class="mq-btn" type="button" aria-label="Pause moving text" aria-pressed="false">Pause</button></div>`;
+}
+function WORK_SLIDES() {
+  const c = (k, n, title, role, line, tags) => `<a class="work-card" href="#/work/${k}" draggable="false"><div class="wc-body"><span class="t-label">Case ${n} · ${role}</span><h3 class="t-h3">${title}</h3><p class="t-sm ink2 measure-n" style="margin:0">${line}</p><div class="legend">${tags}</div></div><div class="wc-art art-${k}">${ART[k]}</div></a>`;
+  return [
+    c('unilever', '01', 'Understanding the system. Identifying the problem. Exploring solutions.', 'Unilever · project internship', 'Two months inside a personal-care factory, tracing defective bottles through design, machinery, labour and the consumer.', tag('done') + tag('hyp') + tag('concept')),
+    c('clique', '02', 'Building a creator-first food entrepreneurship ecosystem.', 'CLIQUE FOODOVATION · co-founder', 'From an operating Taco Tango counter to a proposed ecosystem where every dish has a visible creator.', tag('done', 'Taco Tango: operating') + tag('concept', 'Ecosystem: proposed')),
+    c('hydra', '03', 'From brand strategy to campus shelves.', 'Hydra Enterprise · CMO', 'Brand positioning for a beverage portfolio, and the institutional outreach that put it on university shelves.', tag('done') + tag('illus', 'Illustrative tools')),
+    `<a class="work-card wc-dark" href="#/draftdigger" draggable="false"><div class="wc-body"><span class="t-label">Venture · founder</span><h3 class="t-h3">DraftDigger<span style="color:var(--orange)">.</span> Digging to the roots.</h3><p class="t-sm measure-n" style="margin:0">A business strategy and execution partner for founders. Your vision. Our strategy. Shared growth.</p><div class="legend">${tag('ongoing')}</div></div><div class="wc-art art-dd"><span class="dd-mini" aria-hidden="true">Draft<b>Digger</b>.</span></div></a>`,
+    `<a class="work-card wc-next" href="#/about/5" draggable="false"><div class="wc-body"><span class="t-label">Next · experience</span><h3 class="t-h3">Britannia Industries</h3><p class="t-sm ink2 measure-n" style="margin:0">Upcoming Consumer Market Insights (CMI) Internship.</p><div class="legend">${tag('upcoming')}</div></div><div class="wc-art art-next"><span class="serif-i" aria-hidden="true">next chapter</span></div></a>`
+  ];
+}
+function JOURNEY_SLIDES() {
+  const J = [
+    ['Grade 8', 'The first selling experiment', 'Repackaged chocolates and goodies with stickers and better presentation. Earnings of roughly ₹5–₹10.', 'done'],
+    ['Grade 9', 'Walking into local businesses', 'Approached nearby cafés, hotels and restaurants with observations and suggestions.', 'done'],
+    ['First year', 'Regal Vibes', 'A cocoa, cold cocoa and milkshake venture for a college festival. It wasn\'t profitable.', 'done'],
+    ['College years', 'An independent café experiment', 'A separate café experiment, independent of CLIQUE and Taco Tango.', 'done'],
+    ['Nirma University', 'Communication Design', 'Human-centred thinking, storytelling, communication and problem-solving.', 'done'],
+    ['Now', 'Strategy, systems, ventures', 'Unilever, Hydra, CLIQUE and DraftDigger, with a growing focus on market research and business strategy.', 'ongoing'],
+    ['Next', 'Britannia Industries', 'Upcoming Consumer Market Insights internship.', 'upcoming']
+  ];
+  return J.map(([w, t, d, k], i) => `<a class="jr-card${i === J.length - 2 ? ' jr-now' : ''}" href="#/about/${Math.min(i, 5)}" draggable="false"><span class="jr-i t-label">${String(i + 1).padStart(2, '0')}</span><span class="jr-when serif-i">${w}</span><span class="jr-line" aria-hidden="true"></span><h3 class="t-h4">${t}</h3><p class="t-sm">${d}</p><span class="jr-tag">${tag(k)}</span></a>`);
+}
+
+/* =========================================================
+   HOME
+   ========================================================= */
+function pageHome() {
+  return `
+  <section class="hero wrap" aria-labelledby="h-hero">
+    <div class="hero-top">
+      <p class="hero-name line-rv" style="animation-delay:.05s">JAINIL SHUKLA<span class="blue">.</span></p>
+      <div class="meta-strip line-rv" style="animation-delay:.12s"><span>Business Systems Designer</span><span>Business Strategist</span><span>Bangalore, India</span></div>
+    </div>
+    <h1 class="hero-h" id="h-hero" title="Click to replay">
+      <span class="hh-1"><span class="hh-l1"><span>I don't</span> <span class="hh-strike">invent</span><span>,</span></span><span class="hh-note" aria-hidden="true">Existing markets<br>Real needs<br>The right way in</span></span>
+      <span class="hh-2"><span class="hh-mark">I invade</span><span class="hh-ex">!</span></span>
+    </h1>
+    <div class="hero-foot">
+      <p class="serif-i line-rv" style="animation-delay:.5s;font-size:clamp(1.75rem,1.2rem + 1.9vw,3rem);line-height:1.08;margin:0">You've got the vision.<br>Let's figure out the way.</p>
+      <div class="line-rv" style="animation-delay:.6s">
+        <p class="t-lead" style="margin-bottom:22px;max-width:52ch">I design business frameworks, understand markets, identify opportunities and connect the people, resources and systems required to move businesses forward.</p>
+        <div class="row">${btn('#/work', 'See the work', 'btn-primary')}${btn('#/thinking', 'How I think')}</div>
+      </div>
+    </div>
+  </section>
+
+  ${marquee(['Business Systems Design', 'Business Strategy', 'Consumer Insights', 'Market Research', 'Business Development', 'Venture Building', 'Brand Strategy'])}
+
+  <section class="sec" aria-labelledby="h-invade">
+    <div class="wrap">
+      ${secHead('The philosophy', '<span id="h-invade">Invading means finding the way in, not inventing a new world.</span>', 'Most opportunities already exist. They sit inside markets people are already buying from, in needs that are already felt, in gaps nobody has bothered to fill properly. Watch how an invasion is planned, or pick a step.')}
+      <div class="rv">${W('scanner', 'scan')}</div>
+    </div>
+  </section>
+
+  <section class="sec-sm" aria-labelledby="h-bfds">
+    <div class="wrap">
+      <div class="bfds rv">
+        <span class="t-label" style="color:color-mix(in srgb,var(--bg) 60%,var(--ink))">How the pieces combine</span>
+        <h2 id="h-bfds" class="caps-statement" style="margin-top:18px">Business thinking,<br><span class="second">then design&nbsp;it.</span></h2>
+        <p style="margin-top:24px;max-width:60ch;color:color-mix(in srgb,var(--bg) 78%,var(--ink));font-size:1.0625rem">Design is how I think, not what I sell. Research, strategy, design, communication and technology each do one job in solving a business problem. Select one.</p>
+        ${W('lenses', 'lenses')}
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-sys">
+    <div class="wrap">
+      <div class="grid g-12" style="align-items:end">
+        <div style="grid-column:span 7" class="rv"><span class="t-label">Professional philosophy</span><h2 id="h-sys" class="t-h1" style="margin-top:20px">Business is not a collection of activities. <span class="serif-i" style="font-weight:400">It is a system of connections.</span></h2></div>
+        <div style="grid-column:span 5" class="rv"><p class="t-lead">A Business Systems Designer understands how people, customers, products, markets, operations, resources, technology, communication and revenue models connect, and designs for those connections.</p>
+        <p class="t-sm muted">Consumer Insights · Market Research · Business Development · Venture Building · Brand Strategy</p>${btn('#/system-map', 'Explore the system map', 'btn-primary')}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec rule" aria-labelledby="h-work">
+    <div class="wrap">
+      ${secHead('Selected work', '<span id="h-work">Three projects. One way of thinking.</span>', 'An FMCG factory floor, a food-creator venture and a beverage brand on campus shelves. Different industries, the same habit: understand the system before changing it.')}
+    </div>
+    ${carousel('Selected work', WORK_SLIDES(), 'work')}
+  </section>
+
+  <section class="sec-sm" aria-labelledby="h-jr">
+    <div class="wrap">
+      <div class="row between" style="align-items:end;margin-bottom:clamp(1.5rem,1rem + 1.5vw,2.5rem)"><div><span class="t-label">An entrepreneur's journey</span><h2 id="h-jr" class="t-h2" style="margin-top:14px">From stickers on chocolate<br>wrappers to <span class="serif-i" style="font-weight:400">systems.</span></h2></div>${btn('#/about', 'Full story')}</div>
+    </div>
+    ${carousel('Personal journey', JOURNEY_SLIDES(), 'journey')}
+  </section>
+
+  <section class="sec-sm" aria-labelledby="h-vmb">
+    <div class="wrap">
+      <div class="row between rv" style="margin-bottom:24px"><h2 id="h-vmb" class="t-label">Vision, mission and belief</h2>${tag('ambition', 'Long-term ambitions')}</div>
+      <div class="vmb rv">
+        <div><span class="t-label">Vision</span><p class="quote">To help people build better businesses, create meaningful opportunities and grow through systems that make their ambitions achievable.</p></div>
+        <div><span class="t-label">Mission</span><p class="quote">To understand businesses deeply, identify opportunities intelligently and design practical strategies and systems that help people turn ideas into action.</p></div>
+        <div><span class="t-label">Belief</span><p class="quote">A good idea needs direction. A good strategy needs structure. And a good business needs systems that work.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-next">
+    <div class="wrap grid g-2" style="gap:16px">
+      <a href="#/draftdigger" class="card card-link rv" style="background:var(--ink);color:var(--bg);border-color:var(--ink);padding:clamp(24px,3vw,40px)">
+        <div class="row between"><span class="t-label" style="color:color-mix(in srgb,var(--bg) 60%,var(--ink))">Venture</span>${tag('ongoing')}</div>
+        <h2 id="h-next" class="t-h2" style="margin:40px 0 10px">DraftDigger<span style="color:var(--orange)">.</span></h2>
+        <p style="color:color-mix(in srgb,var(--bg) 78%,var(--ink));max-width:42ch">A business strategy and execution partner for founders. Digging to the roots. Your vision. Our strategy. Shared growth.</p>
+        <span class="t-sm" style="font-weight:500">Meet DraftDigger <span class="arrow">→</span></span>
+      </a>
+      <a href="#/about/5" class="card card-link rv" style="padding:clamp(24px,3vw,40px)">
+        <div class="row between"><span class="t-label">Next</span>${tag('upcoming')}</div>
+        <h2 class="t-h2" style="margin:40px 0 10px">Britannia Industries</h2>
+        <p class="ink2">Upcoming Consumer Market Insights (CMI) Internship.</p>
+        <span class="t-sm" style="font-weight:500">See the journey <span class="arrow">→</span></span>
+      </a>
+    </div>
+  </section>`;
+}
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+function pageAbout() {
+  return `
+  <section class="phead wrap"><span class="t-label">01 · About</span>
+    <h1 class="t-h1 measure-w">Curious about how businesses work since <span class="serif-i" style="font-weight:400">Grade 8.</span></h1>
+    <p class="t-lead">Jainil Shukla is a Business Systems Designer and Business Strategist based in Bangalore. He studied Communication Design at Nirma University, and uses it to understand people, markets and the systems that connect them.</p>
+  </section>
+
+  <section class="sec-sm rule"><div class="wrap grid g-12">
+    <div style="grid-column:span 5" class="rv"><span class="t-label">Entrepreneurial curiosity</span><p class="quote" style="margin-top:18px">Before strategy had a name, it was stickers on chocolate wrappers.</p></div>
+    <div style="grid-column:span 7;--gap:14px" class="rv stack">
+      <p class="t-lead">It started with small experiments: repackaging goodies in school, walking into local cafés with suggestions, running a festival drinks stall that didn't make money. Each one was a lesson in how products, people and money actually move.</p>
+      <p class="ink2 measure">Communication Design added the human side: understanding people, telling stories and solving problems with structure. Today that combination points in one direction, toward business strategy, market research, systems thinking and building ventures.</p>
+    </div>
+  </div></section>
+
+  <section class="sec-sm" id="about-story"><div class="wrap">${secHead('Storyboard', 'The journey, scene by scene.', 'Seven scenes from a Grade 8 experiment to what comes next. Press play or pick a frame.')}${W('storyboard', 'storyboard')}</div></section>
+  <section class="sec-sm" id="about-journey"><div class="wrap">${W('timeline', 'journey')}</div></section>
+
+  <section class="sec rule"><div class="wrap">
+    ${secHead('Education', 'Bachelor of Communication Design', 'Nirma University, Ahmedabad.')}
+    <div class="grid g-4 rv">
+      ${[['Human-centred thinking', 'Start with the people a system serves.'], ['Storytelling', 'Make an idea understood and remembered.'], ['Communication', 'Say the right thing to the right decision-maker.'], ['Problem-solving', 'Bring structure to messy situations.']].map(([a, b]) => `<div class="card"><h3 class="t-h4">${a}</h3><p class="t-sm ink2">${b}</p></div>`).join('')}
+    </div>
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap">
+    ${secHead('Brand architecture', 'Seven identities, kept distinct.', 'Being precise about relationships is part of being credible. Unilever was an internship, Taco Tango was founded by someone else, and DraftDigger is still being built.')}
+    ${W('graph', 'arch')}
+  </div></section>
+
+  <section class="sec rule"><div class="wrap">
+    <div class="row between rv" style="margin-bottom:24px"><span class="t-label">Guiding principles</span>${tag('ambition', 'Long-term ambitions')}</div>
+    <div class="vmb rv">
+      <div><span class="t-label">Vision</span><p class="quote">To help people build better businesses, create meaningful opportunities and grow through systems that make their ambitions achievable.</p></div>
+      <div><span class="t-label">Mission</span><p class="quote">To understand businesses deeply, identify opportunities intelligently and design practical strategies and systems that help people turn ideas into action.</p></div>
+      <div><span class="t-label">Belief</span><p class="quote">A good idea needs direction. A good strategy needs structure. And a good business needs systems that work.</p></div>
+    </div>
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap grid g-12">
+    <div style="grid-column:span 5" class="rv"><span class="t-label">Long-term ambition</span>${tag('ambition')}</div>
+    <div style="grid-column:span 7" class="rv"><p class="t-lead">To become the person founders call when they know where they want to go but not yet how to get there, and to build ventures of his own along the way.</p>
+    <div class="row" style="margin-top:20px">${btn('#/capabilities', 'See capabilities')}${btn('#/contact', "Let's talk", 'btn-primary')}</div></div>
+  </div></section>`;
+}
+
+/* =========================================================
+   MY THINKING
+   ========================================================= */
+function pageThinking() {
+  return `
+  <section class="phead wrap"><span class="t-label">02 · My Thinking</span>
+    <h1 class="t-h1 measure-w">Designing the way business <span class="serif-i" style="font-weight:400">works.</span></h1>
+    <p class="t-lead">Business is not a collection of activities. It is a system of connections. This is the model behind every project: six forces that pull on each other, and a seven-stage way of working through them.</p>
+  </section>
+  <section class="sec-sm rule"><div class="wrap">
+    ${secHead('The ecosystem', 'Six forces. Every decision touches all of them.', 'A pricing change is also a people change, an operations change and a communication change. Seeing the connections is the job.')}
+    ${W('graph', 'eco')}
+  </div></section>
+  <section class="sec rule"><div class="wrap">
+    ${secHead('The framework', 'Discover → Diagnose → Design → Structure → Connect → Execute → Improve.', 'The same seven stages apply to a café, a factory or a platform. What changes is what each stage looks like. Pick a business type to see the framework adapt.')}
+    ${W('flow', 'framework')}
+    <div class="row" style="margin-top:20px">${btn('#/system-map', 'Open the full system map', 'btn-primary')}</div>
+  </div></section>
+  <section class="sec-sm"><div class="wrap grid g-3">
+    ${[['Systems, in the business sense', 'Systems here means how a business is organised to work: people, processes, resources and relationships. Not software architecture or engineering.'], ['Grounded in real projects', 'Each stage of the framework comes from work done at Unilever, CLIQUE and Hydra, shown in detail in the case studies.'], ['Honest about status', 'Every case study separates what was done from what was researched, proposed or is still an ambition.']].map(([a, b]) => `<div class="card rv"><h3 class="t-h4">${a}</h3><p class="t-sm ink2">${b}</p></div>`).join('')}
+  </div></section>`;
+}
+
+/* =========================================================
+   CAPABILITIES
+   ========================================================= */
+const CAPS = [
+  ['Business Strategy', 'Opportunity identification, business models, market entry, positioning and growth frameworks.', [['CLIQUE', 'clique'], ['Hydra', 'hydra']]],
+  ['Business Systems Design', 'Process mapping, workflows, resource coordination and operational thinking.', [['Unilever', 'unilever'], ['CLIQUE', 'clique']]],
+  ['Research & Consumer Insights', 'Market research, competitor analysis, segmentation, surveys and consumer behaviour.', [['Unilever', 'unilever'], ['Hydra', 'hydra']]],
+  ['Brand & Market Strategy', 'Brand positioning, product positioning, communication and consumer perception.', [['Hydra', 'hydra'], ['CLIQUE', 'clique']]],
+  ['Business Development', 'B2B communication, institutional outreach, negotiation, stakeholder relationships and partnerships.', [['Hydra', 'hydra'], ['CLIQUE', 'clique']]],
+  ['Entrepreneurship', 'Venture exploration, founder collaboration, HORECA ecosystems and business concept development.', [['CLIQUE', 'clique'], ['DraftDigger', '']]]
+];
+function pageCapabilities() {
+  return `
+  <section class="phead wrap"><span class="t-label">03 · Capabilities</span>
+    <h1 class="t-h1 measure-w">Six capabilities, each backed by <span class="serif-i" style="font-weight:400">documented work.</span></h1>
+    <p class="t-lead">No skill on this page stands without a project behind it. Where something is still a concept or in development, it says so.</p>
+  </section>
+  <section class="sec-sm rule"><div class="wrap grid g-3">
+    ${CAPS.map(([t, d, ev], i) => `<article class="card rv" style="display:flex;flex-direction:column;gap:10px;min-height:240px"><span class="t-label" style="color:var(--blue-ink)">0${i + 1}</span><h2 class="t-h3">${t}</h2><p class="t-sm ink2">${d}</p><div class="row" style="margin-top:auto;gap:8px"><span class="t-label">Evidence</span>${ev.map(([n, k]) => `<a class="chip" style="display:inline-flex;align-items:center;text-decoration:none" href="${k ? '#/work/' + k : '#/draftdigger'}">${n}</a>`).join('')}</div></article>`).join('')}
+  </div></section>
+  <section class="sec"><div class="wrap">
+    ${secHead('Proof', 'Where each capability was actually used.', 'Select any dot to read the evidence behind it. A dash means that project did not involve the capability.')}
+    ${W('capmx', 'capmx')}
+  </div></section>`;
+}
+
+/* =========================================================
+   WORK
+   ========================================================= */
+function pageWork() {
+  return `
+  <section class="phead wrap"><span class="t-label">04 · Work</span>
+    <h1 class="t-h1 measure-w">Work that shows <span class="serif-i" style="font-weight:400">how</span> I think, not just what I did.</h1>
+    <p class="t-lead">Three case studies, each with interactive frameworks. Every claim carries a status so you always know what was done, what was researched and what is still a proposal.</p>
+    <div style="margin-top:28px">${legend()}</div>
+  </section>
+  <section class="sec-sm rule"><div class="wrap grid" style="gap:16px">${WORK_CARDS()}</div></section>
+
+  <section class="sec-sm rule" aria-labelledby="h-idx"><div class="wrap">
+    ${secHead('Case study index', '<span id="h-idx">Every case, every detail, one click away.</span>', 'Open any case for its contributions, what made it stand out, and a link to each of its eleven sections.')}
+    <div class="wm-page">${workMenuHTML()}</div>
+  </div></section>
+
+  <section class="sec rule" aria-labelledby="h-one"><div class="wrap">
+    ${secHead('Cross-project connection', '<span id="h-one">Three projects. One way of thinking.</span>', 'Each project followed a different path, but all three start by understanding a system and end by connecting people to an opportunity.')}
+    <div class="grid g-3 rv" style="margin-bottom:28px">
+      ${[['Unilever', 'unilever', ['Research', 'Consumer understanding', 'Business insights']], ['CLIQUE', 'clique', ['Problem identification', 'Ecosystem design', 'Business model innovation']], ['Hydra', 'hydra', ['Market research', 'Communication', 'Business development']]].map(([n, k, s]) => `<a href="#/work/${k}/8" class="card card-link"><span class="t-label">${n}</span><ol style="list-style:none;margin-top:14px;display:grid;gap:8px">${s.map((x, i) => `<li class="row" style="gap:10px;flex-wrap:nowrap"><span class="t-label" style="color:var(--blue-ink)">0${i + 1}</span><span style="font-weight:600">${x}</span></li>${i < 2 ? '<li aria-hidden="true" class="muted" style="padding-left:28px;line-height:1">↓</li>' : ''}`).join('')}</ol></a>`).join('')}
+    </div>
+    ${W('graph', 'skillmap')}
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap">
+    ${secHead('Ventures & experience', 'What is being built, and what is next.')}
+    <div class="grid g-2">
+      <a href="#/draftdigger" class="card card-link rv"><div class="row between"><span class="t-label">Founded venture</span>${tag('ongoing')}</div><h3 class="t-h3" style="margin-top:28px">DraftDigger</h3><p class="ink2">Business strategy & execution partner. Initial focus on food and beverage founders.</p><span class="link t-sm">Explore DraftDigger →</span></a>
+      <a href="#/about/5" class="card card-link rv"><div class="row between"><span class="t-label">Experience</span>${tag('upcoming')}</div><h3 class="t-h3" style="margin-top:28px">Britannia Industries</h3><p class="ink2">Upcoming Consumer Market Insights (CMI) Internship.</p><span class="link t-sm">See it in the journey →</span></a>
+    </div>
+  </div></section>`;
+}
+
+/* =========================================================
+   CASE STUDY FRAME
+   ========================================================= */
+const CS_STEPS = ['Context', 'Problem', 'Research', 'Discovery', 'Analysis', 'Strategy', 'Frameworks', 'Contribution', 'How I thought', 'Execution', 'Learning'];
+function caseStudy({ key, theme, n, org, title, lead, meta, sections, prev, next, inside }) {
+  const T = THINK[key];
+  return `<div class="${theme}">
+  <section class="cs-hero"><div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="#/work">Work</a><span aria-hidden="true">/</span><span>Case ${n}</span></nav>
+    <span class="t-label" style="display:block;margin-bottom:20px;${theme === 'theme-hydra' ? 'color:#A3A29C' : ''}">Case study ${n} · ${org}</span>
+    <h1 class="t-h1" style="max-width:20ch">${title}</h1>
+    <p class="t-lead" style="margin-top:24px;max-width:60ch;${theme === 'theme-hydra' ? 'color:#CFCEC8' : ''}">${lead}</p>
+    <div class="cs-meta">${meta.map(([k, v]) => `<div><span class="t-label">${k}</span><p>${v}</p></div>`).join('')}</div>
+    ${T ? standoutStrip(T, key, 8) : ''}
+    ${inside ? `<nav class="cs-inside" aria-label="Inside this case"><span class="t-label">Inside this case</span>${inside.map(([t, i]) => `<button type="button" data-scrollto="${key}-${i}">${t}</button>`).join('')}</nav>` : ''}
+  </div></section>
+  <div class="wrap" style="padding-top:clamp(1.5rem,1rem + 2vw,3rem)">
+    <div class="cs-layout">
+      <aside class="cs-toc" aria-label="Case study sections"><p class="t-label toc-title" style="margin:0 0 10px 10px">On this page</p><ol>${CS_STEPS.map((s, i) => `<li><button data-scrollto="${key}-${i}">${s}</button></li>`).join('')}</ol></aside>
+      <div>
+        ${sections.map((s, i) => `<section class="cs-sec" id="${key}-${i}" aria-labelledby="${key}-${i}-h"><header><span class="t-label"><b>${String(i + 1).padStart(2, '0')}</b>${CS_STEPS[i]}</span><h2 id="${key}-${i}-h">${s.h}</h2>${s.lead ? `<p class="t-lead">${s.lead}</p>` : ''}</header>${s.body}</section>`).join('')}
+        <section class="cs-sec"><div class="cs-next">
+          <a href="#/work/${prev[0]}"><span class="t-label">← Previous</span><p class="t-h4" style="margin:8px 0 0">${prev[1]}</p></a>
+          <a href="#/work/${next[0]}"><span class="t-label">Next →</span><p class="t-h4" style="margin:8px 0 0">${next[1]}</p></a>
+        </div></section>
+      </div>
+    </div>
+  </div></div>`;
+}
+
+/* ---------- UNILEVER ---------- */
+function pageUnilever() {
+  const mech = [
+    { t: 'Grooved caps', tg: 'done', o: 'Rotating and grooved cap mechanisms, and how reliably they seal and open.', w: 'Every extra tolerance in a thread is a chance for a defect on the line or frustration at home.' },
+    { t: 'Spring pumps', tg: 'done', o: 'Spring-loaded dispensing mechanisms and their parts.', w: 'More parts mean more assembly, more cost and more ways to fail.' },
+    { t: 'Temperature', tg: 'hyp', o: 'Whether colder temperatures could make the product thicker and harder to dispense.', w: 'If true, a mechanism that works in one season could struggle in another. This was not tested.' },
+    { t: 'Vacuum concept', tg: 'concept', o: 'A proposed spring-free, vacuum-based dispensing mechanism.', w: 'Fewer parts could simplify both manufacturing and use. It remains a concept, with no prototype.' },
+    { t: 'Cap-fitting labour', tg: 'done', o: 'The labour required to fit caps.', w: 'Manual steps add time and variability to every unit.' },
+    { t: 'Machinery', tg: 'done', o: 'Machinery configurations and the adjustments different formats need.', w: 'Frequent changeovers slow lines and introduce error.' },
+    { t: 'Standardisation', tg: 'rec', o: 'Standardising formats to simplify manufacturing.', w: 'One change upstream can reduce work for machines, people and quality checks at once.' },
+    { t: 'Emptying duration', tg: 'hyp', o: 'How long a bottle takes to empty as a possible usage and repurchase indicator.', w: 'A link between a factory decision and a commercial signal.' }
+  ];
+  return caseStudy({
+    key: 'uni', theme: 'theme-unilever', n: '01', org: 'Unilever · Project internship',
+    title: 'Understanding the system. Identifying the problem. Exploring solutions.',
+    lead: 'A two-month project internship that started with learning how a factory works and ended with tracing a packaging problem through design, machinery, labour and the consumer.',
+    meta: [['Organisation', 'Unilever'], ['Role', 'Project intern'], ['Duration', 'Two months'], ['Focus', 'Bottle production, packaging & dispensing']],
+    prev: ['hydra', 'Hydra Enterprise'], next: ['clique', 'CLIQUE FOODOVATION'],
+    inside: [['In 60 seconds', '60'], ['Dispenser anatomy', 'anat'], ['Mapping plan', 2], ['Market research', 3], ['Hypotheses', 'hyp'], ['Consumer insights', 4], ['Options', 'opt'], ['Strategy', 5], ['Measurement plan', 'kpi'], ['Helping hand as an intern', 7], ['How I thought', 8], ['Learning', 10]],
+    sections: [
+      { h: 'Two months, two kinds of learning.', lead: 'The first month built an understanding of the system. The second used it to look at a specific problem.', body: `<div class="subhead" style="margin-top:0" id="uni-60"><h3 class="t-h3">The case in 60 seconds</h3></div>${scqaHTML()}<div class="subhead"><h3 class="t-h3">Timeline and evidence key</h3></div>` + `<div style="margin-bottom:18px">${legend(['done', 'research', 'rec', 'concept', 'hyp'])}</div>${W('timeline', 'uni_tl')}<p class="note" style="margin-top:18px"><strong>Confidentiality.</strong> Only information approved for publication is shown. Factory-specific details, figures and internal documents are deliberately left out.</p>` },
+      { h: 'Defective shampoo and body-lotion bottles.', lead: 'The issue looked like a packaging problem. It turned out to sit where product design, manufacturing and consumer experience meet.', body: `<div class="grid g-3">${[['Production', 'Defects in bottle production and packaging on the line.'], ['Dispensing', 'Caps and pumps that do not dispense as consistently as they should.'], ['Consequence', 'Rework, labour and an uneven experience for the person using the product.']].map(([a, b]) => `<div class="card"><span class="t-label">${a}</span><p style="margin-top:10px">${b}</p></div>`).join('')}</div>` + `<div class="subhead" id="uni-anat"><h3 class="t-h3">Anatomy of the dispenser</h3>${tag('research', 'General mechanism')}</div><p class="ink2 measure">What sits inside a pump bottle, where problems can start, and how the proposed spring-free concept differs.</p>${W('anatomy', 'uni_anatomy')}<div class="subhead"><h3 class="t-h3">Production line map</h3>${tag('illus', 'Illustrative')}</div>${W('chain', 'uni_line')}` },
+      { h: 'Learn the system before judging it.', lead: 'The research moved from observation to mechanism to system. Each step is tagged with what kind of evidence it represents.', body: `${W('flow', 'uni_research')}<div class="grid g-2" style="margin-top:18px"><div class="evidence"><div><p class="t-label">Project visual</p>${ph('ADD APPROVED DOVE BODY-LOTION SKETCH')}</div></div><div class="evidence"><div><p class="t-label">Project visual</p>${ph('ADD APPROVED MECHANISM SKETCH OR NOTE')}</div></div></div>` + `<div class="subhead"><h3 class="t-h3">Mapping plan</h3>${tag('done')}</div>${W('swimlane', 'uni_plan')}` },
+      { h: 'Eight things worth looking at closely.', lead: 'What was explored, and why each one matters to the business.', body: tabs(mech.map(m => ({ t: m.t, html: `<div class="grid g-2" style="gap:24px"><div><div style="margin-bottom:12px">${tag(m.tg)}</div><span class="t-label">What was explored</span><p style="margin-top:6px">${m.o}</p></div><div><span class="t-label">Why it matters</span><p style="margin-top:6px" class="ink2">${m.w}</p><span class="t-label">Finding</span><p style="margin-top:6px">${ph('ADD ACTUAL OBSERVATION IF APPROVED')}</p></div></div>` })), 'Mechanisms and factors') + `<div class="subhead"><h3 class="t-h3">Market research lens</h3>${tag('illus', 'Illustrative')}</div><p class="ink2 measure">How the dispensing formats used across personal care compare, and where a spring-free concept would sit.</p>${W('matrix', 'uni_formats')}<p class="note"><strong>Market observations.</strong> ${ph('ADD ANY COMPETITOR OR CATEGORY OBSERVATIONS YOU MADE, IF APPROVED')}</p>` + `<div class="subhead" id="uni-hyp"><h3 class="t-h3">Hypothesis register</h3>${tag('hyp', 'Untested')}</div><p class="ink2 measure">Every idea that was not proven, written as something a team could test, and how.</p>${hypHTML()}` },
+      { h: 'From root causes to opportunities.', lead: 'A problem tree makes the chain visible: what might cause the defects, what the defects cause, and what that opens up.', body: W('ptree', 'uni_ptree') + `<div class="subhead"><h3 class="t-h3">Consumer insights</h3>${tag('hyp', 'Insights & hypotheses')}</div><p class="ink2 measure">The factory problem, seen from the bathroom shelf: five moments where the dispenser shapes how a consumer feels about the product.</p>${W('moments', 'uni_moments')}` + `<div class="subhead" id="uni-opt"><h3 class="t-h3">Options evaluated</h3>${tag('illus', 'Judgement')}</div>${W('options', 'uni_options')}` },
+      { h: 'Directions worth exploring further.', lead: 'These were shared as recommendations and concepts. None were implemented or validated during the internship.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">Strategy map</h3>${tag('rec')}</div>${strategyTreeHTML(D.uni_tree)}${W('matrix', 'uni_prio')}<div class="subhead"><h3 class="t-h3">The recommendations</h3></div>` + `<div class="grid g-2" style="margin-bottom:20px">${[['Standardise bottle and cap formats', 'rec', 'Fewer formats could reduce machine adjustments, labour and defects together.'], ['Simplify machine set-ups', 'rec', 'Less changeover between formats means fewer chances for error.'], ['Explore spring-free vacuum dispensing', 'concept', 'A mechanism with fewer parts, worth investigating through proper testing.'], ['Track bottle-emptying duration', 'hyp', 'A possible signal of how consumers use the product and when they repurchase.']].map(([a, t, b]) => `<div class="card"><div style="margin-bottom:10px">${tag(t)}</div><h3 class="t-h4">${a}</h3><p class="t-sm ink2">${b}</p></div>`).join('')}</div>${W('flow', 'uni_journey')}` + `<div class="subhead" id="uni-kpi"><h3 class="t-h3">Measurement plan</h3>${tag('rec', 'Proposed')}</div><p class="ink2 measure">If the recommendations were taken forward, these are the signals that would show whether they work. No figures are claimed.</p>${strategyTreeHTML(D.uni_kpis, 'Purpose', 'Area')}` },
+      { h: 'How a factory problem becomes a business problem.', lead: 'Two frameworks connect the internship focus to the wider FMCG system. They draw on general industry understanding and are labelled as such.', body: `${W('mindmap', 'fmcg_mm')}${W('graph', 'causal')}` },
+      { h: 'What I did, and how I helped.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">How I became a helping hand as an intern</h3>${tag('done')}</div>${uniHelpHTML()}${W('graph', 'uni_contrib')}<div class="subhead"><h3 class="t-h3">The honest split</h3></div>` + `<div class="split"><div class="is-real"><span class="t-label">My contribution</span><ul class="list-dash" style="margin-top:12px"><li>Studied the factory premises, manufacturing environments, hierarchy and functions</li><li>Explored defects in shampoo and body-lotion bottle production, packaging and dispensing</li><li>Examined cap and pump mechanisms, labour and machinery</li><li>Proposed a spring-free vacuum dispensing concept</li><li>Connected product design, manufacturing and consumer experience</li></ul></div><div class="is-vision"><span class="t-label">Not claimed</span><ul class="list-dash" style="margin-top:12px"><li>No prototypes were built</li><li>No cost savings were verified</li><li>No improvements were implemented</li><li>No findings were scientifically validated</li><li>The temperature effect remains an unverified hypothesis</li></ul></div></div>` },
+      { h: 'Inside my thinking on the factory floor.', lead: 'How I worked, the questions I asked, the research I used, what I noticed about consumers, and the plan and solutions that came out of it.', body: thinkingModule(THINK.uni, 'uni') },
+      { h: 'How the work was shared.', body: `<p class="measure">The exploration and recommendations were shared within the internship. ${ph('ADD HOW AND TO WHOM YOU PRESENTED YOUR FINDINGS, IF APPROVED')}</p><div class="evidence" style="aspect-ratio:16/7;margin-top:18px"><div><p class="t-label">Presentation</p>${ph('ADD APPROVED SLIDE OR VISUAL')}</div></div>` },
+      { h: 'A packaging defect is never only a packaging problem.', body: `<div class="grid g-12"><div style="grid-column:span 7"><p class="quote" style="font-size:clamp(1.5rem,1.1rem + 1.4vw,2.4rem)">The cap a consumer struggles with at home is connected to a machine setting, a labour step and a design decision on the factory floor.</p></div><div style="grid-column:span 5"><span class="t-label">Personal reflection</span><p style="margin-top:8px">${ph('ADD YOUR OWN KEY LEARNING FROM THE INTERNSHIP')}</p></div></div>` }
+    ]
+  });
+}
+
+/* ---------- CLIQUE ---------- */
+function pageClique() {
+  const pill = (items) => `<ul class="pillar-list">${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+  return caseStudy({
+    key: 'clq', theme: 'theme-clique', n: '02', org: 'CLIQUE FOODOVATION · Co-founder',
+    title: 'Building a creator-first food entrepreneurship ecosystem.',
+    lead: 'Every dish has a creator. Every creator has a story. CLIQUE started from an operating Mexican-food counter and grew into a proposal for how independent food creators could build businesses under their own names.',
+    meta: [['Role', 'Co-founder'], ['Operating brand', 'Taco Tango'], ['Today', 'Counter at Nirma University'], ['Wider ecosystem', 'Proposed, not operational']],
+    prev: ['unilever', 'Unilever'], next: ['hydra', 'Hydra Enterprise'],
+    inside: [['Mapping plan', 2], ['Market research', 'mr'], ['Venue strategy', 3], ['Consumer insights', 4], ['Strategy', 5], ['Helping hand to a founder', 7], ['How I thought', 8]],
+    sections: [
+      { h: 'What exists, and what is envisioned.', lead: 'Taco Tango was an independent venture before CLIQUE. Keeping the two apart is essential to reading this case honestly.', body: `<div class="split"><div class="is-real"><div class="row between"><span class="t-label">Operating today</span>${tag('done')}</div><h3 class="t-h3" style="margin:14px 0 8px">Taco Tango</h3><ul class="list-dash"><li>An independent Mexican-food venture founded by another person</li><li>Operates a Mexican-food counter at Nirma University</li><li>Jainil approached its founder and established the collaboration</li><li>Now a brand under CLIQUE</li></ul></div><div class="is-vision"><div class="row between"><span class="t-label">Envisioned</span>${tag('concept')}</div><h3 class="t-h3" style="margin:14px 0 8px">CLIQUE's wider ecosystem</h3><ul class="list-dash"><li>Jointly created by Jainil and Taco Tango's founder</li><li>Shared infrastructure for independent food creators</li><li>Creator branding on every dish</li><li>A business and technology layer to run it all</li></ul></div></div>` + learnHTML() },
+      { h: 'Most food is anonymous. Most creators work alone.', lead: 'Independent food creators carry the kitchen, the sourcing, the packaging and the selling by themselves, and the person who made the food rarely gets seen.', body: `<p class="caps-statement" style="font-size:clamp(2rem,1rem + 4vw,4.5rem)">Every dish has a creator.<br><span style="color:var(--orange-ink)">Every creator has a story.</span></p><p class="note" style="margin-top:24px"><strong>Problem framing.</strong> ${ph('ADD THE RESEARCH OR CONVERSATIONS WITH CREATORS THAT SUPPORT THIS PROBLEM')}</p>` },
+      { h: 'Who the ecosystem depends on.', lead: 'Before designing anything, map every stakeholder, what they give and what they need in return.', body: `${W('graph', 'clique_stake')}<p class="note"><strong>Research conducted.</strong> ${ph('ADD ACTUAL RESEARCH METHODS AND FINDINGS')}</p>` + `<div class="subhead"><h3 class="t-h3">Mapping plan</h3>${tag('done')}</div>` + W('swimlane', 'clq_plan') + `<div class="subhead" id="clq-mr"><h3 class="t-h3">Market research lens</h3>${tag('hyp', 'Framing to validate')}</div>` + `<p class="ink2 measure">Where an independent food creator struggles, step by step, and what CLIQUE proposes at each step.</p>` + W('chain', 'clq_chain') },
+      { h: 'The gap between support and visibility.', lead: 'Existing formats offer either infrastructure or identity. Rarely both.', body: W('matrix', 'clique_pos') + `<div class="subhead"><h3 class="t-h3">Venue strategy</h3>${tag('illus')}</div>` + W('matrix', 'clq_venues') },
+      { h: 'Strengths, weaknesses and honest risks.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">Consumer insights · both sides of the platform</h3>${tag('hyp', 'To be validated')}</div>` + W('vpc', 'clq_vpc') + `<div class="subhead"><h3 class="t-h3">SWOT</h3>${tag('rec')}</div>` + W('swot', 'clique_swot') },
+      { h: 'Three pillars, and how the model could earn.', lead: 'The strategy rests on three proposed pillars. None are operational yet.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">Strategy map</h3>${tag('rec')}</div>` + `<div style="--n:4">${strategyTreeHTML(D.clq_tree)}</div>` + `<div class="subhead"><h3 class="t-h3">The three pillars</h3>${tag('concept')}</div>` + `${tabs([
+        { t: 'Pillar 1 · Shared infrastructure', html: `<div style="margin-bottom:12px">${tag('concept')}</div>${pill(['Shared kitchens', 'Cooking equipment', 'Mixers, grinders, microwaves and freezers', 'Raw ingredients', 'Storage and packaging resources'])}` },
+        { t: 'Pillar 2 · Creator branding', html: `<div style="margin-bottom:12px">${tag('concept')}</div>${pill(['Individual chef identity', 'Recipe naming', 'Custom packaging', 'Personal storytelling', 'QR-enabled creator discovery'])}` },
+        { t: 'Pillar 3 · Business & technology', html: `<div style="margin-bottom:12px">${tag('concept')}</div>${pill(['Creator onboarding', 'Recipe databases', 'Kitchen scheduling', 'Inventory management', 'Production and order management', 'Quality control', 'Creator dashboards', 'Customer feedback'])}` }
+      ], 'CLIQUE pillars')}${W('revenue', 'revenue')}` },
+      { h: 'The ecosystem, journey by journey.', lead: 'Five frameworks describe how the proposed ecosystem would work for creators, consumers and the business.', body: `${W('mindmap', 'clique_mm')}<div class="subhead"><h3 class="t-h3">Creator journey</h3></div>${W('flow', 'creator_journey')}<div class="subhead"><h3 class="t-h3">Consumer journey</h3></div>${W('flow', 'consumer_journey')}<div class="subhead"><h3 class="t-h3">Business Model Canvas</h3></div>${W('bmc', 'bmc')}<div class="subhead"><h3 class="t-h3">Service blueprint</h3></div>${W('blueprint', 'blueprint')}` },
+      { h: 'How I helped, and who did what.', lead: 'A co-founded venture means shared credit. Here is how I helped, and the honest split.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">How I became a helping hand to a founder</h3>${tag('done')}</div>` + helpHTML('A typical approach', CLQ_HELP, CLQ_VS, 'Co-founder feedback.') + W('graph', 'clq_contrib') + `<div class="subhead"><h3 class="t-h3">The honest split</h3></div>` + `<div class="split"><div class="is-real"><span class="t-label">Jainil</span><ul class="list-dash" style="margin-top:12px"><li>Approached Taco Tango's founder and established the collaboration</li><li>Jointly created CLIQUE FOODOVATION</li><li>Institutional positioning and persuasive communication</li><li>Approached universities, malls and public-premise decision-makers</li><li>Designed the proposed ecosystem frameworks</li></ul></div><div><span class="t-label">Co-founder</span><ul class="list-dash" style="margin-top:12px"><li>Founded Taco Tango independently</li><li>Handled subsequent commercial negotiations</li><li>Handled final deal closure</li></ul></div></div>` },
+      { h: 'Inside my thinking as a co-founder.', lead: 'How I spotted the opportunity, questioned the problem, mapped both sides of the ecosystem and planned it in phases.', body: thinkingModule(THINK.clq, 'clq') },
+      { h: 'One counter, many conversations.', body: `<div class="grid g-2"><div class="card"><div style="margin-bottom:10px">${tag('done', 'Operating')}</div><h3 class="t-h4">Taco Tango at Nirma University</h3><p class="t-sm ink2">A Mexican-food counter operating on campus.</p></div><div class="card"><div style="margin-bottom:10px">${tag('done')}</div><h3 class="t-h4">Institutional outreach</h3><p class="t-sm ink2">Approaches to universities, malls and public-premise decision-makers. ${ph('ADD WHICH VENUES, IF APPROVED')}</p></div></div><div class="grid g-2" style="margin-top:16px"><div class="evidence"><div><p class="t-label">Counter photo</p>${ph('ADD APPROVED PHOTO OF THE TACO TANGO COUNTER')}</div></div><div class="evidence"><div><p class="t-label">Packaging or branding</p>${ph('ADD APPROVED VISUAL')}</div></div></div>` },
+      { h: 'An operating brand is the best argument for an ecosystem.', body: `<div class="grid g-12"><div style="grid-column:span 7"><p class="quote" style="font-size:clamp(1.5rem,1.1rem + 1.4vw,2.4rem)">Starting from something real, one counter and one brand, gives a bigger idea something to stand on.</p></div><div style="grid-column:span 5"><span class="t-label">Personal reflection</span><p style="margin-top:8px">${ph('ADD YOUR OWN KEY LEARNING FROM CLIQUE')}</p></div></div>` }
+    ]
+  });
+}
+
+/* ---------- HYDRA ---------- */
+function pageHydra() {
+  const prod = (n, d, c) => `<div class="prod rv" style="color:${c}"><span class="t-label" style="color:inherit">${d}</span><span class="bottle" aria-hidden="true"></span><div><h3 class="t-h3" style="color:var(--ink)">${n}</h3></div></div>`;
+  const brand = [
+    ['Positioning', `<div style="margin-bottom:12px">${tag('done', 'Explored')}</div><p class="quote" style="font-size:clamp(1.5rem,1.1rem + 1.2vw,2.2rem)">Hydra as a hydration companion for active, health-conscious consumers.</p>`],
+    ['Personality', `<p>${ph('ADD THE BRAND PERSONALITY YOU DEFINED')}</p>`],
+    ['Core promise', `<p>${ph('ADD THE CORE PROMISE')}</p>`],
+    ['Consumer perception', `<p>Shaped through surveys and seller feedback.</p><p>${ph('ADD WHAT YOU LEARNED ABOUT PERCEPTION')}</p>`],
+    ['Product positioning', `<ul class="list-dash"><li><strong>Hydra Zero Sugar Water</strong>: ${ph('ADD POSITIONING')}</li><li><strong>Chamkila</strong>: ${ph('ADD POSITIONING')}</li><li><strong>Mojito</strong>: ${ph('ADD POSITIONING')}</li></ul>`],
+    ['Packaging', `<p>${ph('ADD PACKAGING DIRECTION AND APPROVED VISUALS')}</p>`],
+    ['Campaigns & storytelling', `<p>${ph('ADD CAMPAIGN AND STORYTELLING WORK')}</p>`],
+    ['Tagline', `<div style="margin-bottom:12px">${tag('concept', 'Proposed direction')}</div><p class="quote" style="font-size:clamp(1.75rem,1.2rem + 1.6vw,2.6rem)">"Hydra — Your Partner in Progress."</p><p class="t-sm muted">A proposed tagline direction, not an official tagline.</p>`],
+    ['Jingles', `<p>${ph('ADD JINGLE CONCEPTS')}</p>`],
+    ['Placement strategy', `<p>Go where active, health-conscious people already are: colleges, universities, cafés, restaurants, clubs and fitness environments.</p>`]
+  ];
+  const comms = [
+    ['University admin', 'Student wellbeing, policy, low effort for them', 'A healthier, zero-sugar choice for students', 'Placements at other campuses', 'Permission and a location'],
+    ['Canteen & café operators', 'Margin, sell-through, counter space', 'A product students ask for that fills a gap', 'Seller feedback from existing placements', 'A short trial on the counter'],
+    ['Fitness & clubs', 'Fit with their members and image', 'Hydration that matches an active lifestyle', 'Brand positioning and product fit', 'Placement near training areas'],
+    ['Student community', 'Taste, price, what friends drink', 'Your partner in progress, on campus', 'Visibility at events', 'Trial and feedback']
+  ];
+  return caseStudy({
+    key: 'hyd', theme: 'theme-hydra', n: '03', org: 'Hydra Enterprise · Marketing & sales',
+    title: 'From brand strategy to campus shelves.',
+    lead: 'As Chief Marketing Officer, Jainil shaped how a beverage portfolio was positioned, then personally took it to the institutions where its consumers spend their days.',
+    meta: [['Role', 'Chief Marketing Officer (CMO)'], ['Company', 'Hydra Enterprise'], ['Portfolio', 'Hydra Zero Sugar Water, Chamkila, Mojito'], ['Placements', 'Nirma University + a few other universities']],
+    prev: ['clique', 'CLIQUE FOODOVATION'], next: ['unilever', 'Unilever'],
+    inside: [['Mapping plan', 2], ['Market research', 'mr'], ['Consumer insights', 3], ['Strategy', 5], ['Helping hand', 7], ['How I thought', 8]],
+    sections: [
+      { h: 'A three-product beverage portfolio.', lead: 'Each product needed its own place in the consumer\'s mind, inside one brand.', body: `<div class="grid g-3">${prod('Hydra Zero Sugar Water', 'Product 01', 'var(--blue)')}${prod('Chamkila', 'Product 02', 'var(--orange-ink)')}${prod('Mojito', 'Product 03', 'var(--ink-3)')}</div><p class="note" style="margin-top:16px"><strong>Before publishing:</strong> confirm the spelling of "Chamkila" and add approved product photography.</p>` },
+      { h: 'A new brand has to earn its first shelf.', lead: 'Consumers can only choose what they can find. For a new beverage, the hardest step is getting onto the right counter in front of the right people.', body: `<div class="grid g-3">${[['Who', 'Active, health-conscious consumers.'], ['Where', 'Campuses, cafés, clubs and fitness spaces.'], ['Barrier', 'Decision-makers who control shelf and counter space.']].map(([a, b]) => `<div class="card"><span class="t-label">${a}</span><p style="margin-top:10px;margin-bottom:0">${b}</p></div>`).join('')}</div>` },
+      { h: 'Listening to sellers and consumers.', lead: 'Jainil maintained communication with sellers, conducted surveys, collected feedback and shared recommendations.', body: `<div class="grid g-2"><div class="card"><span class="t-label">Environments identified</span><div class="chips" style="margin-top:12px">${['Colleges', 'Universities', 'Cafés', 'Restaurants', 'Clubs', 'Fitness environments'].map(x => `<span class="pill">${x}</span>`).join('')}</div></div><div class="card"><span class="t-label">Survey & feedback findings</span><p style="margin-top:10px;margin-bottom:0">${ph('ADD ACTUAL SURVEY FINDINGS')}</p></div></div><p class="note" style="margin-top:16px"><strong>Not measured:</strong> repeat purchase was not quantitatively measured, so no repeat-purchase figure appears anywhere in this case.</p>` + `<div class="subhead"><h3 class="t-h3">Mapping plan</h3>${tag('done')}</div>` + W('swimlane', 'hyd_plan') + `<div class="subhead" id="hyd-mr"><h3 class="t-h3">Market research</h3>${tag('illus')}</div>` + W('matrix', 'hyd_market') },
+      { h: 'Who shapes a campus placement.', lead: 'Placement is rarely one person\'s decision. Mapping influence and interest shows where to spend effort.', body: W('matrix', 'hydra_stake') + `<div class="subhead"><h3 class="t-h3">Consumer insights · two customers</h3>${tag('done')}</div>` + `<div class="two-cust"><div><span class="t-label">Customer 1 · the operator</span><strong>Decides whether it is on the shelf</strong><ul class="list-dash t-sm"><li>Margin and sell-through</li><li>Counter and fridge space</li><li>Low risk to try</li></ul></div><span class="tc-a" aria-hidden="true">→</span><div><span class="t-label">Customer 2 · the student</span><strong>Decides whether it is bought</strong><ul class="list-dash t-sm"><li>Hydration that fits an active day</li><li>Zero sugar as a reason to choose</li><li>Taste, price, what friends drink</li></ul></div></div>` + W('moments', 'hyd_moments') },
+      { h: 'Reading the room in B2B conversations.', lead: 'Every institution cares about something different. The message has to change; the product does not.', body: `${tabs(comms.map(([t, cares, angle, proof, ask]) => ({ t, html: `<div style="margin-bottom:14px">${tag('illus', 'Illustrative framework')}</div><dl class="kv"><dt>Cares about</dt><dd>${cares}</dd><dt>Opening angle</dt><dd>${angle}</dd><dt>Proof to bring</dt><dd>${proof}</dd><dt>The ask</dt><dd>${ask}</dd></dl>` })), 'B2B communication by audience')}${W('objections', 'objections')}` },
+      { h: 'Building the brand.', lead: 'The brand work as CMO, area by area. Placeholders mark work to be added from approved material.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">Strategy map</h3>${tag('done')}</div>` + `<div style="--n:4">${strategyTreeHTML(D.hyd_tree)}</div>` + `<div class="subhead"><h3 class="t-h3">Brand strategy, area by area</h3>${tag('done')}</div>` + tabs(brand.map(([t, html]) => ({ t, html })), 'Hydra brand strategy') },
+      { h: 'The system behind the shelf.', lead: 'The real loop Jainil ran, followed by the illustrative B2B framework that generalises it.', body: `${W('flow', 'hydra_chain')}<div class="subhead"><h3 class="t-h3">Illustrative B2B framework</h3>${tag('illus')}</div>${W('flow', 'b2b')}${W('funnel', 'funnel')}` },
+      { h: 'What I did as CMO, and how I helped.', body: `<div class="subhead" style="margin-top:0"><h3 class="t-h3">How I became a helping hand to the business</h3>${tag('done')}</div>` + helpHTML('A typical approach', HYD_HELP, HYD_VS, 'Team feedback.') + W('graph', 'hyd_contrib') + `<div class="subhead"><h3 class="t-h3">The honest split</h3></div>` + `<div class="split"><div class="is-real"><span class="t-label">Contribution</span><ul class="list-dash" style="margin-top:12px"><li>Brand positioning, personality and core promise</li><li>Consumer perception and product positioning</li><li>Packaging, campaigns, storytelling, tagline concepts and jingles</li><li>Placement strategy</li><li>Personally approached institutions and decision-makers</li><li>Helped secure placements at Nirma University and a few other universities</li><li>Maintained seller communication, ran surveys and shared recommendations</li></ul></div><div class="is-vision"><span class="t-label">Not claimed</span><ul class="list-dash" style="margin-top:12px"><li>No sales or revenue figures</li><li>No repeat-purchase measurement</li><li>"Your Partner in Progress" is a proposed, not official, tagline</li></ul></div></div>` },
+      { h: 'Inside my thinking as CMO.', lead: 'How I connected brand strategy to field sales, the questions that shaped the outreach, and what I learned from consumers and sellers.', body: thinkingModule(THINK.hyd, 'hyd') },
+      { h: 'Tools for running outreach as a system.', lead: 'A conceptual CRM and an editable performance framework show how this outreach could be tracked. Demo rows are clearly illustrative; actual metrics stay blank until real numbers exist.', body: `${W('crm', 'crm')}${W('kpi', 'kpi')}` },
+      { h: 'Strategy only matters once it reaches a shelf.', body: `<div class="grid g-12"><div style="grid-column:span 7"><p class="quote" style="font-size:clamp(1.5rem,1.1rem + 1.4vw,2.4rem)">Positioning decides what a brand says. Business development decides whether anyone gets to hear it.</p></div><div style="grid-column:span 5"><span class="t-label">Personal reflection</span><p style="margin-top:8px">${ph('ADD YOUR OWN KEY LEARNING FROM HYDRA')}</p></div></div>` }
+    ]
+  });
+}
+
+/* =========================================================
+   DRAFTDIGGER
+   ========================================================= */
+function pageDraftDigger() {
+  return `
+  <section class="dd-hero"><div class="wrap" style="padding-top:clamp(3rem,2rem + 4vw,6rem);padding-bottom:clamp(3rem,2rem + 4vw,6rem)">
+    <div class="row between" style="margin-bottom:clamp(2rem,1rem + 3vw,4rem)"><span class="t-label" style="color:#A3A29C">05 · Venture · Founded by Jainil Shukla</span><span class="tag tag-ongoing" style="background:#2E2018;color:#F2BC92;border-color:#45301F">In development</span></div>
+    <h1><span class="sr-only">DraftDigger</span><span class="dd-word" aria-hidden="true">Draft<span class="dig">Digger</span><span style="color:var(--orange)">.</span></span></h1>
+    <div class="grid g-12" style="margin-top:clamp(2rem,1rem + 3vw,4rem);align-items:end">
+      <div style="grid-column:span 6"><p class="caps-statement" style="font-size:clamp(2.2rem,1rem + 4vw,4.6rem);color:#F4F4F0">Digging to<br>the roots.</p></div>
+      <div style="grid-column:span 6"><p class="serif-i" style="font-size:clamp(1.5rem,1.1rem + 1.4vw,2.4rem);line-height:1.15;color:#F4F4F0;margin-bottom:14px">Your vision. Our strategy. Shared growth.</p><p style="color:#CFCEC8;max-width:48ch">A business strategy and execution partner that helps founders understand what their businesses should do, and how to make it happen.</p>
+      <div class="row" style="margin-top:18px"><button class="btn btn-primary" data-jump="dd-story" style="color:#fff">Read the story <span class="arrow" aria-hidden="true">↓</span></button><a class="btn" href="#/contact" style="background:#F4F4F0;color:#171717">Talk to DraftDigger</a></div></div>
+    </div>
+    <nav class="dd-jump" aria-label="On this page">${[['dd-story', 'Story'], ['dd-plan', 'Mapping plan'], ['dd-for', 'Who it\'s for'], ['dd-market', 'Market research'], ['dd-insights', 'Founder insights'], ['dd-svc', 'Services'], ['dd-proc', 'Process'], ['dd-strategy', 'Strategy'], ['dd-standout', 'How it stands out'], ['dd-model', 'How we work'], ['dd-proof', 'Built on'], ['dd-road', 'Roadmap'], ['dd-faq', 'FAQ']].map(([id, t]) => `<button data-jump="${id}">${t}</button>`).join('')}</nav>
+  </div></section>
+
+  <section class="sec" id="dd-story"><div class="wrap">
+    ${secHead('The story', 'Why DraftDigger exists.', 'Five chapters, from a pattern Jainil kept noticing to the venture taking shape now.')}
+    <ol class="dd-story">${DDX.story.map(([n, t, d]) => `<li class="rv"><span class="ds-n">${n}</span><div><h3 class="t-h3">${t}</h3><p>${d}</p></div></li>`).join('')}</ol>
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-plan"><div class="wrap">
+    ${secHead('Mapping plan', 'How DraftDigger maps a founder\'s business.', 'Four phases, five lanes: the question, the method, the map produced and what the founder gets at each step.')}
+    ${W('swimlane', 'dd_plan')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-for"><div class="wrap">
+    ${secHead('Who it\'s for', 'Founders at three kinds of moment.', 'Pick the one closest to yours to see the questions DraftDigger would answer, the services that apply and where the process would focus.')}
+    ${W('situations', 'dd_situations')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-market"><div class="wrap">
+    ${secHead('Market research lens', 'Where DraftDigger starts.', 'Food and beverage founder segments, placed by how much they need structured strategy and how easily they can get it today.')}
+    ${W('matrix', 'dd_market')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-insights"><div class="wrap">
+    ${secHead('Founder insights', 'What founders need, and how DraftDigger answers.', 'A value proposition canvas built from what Jainil has seen across campus counters, beverage brands and food creators. Hypotheses to test with the first founders.')}
+    ${W('vpc', 'dd_vpc')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-svc"><div class="wrap">
+    ${secHead('What it does', 'Eleven services in four groups.', 'Insight, direction, structure and growth. Each service is built on something Jainil has already done in his case studies.')}
+    ${W('services', 'dd_services')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-proc"><div class="wrap">
+    ${secHead('How it works', 'Understand → Diagnose → Strategise → Structure → Coordinate → Execute.', 'For every stage: what the founder brings, what DraftDigger brings, and what comes out of it.')}
+    ${W('flow', 'dd_process')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-strategy"><div class="wrap">
+    ${secHead('Strategy', 'How DraftDigger plans to grow.', 'One goal, four levers, and the honest status of each.')}
+    <div style="--n:4">${strategyTreeHTML(D.dd_tree)}</div>
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-standout"><div class="wrap">
+    ${secHead('How it stands out', 'A helping hand for founders, not a report.', 'What DraftDigger will do for a founder, how that helps, and how it differs from a typical consultancy.')}
+    ${helpHTML('A typical consultancy', DD_HELP, DD_VS, '', ['What DraftDigger does.', 'How it helps the founder.'], 'DraftDigger')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-model"><div class="wrap">
+    ${secHead('How we work together', 'The founder stays at the centre.', 'DraftDigger works beside the founder and coordinates the people the plan depends on, including external specialists where a project needs them.')}
+    ${W('graph', 'dd_model')}
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-proof"><div class="wrap">
+    ${secHead('Built on real work', 'What each project taught DraftDigger.')}
+    <div class="grid g-3">${DDX.proof.map(([n, k, l, d]) => `<a class="card card-link rv dd-proof" href="#/work/${k}/8"><span class="t-label">${n}</span><p class="dd-proof-t">${l}</p><p class="t-sm ink2">${d}</p><span class="link t-sm">How Jainil thought →</span></a>`).join('')}</div>
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-road"><div class="wrap grid g-12">
+    <div style="grid-column:span 5">${secHead('Roadmap', 'Where DraftDigger is today.').replace('sec-head', 'sec-head dd-sh')}<p class="ink2 measure-n">Honest about the stage: DraftDigger is being shaped now. It is not an established firm and has no client results to show yet.</p></div>
+    <div style="grid-column:span 7"><ol class="road">${DDX.road.map(([w, t, d, tg]) => `<li class="road-${tg === 'ongoing' ? 'done' : tg}"><span class="rw t-label">${w}</span><span class="rd" aria-hidden="true"></span><div><strong>${t}</strong><p class="t-sm ink2">${d}</p>${tag(tg)}</div></li>`).join('')}</ol></div>
+  </div></section>
+
+  <section class="sec-sm rule" id="dd-faq"><div class="wrap grid g-12">
+    <div style="grid-column:span 4"><span class="t-label">Questions</span><h2 class="t-h2" style="margin-top:14px">Straight answers.</h2></div>
+    <div style="grid-column:span 8">${DDX.faq.map(([q, a], i) => `<details class="tq"${i === 0 ? ' open' : ''}><summary><span class="tq-q">Q${i + 1}</span><span class="tq-t">${q}</span></summary><div class="tq-b" style="grid-template-columns:1fr"><p>${a}</p></div></details>`).join('')}</div>
+  </div></section>
+
+  <section class="sec-sm"><div class="wrap"><div class="bfds rv" style="display:flex;justify-content:space-between;gap:24px;align-items:end;flex-wrap:wrap">
+    <div><span class="t-label" style="color:#A3A29C">Starting something?</span><p class="caps-statement" style="font-size:clamp(2rem,1rem + 4vw,4.5rem);margin-top:14px">Let's figure<br>out the way.</p></div>
+    <div class="row"><a class="btn btn-primary" href="#/contact" style="color:#fff">Talk to DraftDigger <span class="arrow" aria-hidden="true">→</span></a><a class="btn" href="mailto:${EMAIL}?subject=${encodeURIComponent('DraftDigger: let\'s talk')}" style="background:#F4F4F0;color:#171717">Email Jainil</a></div>
+  </div></div></section>`;
+}
+
+/* =========================================================
+   SYSTEM MAP
+   ========================================================= */
+const HABITS = [
+  ['Immerse before judging', 'A month on the factory floor before forming a view. A working counter before designing an ecosystem.'],
+  ['Separate symptom from cause', 'A defect, an empty shelf or an anonymous dish is usually the visible end of a longer chain.'],
+  ['Map before deciding', 'Problem trees, journeys, stakeholder maps and canvases make the system visible so choices are deliberate.'],
+  ['Find who decides', 'Every plan depends on someone saying yes: a function head, a venue owner, a canteen operator.'],
+  ['Label what is proven', 'Hypotheses stay hypotheses. Proposals stay proposals. Unmeasured results are not claimed.']
+];
+function pageSystemMap() {
+  const habits = HABITS;
+  return `
+  <section class="phead wrap"><span class="t-label">The system map</span>
+    <h1 class="t-h1 measure-w">Every workflow, map, technique and insight <span class="serif-i" style="font-weight:400">in one place.</span></h1>
+    <p class="t-lead">This is how I think, laid out end to end: the forces I look at, the workflow I follow, the research techniques I use, the maps I build and the insights they produced across Unilever, CLIQUE FOODOVATION and Hydra Enterprise.</p>
+    <nav class="sm-jump" aria-label="On this page">${[['sm-forces', 'The six forces'], ['sm-mind', 'Master mind map'], ['sm-flow', 'Master workflow'], ['sm-gal', 'Mapping techniques'], ['sm-studio', 'Live diagrams'], ['sm-habits', 'Working pattern'], ['sm-tech', 'Research techniques'], ['sm-lib', 'Map library'], ['sm-ins', 'Insights']].map(([id, t], i) => `<button class="chip" data-jump="${id}"><span class="t-label" style="margin-right:6px;color:var(--blue-ink)">0${i + 1}</span>${t}</button>`).join('')}</nav>
+  </section>
+  <section class="sec-sm rule" id="sm-forces"><div class="wrap">${secHead('01 · The six forces', 'The system every decision lands in.', 'People, market, strategy, operations, communication and growth. Select a force to see how it connects.')}${W('graph', 'eco')}</div></section>
+  <section class="sec-sm rule" id="sm-mind"><div class="wrap">${secHead('02 · Master mind map', 'Everything, branching from one centre.', 'Forces, stages, mapping toolkit, research techniques, projects and insights in a single expandable mind map. Open a branch, select any node.')}${W('mindmap', 'sm_mind')}</div></section>
+  <section class="sec-sm rule" id="sm-flow"><div class="wrap">${secHead('03 · Master workflow', 'One workflow, three very different projects.', 'Each stage shows the techniques I use, the maps it produces, and exactly where it showed up in each case study.')}${W('flow', 'sm_flow')}</div></section>
+  <section class="sec-sm rule" id="sm-gal"><div class="wrap">${secHead('04 · Mapping techniques', 'Twelve ways to make a business visible.', 'What each diagram is, when Jainil reaches for it, and a link to the live version in a case study.')}${galleryHTML()}</div></section>
+  <section class="sec-sm rule" id="sm-studio"><div class="wrap">${secHead('05 · Live diagrams', 'Try the real diagrams here.', 'Seven working diagrams from the case studies. Click, drag, expand and explore without leaving this page.')}${studioHTML()}</div></section>
+  <section class="sec-sm rule" id="sm-habits"><div class="wrap">${secHead('06 · Working pattern', 'Five habits that show up every time.')}
+    <ol class="habits">${habits.map(([a, b], i) => `<li class="rv"><span class="hn">0${i + 1}</span><div><h3 class="t-h3">${a}</h3><p class="ink2">${b}</p></div></li>`).join('')}</ol></div></section>
+  <section class="sec-sm rule" id="sm-tech"><div class="wrap">${secHead('07 · Research techniques', 'How I gather evidence, and where.', 'Select a dot to see how a technique was used in that project.')}${W('capmx', 'sm_tech')}</div></section>
+  <section class="sec-sm rule" id="sm-lib"><div class="wrap">${secHead('08 · Map library', 'Every interactive map, one click away.', 'Filter by type or project. Each card opens the live map inside its case study.')}${W('library', 'sm_lib')}</div></section>
+  <section class="sec-sm rule" id="sm-ins"><div class="wrap">${secHead('09 · Insights', 'What the work taught me.', 'Insights drawn from the three case studies. Each one links to its evidence.')}${W('insights', 'sm_insights')}</div></section>
+  <section class="sec-sm"><div class="wrap"><div class="bfds rv" style="display:flex;justify-content:space-between;gap:24px;align-items:end;flex-wrap:wrap"><div><span class="t-label" style="color:#A3A29C">See it applied</span><p class="caps-statement" style="font-size:clamp(2rem,1rem + 4vw,4.5rem);margin-top:14px">Three projects.<br>One way of thinking.</p></div><div class="row">${btn('#/work/unilever', 'Unilever', 'btn-secondary')}${btn('#/work/clique', 'CLIQUE', 'btn-secondary')}${btn('#/work/hydra', 'Hydra', 'btn-secondary')}</div></div></div></section>`;
+}
+
+/* =========================================================
+   CONTACT
+   ========================================================= */
+const INTENTS = [
+  ['Starting something', 'Starting something', 'An idea, product or recipe that needs a clear way forward.', "Hi Jainil,\n\nI'm starting [what you're building] and I'd like help figuring out [market / customer / way in].\n\n"],
+  ['Growing something', 'Growing something', 'A working business where the next step isn\'t obvious.', "Hi Jainil,\n\nMy business [name] is growing, but I'm stuck on [what's not working]. I'd like to talk about [strategy / structure / growth].\n\n"],
+  ["What's next", "Figuring out what's next", 'Something stalled or changed and you need direction.', "Hi Jainil,\n\nI'm trying to figure out what's next for [business / project]. Here's where things stand: \n\n"],
+  ['A role or internship', 'Hiring or a role', 'Recruiters and teams looking for strategy and insight talent.', "Hi Jainil,\n\nI'm [name] from [organisation]. We have a [role] in [team] and I'd like to talk.\n\n"],
+  ['Collaborate', 'Collaborating on a venture', 'Founders, venues or partners who want to build something together.', "Hi Jainil,\n\nI'd like to explore working together on [idea / venture]. \n\n"]
+];
+function pageContact() {
+  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL}&su=${encodeURIComponent("Let's talk")}`;
+  return `
+  <section class="phead wrap"><span class="t-label">06 · Contact</span>
+    <h1 class="t-hero" style="text-transform:uppercase">Got something<br>in mind<span class="blue">?</span></h1>
+    <p class="t-lead">Whether you're starting something, growing something or trying to figure out what's next, let's figure out the way.</p>
+    <div class="ct-hero-row">
+      <a class="btn btn-primary" href="mailto:${EMAIL}?subject=${encodeURIComponent("Let's talk")}">Email ${EMAIL} <span class="arrow" aria-hidden="true">→</span></a>
+      <button class="btn btn-secondary" type="button" data-jump="ct-intents">Start a message</button>
+      <button class="btn btn-secondary" type="button" data-openbot>Ask Assistant of JV</button>
+      <a class="btn btn-secondary" href="#/work">See the work first</a>
+    </div>
+  </section>
+
+  <section class="sec-sm rule"><div class="wrap">
+    <div class="ct-mail rv">
+      <div><span class="t-label">Email Jainil directly</span><br><a class="big-email" href="mailto:${EMAIL}">${EMAIL}</a><p style="margin:12px 0 0;color:#CFCEC8">Based in Bangalore, Karnataka, India. Open to founders, business owners, recruiters and growing organisations.</p></div>
+      <div class="row" style="justify-content:flex-end">
+        <a class="btn btn-primary" href="mailto:${EMAIL}?subject=${encodeURIComponent("Let's talk")}" style="color:#fff">Write an email</a>
+        <a class="btn ct-ghost" href="${gmail}" target="_blank" rel="noopener">Open in Gmail ↗</a>
+        <button class="btn ct-ghost" id="copyEmail" type="button">Copy email</button>
+        <span class="t-xs" id="copyMsg" aria-live="polite" style="color:#A3A29C;min-width:60px"></span>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="sec-sm" id="ct-intents"><div class="wrap">
+    ${secHead('Start here', 'What brings you here?', 'Pick one and the form below gets a head start. You can change anything before sending.')}
+    <div class="ct-intents" role="group" aria-label="Reason for getting in touch">${INTENTS.map(([t, v, d], i) => `<button class="ct-int" type="button" data-int="${i}" aria-pressed="false"><span class="t-label" style="color:var(--blue-ink)">0${i + 1}</span><strong>${t}</strong><span class="d">${d}</span></button>`).join('')}</div>
+  </div></section>
+
+  <section class="sec-sm rule" id="ct-form"><div class="wrap grid g-12" style="align-items:start">
+    <div style="grid-column:span 5" class="rv">
+      <span class="t-label">What happens next</span>
+      <ol class="ct-next" style="grid-template-columns:1fr;margin-top:14px">
+        <li><b>01</b>You send a message, through the form or by email.</li>
+        <li><b>02</b>Jainil reads it himself and replies personally.</li>
+        <li><b>03</b>You talk it through and figure out the way, together.</li>
+      </ol>
+      <dl class="kv" style="margin-top:28px"><dt>Email</dt><dd><a class="link" href="mailto:${EMAIL}">${EMAIL}</a></dd><dt>Base</dt><dd>Bangalore, Karnataka, India</dd><dt>Venture</dt><dd><a class="link" href="#/draftdigger">DraftDigger</a> (in development)</dd></dl>
+    </div>
+    <div style="grid-column:span 7" class="rv">
+      <form class="form card" id="contactForm" novalidate style="padding:clamp(20px,3vw,36px)">
+        <div class="grid g-2" style="gap:18px">
+          <div class="field"><label for="f-name">Name</label><input class="input" id="f-name" name="name" autocomplete="name" required aria-describedby="e-name"><span class="err" id="e-name"></span></div>
+          <div class="field"><label for="f-email">Your email</label><input class="input" id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="e-email"><span class="err" id="e-email"></span></div>
+        </div>
+        <div class="field"><label for="f-org">Organisation <span class="muted">(optional)</span></label><input class="input" id="f-org" name="organisation" autocomplete="organization"></div>
+        <div class="field"><label for="f-stage">Where are you?</label><select class="select" id="f-stage" name="stage">${INTENTS.map(i => `<option>${i[1]}</option>`).join('')}<option>Something else</option></select></div>
+        <div class="field"><label for="f-msg">Message</label><textarea class="textarea" id="f-msg" name="message" required maxlength="2000" aria-describedby="e-msg h-msg"></textarea><span class="help" id="h-msg"><span>A few lines about the business and what you need is plenty.</span> <span class="char" id="charCount">0 / 2000</span></span><span class="err" id="e-msg"></span></div>
+        <div class="form-status" id="formStatus" role="status"></div>
+        <div class="row between"><span class="t-xs muted" id="formMode"></span><button class="btn btn-primary" type="submit">Let's talk <span class="arrow" aria-hidden="true">→</span></button></div>
+        <p class="t-xs muted" style="margin:0">Prefer email? Write to <a class="link" href="mailto:${EMAIL}">${EMAIL}</a></p>
+      </form>
+    </div>
+  </div></section>`;
+}
+
+function initContact(root) {
+  $$('[data-openbot]', root).forEach(b => b.addEventListener('click', () => { const l = document.querySelector('.jv-launch'); if (l && l.getAttribute('aria-expanded') !== 'true') l.click(); }));
+  const f = $('#contactForm', root); if (!f) return;
+  const msg = f.elements.message, cc = $('#charCount', root);
+  const count = () => { cc.textContent = `${msg.value.length} / 2000`; };
+  msg.addEventListener('input', count);
+  $$('[data-int]', root).forEach(b => b.addEventListener('click', () => {
+    const it = INTENTS[+b.dataset.int];
+    $$('[data-int]', root).forEach(x => x.setAttribute('aria-pressed', x === b));
+    f.elements.stage.value = it[1];
+    if (!msg.value.trim() || INTENTS.some(x => msg.value === x[3])) msg.value = it[3];
+    count();
+    const t = $('#ct-form', root); window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 90, behavior: RM.matches ? 'auto' : 'smooth' });
+    setTimeout(() => { const n = f.elements.name; (n.value ? msg : n).focus({ preventScroll: true }); }, RM.matches ? 0 : 600);
+  }));
+  $('#formMode', root).textContent = FORM_ENDPOINT ? 'Sends directly to Jainil.' : 'Opens your email app with this message ready to send.';
+  $('#copyEmail', root).addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(EMAIL); $('#copyMsg', root).textContent = 'Copied'; } catch (e) { $('#copyMsg', root).textContent = EMAIL; }
+    setTimeout(() => $('#copyMsg', root).textContent = '', 2500);
+  });
+  f.addEventListener('submit', async e => {
+    e.preventDefault();
+    const v = k => f.elements[k].value.trim(); let ok = true;
+    const set = (k, msg) => { const i = f.elements[k]; i.setAttribute('aria-invalid', !!msg); $('#e-' + (k === 'message' ? 'msg' : k), root).textContent = msg || ''; if (msg && ok) { i.focus(); ok = false; } };
+    set('name', v('name') ? '' : 'Please add your name.');
+    set('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email')) ? '' : 'Please add a valid email address.');
+    set('message', v('message').length > 4 ? '' : 'Please add a short message.');
+    if (!ok) return;
+    const st = $('#formStatus', root);
+    const body = `Name: ${v('name')}\nEmail: ${v('email')}\nOrganisation: ${v('organisation') || '-'}\nStage: ${v('stage')}\n\n${v('message')}`;
+    if (FORM_ENDPOINT) {
+      st.className = 'form-status show ok'; st.textContent = 'Sending…';
+      try {
+        const r = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ name: v('name'), email: v('email'), organisation: v('organisation'), stage: v('stage'), message: v('message') }) });
+        if (!r.ok) throw new Error(r.status);
+        st.textContent = 'Thank you. Your message has been sent.'; f.reset();
+      } catch (err) { st.className = 'form-status show bad'; st.innerHTML = `Something went wrong sending the form. Please email <a class="link" href="mailto:${EMAIL}">${EMAIL}</a> directly.`; }
+    } else {
+      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Let\'s talk: ' + v('stage'))}&body=${encodeURIComponent(body)}`;
+      st.className = 'form-status show ok'; st.innerHTML = `Your email app should now open with the message ready. If nothing happened, email <a class="link" href="mailto:${EMAIL}">${EMAIL}</a> directly.`;
+    }
+  });
+}
+
+function page404() {
+  return `<section class="phead wrap" style="min-height:50vh"><span class="t-label">404</span><h1 class="t-h1">This page doesn't exist.</h1><p class="t-lead">The link may be old or mistyped.</p><div class="row" style="margin-top:24px">${btn('#/', 'Back to home', 'btn-primary')}${btn('#/work', 'See the work')}</div></section>`;
+}
+
+/* =========================================================
+   ROUTER
+   ========================================================= */
+const ROUTES = {
+  '/': [pageHome, 'Jainil Shukla | Business Systems Designer & Business Strategist', 'I don\'t invent. I invade. Business Systems Designer and Business Strategist based in Bangalore.'],
+  '/about': [pageAbout, 'About | Jainil Shukla', 'The journey, education and philosophy of Jainil Shukla.'],
+  '/thinking': [pageThinking, 'My Thinking | Jainil Shukla', 'Designing the way business works: a business ecosystem and a seven-stage framework.'],
+  '/capabilities': [pageCapabilities, 'Capabilities | Jainil Shukla', 'Business strategy, systems design, research, brand strategy, business development and entrepreneurship.'],
+  '/work': [pageWork, 'Work | Jainil Shukla', 'Case studies: Unilever, CLIQUE FOODOVATION and Hydra Enterprise.'],
+  '/work/unilever': [pageUnilever, 'Unilever case study | Jainil Shukla', 'Understanding the system, identifying the problem and exploring solutions in a two-month Unilever project internship.'],
+  '/work/clique': [pageClique, 'CLIQUE FOODOVATION case study | Jainil Shukla', 'Building a creator-first food entrepreneurship ecosystem.'],
+  '/work/hydra': [pageHydra, 'Hydra Enterprise case study | Jainil Shukla', 'From brand strategy to campus shelves as CMO of Hydra Enterprise.'],
+  '/draftdigger': [pageDraftDigger, 'DraftDigger | Business Strategy & Execution Partner', 'DraftDigger: Digging to the roots. A business strategy and execution partner in development.'],
+  '/system-map': [pageSystemMap, 'The System Map | Jainil Shukla', 'Every workflow, map, research technique and insight from Jainil Shukla\'s work, in one place.'],
+  '/contact': [pageContact, 'Contact | Jainil Shukla', 'Got something in mind? Let\'s figure out the way.']
+};
+let spyObs = null, rvObs = null;
+function render() {
+  let path = (location.hash.replace(/^#/, '') || '/').replace(/\/+$/, '') || '/';
+  let target = null; const dm = path.match(/^\/work\/(unilever|clique|hydra)\/(\d+)$/);
+  if (dm) { target = ({ unilever: 'uni', clique: 'clq', hydra: 'hyd' })[dm[1]] + '-' + dm[2]; path = '/work/' + dm[1]; }
+  let cIdx = null; const cm = path.match(/^\/contact\/(\d+)$/); if (cm) { cIdx = +cm[1]; path = '/contact'; }
+  let jIdx = null; const am = path.match(/^\/about\/(\d+)$/);
+  if (am) { jIdx = +am[1]; target = 'about-journey'; path = '/about'; }
+  const r = ROUTES[path] || [page404, 'Not found | Jainil Shukla', ''];
+  const main = $('#main');
+  main.innerHTML = `<div class="page-enter">${r[0]()}</div>`;
+  document.title = r[1];
+  const md = $('meta[name="description"]'); if (md && r[2]) md.setAttribute('content', r[2]);
+  $$('.nav-links a, .mnav a').forEach(a => {
+    const h = a.getAttribute('href').slice(1);
+    const cur = h === path || (h === '/work' && path.startsWith('/work/') && a.closest('.nav-links')) || (h === '/thinking' && path === '/system-map' && a.closest('.nav-links'));
+    cur ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current');
+  });
+  closeMenu();
+  window.scrollTo(0, 0);
+  mountWidgets(main);
+  initContact(main);
+  initReveal(main);
+  initSpy(main);
+  $$('[data-jump]', main).forEach(b => b.addEventListener('click', () => { const t = document.getElementById(b.dataset.jump); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - 80, behavior: RM.matches ? 'auto' : 'smooth' }); }));
+  if (cIdx !== null) setTimeout(() => { const b = $(`[data-int="${cIdx}"]`, main); if (b) b.click(); }, 80);
+  if (target) { setTimeout(() => { if (jIdx !== null) { const pt = $(`[data-k=journey] .tl-pt[data-i="${jIdx}"]`, main); if (pt) pt.click(); } const t = document.getElementById(target); if (t) window.scrollTo({ top: t.getBoundingClientRect().top + scrollY - (innerWidth <= 1060 ? 130 : 90) }); }, 80); }
+  if (render.ran && !target && cIdx === null) { const h1 = $('h1', main); if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); } }
+  render.ran = true;
+}
+function initReveal(root) {
+  if (rvObs) rvObs.disconnect();
+  const els = $$('.rv', root);
+  if (RM.matches || !('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+  rvObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rvObs.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: .05 });
+  els.forEach(e => rvObs.observe(e));
+}
+function initSpy(root) {
+  if (spyObs) spyObs.disconnect();
+  const btns = $$('[data-scrollto]', root); if (!btns.length) return;
+  btns.forEach(b => b.addEventListener('click', () => {
+    const t = document.getElementById(b.dataset.scrollto); if (!t) return;
+    const y = t.getBoundingClientRect().top + window.scrollY - (window.innerWidth <= 1060 ? 130 : 90);
+    window.scrollTo({ top: y, behavior: RM.matches ? 'auto' : 'smooth' });
+    const h = $('h2', t); if (h) { h.setAttribute('tabindex', '-1'); setTimeout(() => h.focus({ preventScroll: true }), RM.matches ? 0 : 500); }
+  }));
+  const map = new Map(btns.map(b => [b.dataset.scrollto, b]));
+  spyObs = new IntersectionObserver(es => {
+    es.forEach(e => { if (e.isIntersecting) { btns.forEach(b => b.classList.remove('active')); const b = map.get(e.target.id); if (b) { b.classList.add('active'); const ol = b.closest('ol'); if (ol && ol.scrollWidth > ol.clientWidth) ol.scrollTo({ left: b.parentElement.offsetLeft - 20, behavior: RM.matches ? 'auto' : 'smooth' }); } } });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  $$('.cs-sec[id]', root).forEach(s => spyObs.observe(s));
+}
+
+/* ---------- nav & menu ---------- */
+const menuBtn = $('#menuBtn'), mnav = $('#mnav');
+function closeMenu() { mnav.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.setAttribute('aria-label', 'Open menu'); document.body.style.overflow = ''; }
+menuBtn.addEventListener('click', () => {
+  const open = !mnav.classList.contains('open');
+  mnav.classList.toggle('open', open); menuBtn.setAttribute('aria-expanded', open); menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  document.body.style.overflow = open ? 'hidden' : '';
+  if (open) setTimeout(() => { if (mnav.classList.contains('open')) $('a', mnav).focus(); }, 50);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && mnav.classList.contains('open')) { closeMenu(); menuBtn.focus(); } });
+mnav.addEventListener('keydown', e => {
+  if (e.key !== 'Tab') return; const f = $$('a', mnav); const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); menuBtn.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); menuBtn.focus(); }
+});
+mnav.addEventListener('click', e => { if (e.target.closest('a')) closeMenu(); });
+// A link to the page you are already on: re-run the route (scroll to top or to the deep-linked section)
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#/"]'); if (!a || a.hasAttribute('data-open') || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  if (a.getAttribute('href') === location.hash || (a.getAttribute('href') === '#/' && (location.hash === '' || location.hash === '#'))) { e.preventDefault(); closeMenu(); render(); }
+});
+const nav = $('#nav');
+let ticking = false;
+window.addEventListener('scroll', () => { if (ticking) return; ticking = true; requestAnimationFrame(() => { nav.classList.toggle('scrolled', window.scrollY > 8); ticking = false; }); }, { passive: true });
+window.addEventListener('resize', () => { if (window.innerWidth > 1060) closeMenu(); });
+$('#yr').textContent = new Date().getFullYear();
+$('#toTop').addEventListener('click', () => { window.scrollTo({ top: 0, behavior: RM.matches ? 'auto' : 'smooth' }); });
+$('#skipLink').addEventListener('click', e => { e.preventDefault(); const m = $('#main'); m.focus(); m.scrollIntoView(); });
+window.addEventListener('hashchange', render);
+render();

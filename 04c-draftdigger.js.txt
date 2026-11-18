@@ -1,0 +1,132 @@
+/* =========================================================
+   DRAFTDIGGER — story, mapping and detail
+   DraftDigger is in development. Everything below describes the
+   intended offer; nothing here claims clients or results.
+   ========================================================= */
+const DDX = {};
+
+DDX.story = [
+  ['01', 'The pattern', 'Founders arrive with vision and energy, but not always a clear way forward. The question is rarely "what is my dream?". It is "what should my business actually do next, and how do I make it happen?"'],
+  ['02', 'What the work taught', 'At Unilever, a defect turned out to be a system problem. At CLIQUE, an idea only became real through partnerships. At Hydra, a brand only mattered once it reached a shelf. Strategy without structure and execution goes nowhere.'],
+  ['03', 'The idea', 'A partner that sits beside the founder, not above them. Not a report handed over at the end, but thinking, structure and coordination worked out together.'],
+  ['04', 'The name', 'Every business starts as a draft. The work is digging beneath it: into the market, the customer and the operation, until the real shape of the business is clear.'],
+  ['05', 'Where it starts', 'With food and beverage founders, the industry where Jainil\'s work has happened so far: campus counters, beverage brands and food creators.']
+];
+
+D.dd_situations = {
+  items: [
+    { t: 'Starting something', d: 'You have an idea, a product or a recipe, and need to know if and how it can become a business.',
+      q: ['Is there a real market for this?', 'Who exactly is the customer?', 'Where is the way in?'],
+      svc: ['Business research', 'Consumer insights', 'Competitor analysis', 'Market entry', 'Business models'], st: ['Understand', 'Diagnose', 'Strategise'] },
+    { t: 'Growing something', d: 'The business works, but growth is messy: too much depends on you and the next step isn\'t obvious.',
+      q: ['What is actually driving growth?', 'Where does the operation break?', 'Which channel or partner comes next?'],
+      svc: ['Positioning', 'Operational structure', 'Workflow design', 'Growth strategy', 'Coordination'], st: ['Diagnose', 'Structure', 'Coordinate'] },
+    { t: 'Figuring out what\'s next', d: 'Something has stalled or changed, and you need a clear direction before spending more time or money.',
+      q: ['What isn\'t working, and why?', 'Which options are realistic?', 'What should we do first?'],
+      svc: ['Business research', 'Positioning', 'Business models', 'Execution planning'], st: ['Understand', 'Diagnose', 'Strategise', 'Execute'] }
+  ]
+};
+
+D.dd_services = {
+  groups: [
+    { g: 'Insight', c: 'blue', items: [
+      ['Business research', 'What is really going on in this business and its market?', 'A clear picture of the current system', 'Understand', '#/work/unilever/8', 'Unilever: immersion before opinion'],
+      ['Consumer insights', 'Who is the customer, and what do they actually need?', 'Customer understanding you can act on', 'Diagnose', '#/work/hydra/8', 'Hydra: surveys and seller feedback'],
+      ['Competitor analysis', 'Who else serves this need, and where is the gap?', 'A map of the competitive space', 'Diagnose', '#/work/clique/3', 'CLIQUE: support vs visibility map'] ] },
+    { g: 'Direction', c: 'ink', items: [
+      ['Positioning', 'What should this business stand for in the customer\'s mind?', 'A positioning the whole team can repeat', 'Strategise', '#/work/hydra/5', 'Hydra: brand positioning as CMO'],
+      ['Market entry', 'Where and how do we get in?', 'Prioritised entry points', 'Strategise', '#/', 'The "I invade" approach'],
+      ['Business models', 'How will this make money sustainably?', 'A model worth testing', 'Strategise', '#/work/clique/6', 'CLIQUE: Business Model Canvas'] ] },
+    { g: 'Structure', c: 'orange', items: [
+      ['Operational structure', 'Who does what, with which resources?', 'Roles and responsibilities', 'Structure', '#/work/unilever/4', 'Unilever: labour, machinery, process'],
+      ['Workflow design', 'How does work move from start to finish?', 'Mapped, simpler workflows', 'Structure', '#/work/clique/6', 'CLIQUE: service blueprint'],
+      ['Coordination', 'Who else needs to be involved, and how?', 'People and partners working together', 'Coordinate', '#/work/clique/2', 'CLIQUE: stakeholder ecosystem'] ] },
+    { g: 'Growth', c: 'blue', items: [
+      ['Growth strategy', 'What is the next stage of growth, and what does it need?', 'A growth path with clear steps', 'Strategise', '#/work/hydra/6', 'Hydra: strategy to shelf system'],
+      ['Execution planning', 'What happens first, second and third?', 'An execution plan with owners', 'Execute', '#/work/hydra/9', 'Hydra: outreach tracker & KPIs'] ] }
+  ]
+};
+
+D.dd_process = {
+  title: 'The DraftDigger process', tag: 'ongoing',
+  steps: [
+    { t: 'Understand', b: 'Get to know the founder, the business and what they are really trying to achieve. Listen before advising.', meta: { 'Founder brings': 'The vision, the history, the constraints', 'DraftDigger brings': 'Questions, research and an outside view', 'Output': 'A shared brief' } },
+    { t: 'Diagnose', b: 'Research the market, consumers and competitors. Separate the visible problem from the real one.', meta: { 'Founder brings': 'Access to the business, customers and data', 'DraftDigger brings': 'Research, mapping, root-cause analysis', 'Output': 'Root causes and opportunities' } },
+    { t: 'Strategise', b: 'Choose a direction: positioning, market entry, business model and growth path. Make the trade-offs explicit.', meta: { 'Founder brings': 'Decisions and priorities', 'DraftDigger brings': 'Options, frameworks and a recommendation', 'Output': 'A strategy with clear trade-offs' } },
+    { t: 'Structure', b: 'Design the operational structure and workflows that let the strategy run every day without depending on one person.', meta: { 'Founder brings': 'The team and resources', 'DraftDigger brings': 'Process and workflow design', 'Output': 'Roles, processes and workflows' } },
+    { t: 'Coordinate', b: 'Connect the people, partners and specialists the plan needs. External specialists are brought in where required.', meta: { 'Founder brings': 'Their network and final say', 'DraftDigger brings': 'Coordination and specialist sourcing', 'Output': 'The right people, working together' } },
+    { t: 'Execute', b: 'Plan execution and stay alongside the founder as it happens, adjusting as reality responds.', meta: { 'Founder brings': 'Ownership of the business', 'DraftDigger brings': 'An execution plan and a partner', 'Output': 'Progress, measured honestly' } }
+  ]
+};
+
+D.dd_model = {
+  title: 'Digging to the roots · how a DraftDigger engagement is connected', h: 520, mh: 620,
+  intro: 'The founder stays at the centre. DraftDigger works beside them and coordinates the specialists and partners the plan needs. Select any part to see its role.',
+  nodes: [
+    { id: 'f', label: 'The founder', sub: 'your vision', cls: 'hub', x: 50, y: 50, m: [50, 48], body: 'Owns the business and every final decision. DraftDigger works for the founder\'s vision, not its own agenda.' },
+    { id: 'dd', label: 'DraftDigger', sub: 'our strategy', cls: 'c-orange', x: 50, y: 13, m: [50, 12], body: 'Research, strategy, structure and coordination, worked out together with the founder.', tags: ['ongoing'] },
+    { id: 'sp', label: 'External specialists', sub: 'when needed', x: 85, y: 30, m: [80, 28], body: 'Legal, finance, engineering or other deep expertise, brought in where a project requires it rather than claimed in-house.', tags: ['concept'] },
+    { id: 'tm', label: 'The founder\'s team', x: 15, y: 30, m: [20, 28], body: 'The people who will run the structure day to day. Workflows are designed with them, not for them.', tags: ['concept'] },
+    { id: 'pt', label: 'Partners & venues', x: 85, y: 75, m: [80, 72], body: 'Suppliers, venues and institutions the business depends on, the same kind of relationships Jainil built at CLIQUE and Hydra.', tags: ['concept'] },
+    { id: 'cu', label: 'Customers', x: 15, y: 75, m: [20, 72], body: 'Understood through research before any strategy is chosen.', tags: ['concept'] },
+    { id: 'gr', label: 'Shared growth', cls: 'c-blue', x: 50, y: 90, m: [50, 90], body: 'The goal of the partnership: progress the founder can see and measure.', tags: ['ambition'] }
+  ],
+  edges: [['f', 'dd', 'together'], ['dd', 'sp', 'coordinates'], ['f', 'tm'], ['dd', 'tm', 'structures'], ['f', 'pt'], ['dd', 'pt', 'connects'], ['f', 'cu'], ['dd', 'cu', 'researches'], ['f', 'gr', '', 1]]
+};
+
+DDX.proof = [
+  ['Unilever', 'unilever', 'Look at the whole system before fixing a part.', 'A packaging defect led back to design, machinery and labour, and forward to the consumer.'],
+  ['CLIQUE FOODOVATION', 'clique', 'Real ventures are built through partnerships.', 'One operating counter, one founder conversation, and an ecosystem plan built around both.'],
+  ['Hydra Enterprise', 'hydra', 'Strategy only counts once it reaches the customer.', 'Brand positioning, then the outreach that put the product on university shelves.']
+];
+
+DDX.road = [
+  ['Now', 'Shaping the offer', 'Defining services, process and who DraftDigger is for.', 'ongoing'],
+  ['Next', 'First food & beverage founders', 'Working with early founders in the industry Jainil knows best.', 'concept'],
+  ['Then', 'Specialist network', 'Building relationships with external specialists to bring in when needed.', 'concept'],
+  ['Later', 'Beyond food & beverage', 'Expanding into other industries.', 'ambition']
+];
+
+DDX.faq = [
+  ['Is DraftDigger an established consultancy?', 'No. It is a venture founded by Jainil Shukla and currently in development. There are no client results to show yet, and none are claimed.'],
+  ['Who would I actually work with?', 'Jainil, working directly with the founder. Where a project needs deep specialist skills, external specialists are brought in.'],
+  ['Which businesses is it for?', 'Initially food and beverage founders, with the ambition to expand into other industries.'],
+  ['Does DraftDigger only advise, or also help execute?', 'Both. The process runs from understanding the business all the way to execution planning and staying alongside the founder.'],
+  ['Do you handle legal, finance or technical work?', 'Not in-house. Those are coordinated with external specialists where a project requires them.'],
+  ['How do we start?', 'With a conversation about where the business is and where you want it to go. Use the contact page or email jainilvshukla@gmail.com.']
+];
+
+/* ---------- widgets ---------- */
+function wSituations(el, cfg) {
+  let i = 0;
+  el.innerHTML = `<div class="sit"><div class="sit-tabs" role="tablist" aria-label="Your situation">${cfg.items.map((x, k) => `<button role="tab" aria-selected="${k === 0}" tabindex="${k === 0 ? 0 : -1}" data-k="${k}"><span class="t-label">0${k + 1}</span><strong>${esc(x.t)}</strong></button>`).join('')}</div><div class="sit-out" role="tabpanel" aria-live="polite"></div></div>`;
+  const out = $('.sit-out', el), bs = $$('.sit-tabs button', el);
+  const STAGES = ['Understand', 'Diagnose', 'Strategise', 'Structure', 'Coordinate', 'Execute'];
+  const r = () => {
+    const x = cfg.items[i]; bs.forEach((b, k) => { b.setAttribute('aria-selected', k === i); b.tabIndex = k === i ? 0 : -1; });
+    out.innerHTML = `<div class="fp-anim"><p class="sit-d">${esc(x.d)}</p><div class="grid g-3" style="gap:16px;margin-top:18px">
+      <div><span class="t-label">Questions we'd answer</span><ul class="list-dash t-sm" style="margin-top:8px">${x.q.map(q => `<li>${esc(q)}</li>`).join('')}</ul></div>
+      <div><span class="t-label">Services that apply</span><div class="chips" style="margin-top:8px">${x.svc.map(s => `<span class="pill">${esc(s)}</span>`).join('')}</div></div>
+      <div><span class="t-label">Where the process focuses</span><div class="sit-st">${STAGES.map(s => `<span class="${x.st.includes(s) ? 'on' : ''}">${s}</span>`).join('')}</div></div></div></div>`;
+  };
+  bs.forEach(b => b.addEventListener('click', () => { i = +b.dataset.k; r(); }));
+  $('.sit-tabs', el).addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); i = (i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length; r(); bs[i].focus(); } });
+  r();
+}
+function wServices(el, cfg) {
+  const all = cfg.groups.flatMap(g => g.items.map(it => ({ g: g.g, c: g.c, it })));
+  let sel = 0;
+  el.innerHTML = frame('Envisioned services · select one to see the detail', tag('concept', 'Envisioned'),
+    `<div class="svc"><div class="svc-groups">${cfg.groups.map(g => `<div class="svc-g"><span class="t-label svc-gl svc-${g.c}">${esc(g.g)}</span>${g.items.map(it => { const k = all.findIndex(a => a.it === it); return `<button class="svc-b" data-k="${k}" aria-pressed="${k === 0}">${esc(it[0])}</button>`; }).join('')}</div>`).join('')}</div><div class="svc-out" aria-live="polite"></div></div>`,
+    '<span>Each service maps to a stage of the process and to work Jainil has already done</span>');
+  const out = $('.svc-out', el);
+  const r = () => {
+    const { g, it } = all[sel]; const [n, q, o, st, href, proof] = it;
+    $$('.svc-b', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.k === sel));
+    out.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(g)}</span><h3 class="t-h3" style="margin:8px 0 14px">${esc(n)}</h3><dl class="kv"><dt>Answers</dt><dd>${esc(q)}</dd><dt>You get</dt><dd>${esc(o)}</dd><dt>Stage</dt><dd>${esc(st)}</dd><dt>Built on</dt><dd><a class="link" href="${href}">${esc(proof)} →</a></dd></dl></div>`;
+  };
+  $$('.svc-b', el).forEach(b => b.addEventListener('click', () => { sel = +b.dataset.k; r(); }));
+  r();
+}
+WIDGETS.situations = wSituations;
+WIDGETS.services = wServices;

@@ -1,0 +1,215 @@
+/* =========================================================
+   CLIQUE + HYDRA DEEP DIVES
+   ========================================================= */
+function helpHTML(title, cards, vs, fb, labels = ['What I did.', 'How it helped.'], right = 'My approach') {
+  return `<div class="help-grid">${cards.map(([t, did, why], i) => `<article class="help-c rv"><span class="help-n">${String(i + 1).padStart(2, '0')}</span><h4 class="t-h4">${esc(t)}</h4><p class="t-sm"><b>${labels[0]}</b> ${esc(did)}</p><p class="t-sm ink2"><b>${labels[1]}</b> ${esc(why)}</p></article>`).join('')}</div>
+  <div class="vs rv"><div class="vs-h"><span class="t-label">${esc(title)}</span><span></span><span class="t-label" style="color:var(--blue-ink)">${esc(right)}</span></div>${vs.map(([a, b]) => `<div class="vs-r"><span>${esc(a)}</span><span class="vs-a" aria-hidden="true">→</span><strong>${esc(b)}</strong></div>`).join('')}</div>
+  ${fb ? `<p class="note" style="margin-top:14px"><strong>${esc(fb)}</strong> ${ph('ADD A LINE OF FEEDBACK, IF APPROVED')}</p>` : ''}`;
+}
+
+/* ---------- value chain widget ---------- */
+function wChain(el, cfg) {
+  let i = 0; const L = cfg.labels || ['Struggle', 'CLIQUE answer', 'Pillar'];
+  el.innerHTML = frame(cfg.title, tag(...[].concat(cfg.tag)), `<div class="ch-rail">${cfg.steps.map((s, k) => `<button class="ch-s" data-k="${k}" aria-pressed="${k === 0}"><span class="ch-n">${String(k + 1).padStart(2, '0')}</span><span class="ch-t">${esc(s.t)}</span><span class="ch-m" aria-hidden="true">${'●'.repeat(s.p)}<i>${'●'.repeat(3 - s.p)}</i></span></button>`).join('')}</div><div class="g-panel" aria-live="polite"></div>`, `<span>${esc(cfg.hint || 'Dots show how hard each step is for an independent creator to handle alone (framing, to be validated)')}</span>`);
+  const panel = $('.g-panel', el);
+  const r = () => { const s = cfg.steps[i]; $$('.ch-s', el).forEach((b, k) => b.setAttribute('aria-pressed', k === i)); panel.innerHTML = `<div class="fp-anim"><span class="t-label">Step ${i + 1} of ${cfg.steps.length}</span><h4 style="margin-top:6px">${esc(s.t)}</h4><dl class="kv" style="margin-top:10px"><dt>${L[0]}</dt><dd>${esc(s.pain)}</dd><dt>${L[1]}</dt><dd>${esc(s.fix)}</dd><dt>${L[2]}</dt><dd>${esc(s.pillar)}</dd></dl></div>`; };
+  $$('.ch-s', el).forEach(b => b.addEventListener('click', () => { i = +b.dataset.k; r(); }));
+  r();
+}
+WIDGETS.chain = wChain;
+
+/* ---------- value proposition canvas widget ---------- */
+function wVPC(el, cfg) {
+  let side = 0, sel = null;
+  el.innerHTML = frame(cfg.title, tag('hyp', 'To be validated'), `<div class="vpc-tabs chips" role="group" aria-label="Customer side" style="padding:12px 18px">${cfg.sides.map((s, k) => `<button class="chip" data-side="${k}" aria-pressed="${k === 0}">${esc(s.name)}</button>`).join('')}</div><div class="vpc"></div><div class="g-panel" aria-live="polite"></div>`, '<span>Select any job, pain or gain to see what answers it</span>');
+  const box = $('.vpc', el), panel = $('.g-panel', el);
+  function draw() {
+    const S = cfg.sides[side];
+    const list = (arr, cls) => arr.map((x, k) => `<button class="vpc-i ${cls}" data-id="${cls}${k}" aria-pressed="false">${esc(x[0])}</button>`).join('');
+    box.innerHTML = `<div class="vpc-map"><span class="t-label">What CLIQUE offers</span><div class="vpc-sq"><div><b>Products & services</b>${S.prod.map(p => `<span class="vpc-p">${esc(p)}</span>`).join('')}</div><div><b>Pain relievers</b>${list(S.pains.map(p => [p[1]]), 'r')}</div><div><b>Gain creators</b>${list(S.gains.map(g => [g[1]]), 'c')}</div></div></div>
+      <div class="vpc-arrow" aria-hidden="true">⇄</div>
+      <div class="vpc-prof"><span class="t-label">${esc(S.name)}</span><div class="vpc-ci"><div><b>Jobs</b>${S.jobs.map(j => `<span class="vpc-p">${esc(j)}</span>`).join('')}</div><div><b>Pains</b>${list(S.pains, 'p')}</div><div><b>Gains</b>${list(S.gains, 'g')}</div></div></div>`;
+    $$('.vpc-i', box).forEach(b => b.addEventListener('click', () => { const id = b.dataset.id; sel = sel === id ? null : id; paint(); }));
+    paint();
+  }
+  function paint() {
+    const S = cfg.sides[side];
+    const pair = sel ? ({ p: 'r', r: 'p', g: 'c', c: 'g' })[sel[0]] + sel.slice(1) : null;
+    $$('.vpc-i', box).forEach(b => { b.setAttribute('aria-pressed', b.dataset.id === sel); b.classList.toggle('pair', b.dataset.id === pair); b.classList.toggle('dim', !!sel && b.dataset.id !== sel && b.dataset.id !== pair); });
+    if (!sel) { panel.innerHTML = `<div><span class="t-label">Reading the canvas</span><p style="margin-top:8px">${esc(S.intro)}</p></div>`; return; }
+    const k = +sel.slice(1), isPain = sel[0] === 'p' || sel[0] === 'r', it = (isPain ? S.pains : S.gains)[k];
+    panel.innerHTML = `<div class="fp-anim"><span class="t-label">${isPain ? 'Pain → reliever' : 'Gain → creator'}</span><h4 style="margin-top:6px">${esc(it[0])}</h4><p style="margin-top:4px">→ ${esc(it[1])}</p></div>`;
+  }
+  $$('[data-side]', el).forEach(b => b.addEventListener('click', () => { side = +b.dataset.side; sel = null; $$('[data-side]', el).forEach(x => x.setAttribute('aria-pressed', x === b)); draw(); }));
+  draw();
+}
+WIDGETS.vpc = wVPC;
+
+/* =================== CLIQUE =================== */
+D.clq_plan = {
+  title: 'Mapping plan · from one counter to an ecosystem',
+  cols: ['Spot the opportunity', 'Build the partnership', 'Map the ecosystem', 'Open the doors'],
+  when: ['Start', 'Start', 'Design', 'Outreach'],
+  rows: [
+    { name: 'Key question', cells: ['Is there something real to build on?', 'Why would this founder want to work together?', 'What would independent creators need to succeed?', 'Who has to say yes for this to exist?'] },
+    { name: 'Method', cells: ['Noticing an operating venture with real customers', 'Approaching Taco Tango\'s founder; establishing the collaboration', 'Stakeholder mapping, journey mapping, service blueprinting, BMC', 'Institutional positioning and persuasive communication'] },
+    { name: 'Map produced', cells: ['Ecosystem mind map', 'Stakeholder ecosystem map', 'Creator & consumer journeys, blueprint, canvas', 'Venue map'] },
+    { name: 'Output', cells: ['Taco Tango as the starting point', 'CLIQUE FOODOVATION, co-created', 'Three proposed pillars', 'Approaches to universities, malls and public premises'] },
+    { name: 'Status', cells: ['done', 'done', 'concept', 'done'] }
+  ]
+};
+D.clq_chain = {
+  title: 'Market research lens · the independent creator\'s value chain', tag: ['hyp', 'Framing to validate'],
+  steps: [
+    { t: 'Recipe & skill', p: 1, pain: 'Talent is rarely the barrier; the dish is already good.', fix: 'Recipe naming and a recipe database that credits the creator.', pillar: 'Creator branding · Business & technology' },
+    { t: 'Ingredients', p: 2, pain: 'Buying small quantities is expensive and inconsistent.', fix: 'Shared procurement of raw ingredients.', pillar: 'Shared infrastructure' },
+    { t: 'Kitchen & equipment', p: 3, pain: 'A licensed kitchen, mixers, grinders, microwaves and freezers are out of reach.', fix: 'Shared kitchens and equipment, booked by schedule.', pillar: 'Shared infrastructure' },
+    { t: 'Packaging', p: 2, pain: 'Custom packaging needs volume a single creator doesn\'t have.', fix: 'Custom creator packaging at shared volume.', pillar: 'Creator branding' },
+    { t: 'Brand & story', p: 2, pain: 'The person behind the food stays invisible.', fix: 'Chef identity, storytelling and QR discovery.', pillar: 'Creator branding' },
+    { t: 'Channel & venue', p: 3, pain: 'Getting into a campus, mall or public space means convincing an institution.', fix: 'Institutional outreach handled by CLIQUE.', pillar: 'Venue outreach (done) · ecosystem (proposed)' },
+    { t: 'Customer & feedback', p: 2, pain: 'No direct line from customer to creator.', fix: 'Customer feedback routed to creator dashboards.', pillar: 'Business & technology' }
+  ]
+};
+D.clq_venues = {
+  id: 'clq_venues', title: 'Venue strategy · where creators could sell', tag: ['illus', 'Illustrative'],
+  x: ['Harder to access', 'Easier to access'], y: ['Lower footfall fit', 'Higher footfall fit'],
+  q: ['Worth the effort', 'Start here', 'Low priority', 'Easy, small wins'],
+  intro: 'The three kinds of venue Jainil approached, placed by judgement. Universities come first because Taco Tango already operates at one.',
+  points: [
+    { id: 'uni', label: 'Universities', x: 72, y: 80, us: true, desc: 'Taco Tango already runs a counter at Nirma University. Steady student footfall and a decision-maker who can be reached.' },
+    { id: 'mall', label: 'Malls', x: 28, y: 74, desc: 'High footfall, but harder to access for a young venture. Approached.' },
+    { id: 'pub', label: 'Public premises', x: 40, y: 50, desc: 'Varied footfall and approval processes. Approached.' }
+  ]
+};
+D.clq_vpc = {
+  title: 'Consumer insights · value proposition canvas',
+  sides: [
+    { name: 'Independent food creators', intro: 'The primary customer. What creators are trying to do, what gets in the way, and what CLIQUE proposes. All of it to be validated with creators.',
+      jobs: ['Turn cooking skill into income', 'Get food to paying customers', 'Build a name of their own'],
+      pains: [['No affordable kitchen or equipment', 'Shared kitchens and equipment'], ['Ingredients cost more in small quantities', 'Shared procurement'], ['Hard to get into venues', 'Institutional outreach by CLIQUE'], ['No business systems', 'Onboarding, scheduling, inventory, dashboards']],
+      gains: [['Recognition for their dishes', 'Chef identity and recipe naming'], ['Loyal customers', 'QR stories and direct feedback'], ['Room to grow', 'Creator dashboards and support']],
+      prod: ['Shared infrastructure', 'Creator branding', 'Business & technology platform'] },
+    { name: 'Consumers', intro: 'The second side: people buying the food. What they want from a meal, and how CLIQUE would make the creator part of it. Hypotheses to validate.',
+      jobs: ['Grab good food nearby', 'Try something new', 'Know what they are eating'],
+      pains: [['Food feels anonymous', 'A named creator on every dish'], ['Can\'t give feedback that matters', 'Feedback that reaches the creator'], ['Same options every day', 'Many creators, one counter']],
+      gains: [['A story behind the meal', 'QR-enabled creator story'], ['Supporting a real person', 'Visible creator identity']],
+      prod: ['Creator-branded dishes', 'Custom packaging with QR', 'Feedback loop'] }
+  ]
+};
+D.clq_tree = {
+  goal: 'Make independent food creators visible and viable',
+  levers: [
+    { t: 'Proof', a: [['Taco Tango counter at Nirma University', 'done']] },
+    { t: 'Channels', a: [['Approach universities, malls, public premises', 'done'], ['Grow a venue network', 'concept']] },
+    { t: 'Platform', a: [['Shared infrastructure', 'concept'], ['Creator branding', 'concept'], ['Business & technology', 'concept']] },
+    { t: 'Revenue', a: [['Test kitchen, packaging and service streams', 'concept']] }
+  ]
+};
+D.clq_contrib = {
+  title: 'Contribution map · how I helped build CLIQUE', h: 540, mh: 640,
+  intro: 'Every relationship and output Jainil was part of. Select a node.',
+  nodes: [
+    { id: 'j', label: 'Jainil', sub: 'co-founder', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'Spotted the opportunity, built the partnership, designed the ecosystem and opened institutional doors.' },
+    { id: 'f', label: 'Taco Tango\'s founder', x: 18, y: 18, m: [26, 9], body: '<strong>Approached.</strong> Jainil approached the founder of an independent venture and established the collaboration.', tags: ['done'] },
+    { id: 'c', label: 'CLIQUE FOODOVATION', cls: 'c-blue', x: 50, y: 10, m: [74, 9], body: '<strong>Co-created.</strong> Jointly created with Taco Tango\'s founder.', tags: ['done'] },
+    { id: 'u', label: 'Universities', x: 84, y: 22, m: [80, 30], body: '<strong>Approached.</strong> Institutional positioning and persuasive communication.', tags: ['done'] },
+    { id: 'm', label: 'Malls', x: 90, y: 56, m: [80, 52], body: '<strong>Approached.</strong> Decision-makers at malls.', tags: ['done'] },
+    { id: 'p', label: 'Public premises', x: 78, y: 86, m: [76, 76], body: '<strong>Approached.</strong> Public-premise decision-makers.', tags: ['done'] },
+    { id: 'cf', label: 'Co-founder: deals', x: 50, y: 92, m: [50, 92], body: 'Subsequent commercial negotiations and final deal closure were handled by his co-founder.', tags: ['done'] },
+    { id: 'fw', label: 'Ecosystem frameworks', cls: 'c-orange', x: 18, y: 84, m: [24, 76], body: '<strong>Designed.</strong> Mind map, journeys, service blueprint, business model and revenue exploration.', tags: ['concept'] },
+    { id: 'cr', label: 'Creators & consumers', x: 10, y: 52, m: [20, 52], body: '<strong>Designed for.</strong> Both sides of the proposed platform.', tags: ['concept'] }
+  ],
+  edges: [['j', 'f', 'approached'], ['j', 'c', 'co-created'], ['f', 'c'], ['j', 'u', 'approached'], ['j', 'm', 'approached'], ['j', 'p', 'approached'], ['u', 'cf', '', 1], ['m', 'cf', '', 1], ['j', 'fw', 'designed'], ['j', 'cr', 'designed for'], ['fw', 'cr']]
+};
+const CLQ_HELP = [
+  ['Saw potential in someone else\'s venture', 'Noticed Taco Tango, an independent Mexican-food counter, as something real to build on.', 'Gave an existing founder a partner and a bigger frame for their work.'],
+  ['Brought the partnership to life', 'Approached the founder and established the collaboration that became CLIQUE.', 'Turned one brand into the start of a venture.'],
+  ['The voice to institutions', 'Led institutional positioning and persuasive communication with universities, malls and public premises.', 'Opened conversations a single food counter rarely gets.'],
+  ['Turned one counter into a system', 'Designed the three pillars, journeys, blueprint and business model.', 'A clear picture of what CLIQUE could become, and what it needs.'],
+  ['Split the work honestly', 'Left subsequent negotiations and final deal closure with his co-founder.', 'Each founder working where they are strongest.']
+];
+const CLQ_VS = [
+  ['Start a food brand from scratch', 'Partner with one that already has customers'],
+  ['Sell food', 'Build a system where many creators can sell'],
+  ['Hide the cook behind a brand', 'Put the creator\'s name on every dish'],
+  ['Wait for venues to notice', 'Approach institutions directly'],
+  ['Present the ecosystem as running', 'Label it clearly as a proposal']
+];
+
+/* =================== HYDRA =================== */
+D.hyd_plan = {
+  title: 'Mapping plan · from positioning to the shelf and back',
+  cols: ['Define the brand', 'Find where the audience is', 'Open the doors', 'Listen and refine'],
+  when: ['Brand', 'Market', 'Sales', 'Feedback'],
+  rows: [
+    { name: 'Key question', cells: ['What should Hydra stand for?', 'Where do active, health-conscious people spend their day?', 'Who decides what goes on the shelf?', 'What are sellers and consumers telling us?'] },
+    { name: 'Method', cells: ['Brand positioning, personality, core promise; product roles', 'Environment mapping across campuses, cafés, clubs and gyms', 'Decision-maker research; personal institutional outreach', 'Surveys; ongoing seller communication'] },
+    { name: 'Map produced', cells: ['Brand strategy explorer', 'Campus market map', 'Power–interest map; B2B framework', 'Funnel and performance framework'] },
+    { name: 'Output', cells: ['Hydra as a hydration companion', 'Prioritised environments', 'Placements at Nirma and a few other universities', 'Recommendations shared'] },
+    { name: 'Status', cells: ['done', 'done', 'done', 'done'] }
+  ]
+};
+D.hyd_market = {
+  id: 'hyd_market', title: 'Market research · campus and city environments', tag: ['illus', 'Illustrative'],
+  x: ['Harder to access', 'Easier to access'], y: ['Lower audience fit', 'Higher audience fit'],
+  q: ['High fit, needs effort', 'Start here', 'Low priority', 'Easy, lower fit'],
+  intro: 'The environments Jainil identified, placed by judgement on how well they fit an active, health-conscious audience and how easy they are for a new brand to enter. Universities are where placements were secured.',
+  points: [
+    { id: 'uni', label: 'Universities', x: 74, y: 82, us: true, desc: 'Placements secured at Nirma University and a few other universities.' },
+    { id: 'col', label: 'Colleges', x: 62, y: 70, desc: 'Similar audience to universities; identified as a target.' },
+    { id: 'gym', label: 'Fitness spaces', x: 34, y: 88, desc: 'The closest fit with a hydration companion, but each space has its own owner to convince.' },
+    { id: 'club', label: 'Clubs', x: 30, y: 62, desc: 'Active members, varied access.' },
+    { id: 'cafe', label: 'Cafés', x: 64, y: 44, desc: 'Easier to approach, broader audience.' },
+    { id: 'rest', label: 'Restaurants', x: 50, y: 30, desc: 'Broad audience, less specific fit.' }
+  ]
+};
+D.hyd_moments = {
+  title: 'Consumer insights · the path to a campus purchase',
+  items: [
+    { t: 'Sees it', y: 54, d: 'The product is noticed at the counter or fridge.', i: 'A new brand can only be chosen where it is visible. Placement is the first brand moment.', s: 'research' },
+    { t: 'Reads zero sugar', y: 36, d: 'The label speaks to a health-conscious choice.', i: 'Hydration plus zero sugar gives an active consumer a reason to switch.', s: 'done' },
+    { t: 'Compares', y: 72, d: 'Taste, price and what friends drink are weighed.', i: 'The hardest moment for a new brand. ' + ph('ADD WHAT SURVEYS SHOWED HERE'), s: 'research' },
+    { t: 'Buys', y: 40, d: 'The first purchase happens.', i: 'Seller feedback is the earliest signal of how this moment is going.', s: 'done' },
+    { t: 'Comes back', y: 58, d: 'Whether the consumer buys again.', i: 'Repeat purchase was not quantitatively measured, so this stays an open question.', s: 'hyp' }
+  ],
+  note: 'Repeat purchase was not quantitatively measured.'
+};
+D.hyd_tree = {
+  goal: 'Get Hydra chosen where active consumers already are',
+  levers: [
+    { t: 'Brand', a: [['Positioning as a hydration companion', 'done'], ['Personality, promise, tagline concepts', 'done']] },
+    { t: 'Products', a: [['A distinct role for each of the three products', 'done']] },
+    { t: 'Placement', a: [['Personal outreach to institutions', 'done'], ['Placements at Nirma and a few other universities', 'done']] },
+    { t: 'Feedback', a: [['Surveys and seller communication', 'done'], ['Recommendations back into strategy', 'done']] }
+  ]
+};
+D.hyd_contrib = {
+  title: 'Contribution map · how I helped Hydra grow', h: 540, mh: 640,
+  intro: 'Every area Jainil owned or touched as CMO. Select a node.',
+  nodes: [
+    { id: 'j', label: 'Jainil', sub: 'CMO', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'Brand strategy and field business development in one role.' },
+    { id: 'b', label: 'Brand strategy', x: 18, y: 18, m: [26, 9], body: '<strong>Led.</strong> Positioning, personality, core promise and consumer perception.', tags: ['done'] },
+    { id: 'p', label: 'Product positioning', x: 50, y: 10, m: [74, 9], body: '<strong>Led.</strong> Hydra Zero Sugar Water, Chamkila and Mojito.', tags: ['done'] },
+    { id: 'c', label: 'Packaging & campaigns', x: 82, y: 18, m: [80, 30], body: '<strong>Shaped.</strong> Packaging, campaigns, storytelling, tagline concepts and jingles.', tags: ['done'] },
+    { id: 'i', label: 'Institutions', x: 90, y: 56, m: [80, 52], body: '<strong>Approached personally.</strong> Colleges, universities, cafés, restaurants, clubs and fitness spaces.', tags: ['done'] },
+    { id: 'n', label: 'Nirma + other universities', cls: 'c-blue', x: 78, y: 86, m: [76, 76], body: '<strong>Placements secured</strong> at Nirma University and a few other universities.', tags: ['done'] },
+    { id: 's', label: 'Sellers', x: 22, y: 86, m: [24, 76], body: '<strong>Kept in touch.</strong> Ongoing communication and feedback collection.', tags: ['done'] },
+    { id: 'cs', label: 'Consumers', x: 10, y: 52, m: [20, 52], body: '<strong>Surveyed.</strong> ' + ph('ADD WHAT YOU LEARNED'), tags: ['done'] },
+    { id: 't', label: 'Hydra team', cls: 'c-orange', x: 50, y: 93, m: [50, 92], body: 'Recommendations shared with the team. ' + ph('ADD TEAM CONTEXT / FEEDBACK, IF APPROVED'), tags: ['research'] }
+  ],
+  edges: [['j', 'b', 'led'], ['j', 'p', 'led'], ['j', 'c', 'shaped'], ['j', 'i', 'approached'], ['i', 'n', 'placed'], ['j', 's', 'listened'], ['j', 'cs', 'surveyed'], ['j', 't', 'recommended', 1], ['b', 'p'], ['s', 'cs']]
+};
+const HYD_HELP = [
+  ['The brand\'s foundation', 'Defined positioning, personality, core promise and the role of each product.', 'Gave the business one clear story to tell everywhere.'],
+  ['The door-opener', 'Personally approached institutions and decision-makers.', 'Placements at Nirma University and a few other universities.'],
+  ['The sellers\' point of contact', 'Kept communicating with sellers after placement.', 'Relationships that last beyond the first order.'],
+  ['The listener', 'Ran surveys and collected feedback from sellers and consumers.', 'Real input for the next round of decisions.'],
+  ['The honest reporter', 'Stated clearly what wasn\'t measured, like repeat purchase.', 'Decisions based on what is actually known.']
+];
+const HYD_VS = [
+  ['Stop at a brand deck', 'Take the brand to the shelf personally'],
+  ['Pitch the product\'s features', 'Pitch what the operator needs'],
+  ['Treat placement as the finish line', 'Keep listening to sellers afterwards'],
+  ['One message for everyone', 'Different arguments for students and operators'],
+  ['Claim repeat purchase', 'Say it wasn\'t measured']
+];

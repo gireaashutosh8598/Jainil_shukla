@@ -1,0 +1,161 @@
+/* =========================================================
+   UNILEVER — HYPER-DETAILED MODULES
+   General mechanism and line knowledge is labelled as such.
+   Nothing here claims tests, prototypes or measured results.
+   ========================================================= */
+
+/* ---------- case in 60 seconds (SCQA) ---------- */
+const UNI_SCQA = [
+  ['Situation', 'A two-month project internship at a Unilever manufacturing site. Month one: learning the premises, environments, hierarchy and functions.', 'done'],
+  ['Complication', 'Defects in shampoo and body-lotion bottle production, packaging and dispensing. The visible problem sat on the line; its causes could start much earlier.', 'done'],
+  ['What I did', 'Traced the problem through caps, spring pumps, machinery and cap-fitting labour, framed a temperature hypothesis, and connected it to the consumer.', 'done'],
+  ['What came out of it', 'A spring-free vacuum dispensing concept, recommendations to standardise and simplify, and emptying duration as a possible repurchase signal.', 'rec']
+];
+function scqaHTML() {
+  return `<div class="scqa">${UNI_SCQA.map(([h, t, s], i) => `<div class="scqa-c rv"><span class="scqa-l">${String(i + 1).padStart(2, '0')}</span><span class="t-label">${h}</span><p>${t}</p>${tag(s)}</div>`).join('')}</div>`;
+}
+
+/* ---------- anatomy: spring pump vs vacuum concept ---------- */
+const PUMP_SVG = `
+  <rect x="88" y="132" width="124" height="208" rx="26" class="an-body"/>
+  <rect x="96" y="206" width="108" height="126" rx="20" class="an-fill"/>
+  <rect x="118" y="108" width="64" height="28" rx="4" class="an-part"/>
+  <path d="M118 116h64M118 124h64" class="an-thread"/>
+  <rect x="106" y="92" width="88" height="20" rx="5" class="an-part"/>
+  <rect x="134" y="112" width="32" height="86" rx="6" class="an-chamber"/>
+  <path d="M150 120l10 6-20 8 20 8-20 8 20 8-20 8 20 8-10 6" class="an-spring"/>
+  <path d="M150 198V328" class="an-tube"/>
+  <rect x="146" y="68" width="8" height="26" class="an-part"/>
+  <rect x="120" y="40" width="64" height="30" rx="8" class="an-part"/>
+  <path d="M184 50h46v10h-46" class="an-part"/>`;
+const VAC_SVG = `
+  <rect x="88" y="132" width="124" height="208" rx="26" class="an-body"/>
+  <rect x="96" y="140" width="108" height="150" rx="14" class="an-fill"/>
+  <rect x="96" y="290" width="108" height="12" rx="4" class="an-disc"/>
+  <path d="M120 322v-14M150 322v-14M180 322v-14" class="an-up"/>
+  <path d="M114 312l6-6 6 6M144 312l6-6 6 6M174 312l6-6 6 6" class="an-up"/>
+  <rect x="118" y="108" width="64" height="28" rx="4" class="an-part"/>
+  <rect x="106" y="92" width="88" height="20" rx="5" class="an-part"/>
+  <rect x="138" y="112" width="24" height="26" rx="4" class="an-chamber"/>
+  <circle cx="150" cy="125" r="5" class="an-valve"/>
+  <rect x="146" y="68" width="8" height="26" class="an-part"/>
+  <rect x="120" y="40" width="64" height="30" rx="8" class="an-part"/>
+  <path d="M184 50h46v10h-46" class="an-part"/>
+  <path d="M120 336h60" class="an-vent"/>`;
+D.uni_anatomy = {
+  views: [
+    { name: 'Spring-loaded pump (explored)', tag: ['done', 'Explored'], svg: PUMP_SVG, spots: [
+      [50, 15, 'Actuator', 'The head the consumer presses. Its feel sets the first impression of the product.'],
+      [74, 15, 'Nozzle', 'Where product exits. Thick products can dispense unevenly here.'],
+      [50, 28, 'Closure & thread', 'Grooved or rotating caps must align precisely to seal. A source of fitting effort and potential defects.'],
+      [50, 41, 'Spring & chamber', 'The spring returns the pump after each press. Extra parts and assembly steps mean extra points that can fail.'],
+      [50, 72, 'Dip tube', 'Draws product up from the bottom. When the bottle runs low, product the tube cannot reach may be left behind.'],
+      [62, 72, 'Product', 'If colder temperatures thicken it (unverified hypothesis), dispensing could feel harder in winter.'] ] },
+    { name: 'Vacuum concept (proposed)', tag: ['concept', 'Concept · not prototyped'], svg: VAC_SVG, spots: [
+      [50, 15, 'Actuator', 'Same familiar press for the consumer.'],
+      [50, 35, 'Valve, no spring', 'The proposed direction: dispensing without a metal spring, reducing parts and assembly steps.'],
+      [50, 82, 'Rising disc', 'In vacuum-style designs a disc rises as product is used, pushing it up without a dip tube. General principle of airless dispensers.'],
+      [62, 58, 'Product', 'Could empty more completely, which links to the emptying-duration signal. To be tested.'],
+      [50, 94, 'Base vent', 'Lets the disc move as product is drawn out. Design details would need engineering and testing.'] ] }
+  ]
+};
+function wAnatomy(el, cfg) {
+  let v = 0, s = 0;
+  el.innerHTML = frame('Anatomy of the dispenser · explored vs proposed', `<div class="chips" role="group" aria-label="View">${cfg.views.map((x, k) => `<button class="chip" data-v="${k}" aria-pressed="${k === 0}">${esc(x.name)}</button>`).join('')}</div>`,
+    `<div class="an"><div class="an-fig"><svg viewBox="0 0 300 360" aria-hidden="true"></svg><div class="an-spots"></div></div><div class="an-out" aria-live="polite"></div></div>`,
+    '<span>Select a numbered part to see what it does and where problems can start</span><span>General mechanism understanding, simplified. Not an engineering drawing.</span>');
+  const svg = $('svg', el), spots = $('.an-spots', el), out = $('.an-out', el);
+  function draw() {
+    const V = cfg.views[v]; svg.innerHTML = V.svg;
+    spots.innerHTML = V.spots.map(([x, y, t], k) => `<button class="an-dot" style="left:${x}%;top:${y}%" data-s="${k}" aria-pressed="${k === s}" aria-label="${k + 1}. ${esc(t)}">${k + 1}</button>`).join('');
+    $$('.an-dot', el).forEach(b => b.addEventListener('click', () => { s = +b.dataset.s; info(); }));
+    $$('[data-v]', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.v === v));
+    info();
+  }
+  function info() {
+    const V = cfg.views[v], [, , t, d] = V.spots[s];
+    $$('.an-dot', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.s === s));
+    out.innerHTML = `<div class="fp-anim"><div style="margin-bottom:10px">${tag(...V.tag)}</div><span class="t-label">Part ${s + 1} of ${V.spots.length}</span><h4 class="t-h3" style="margin:6px 0 8px">${esc(t)}</h4><p>${esc(d)}</p><ol class="an-list">${V.spots.map(([, , n], k) => `<li class="${k === s ? 'on' : ''}"><button data-li="${k}">${k + 1}. ${esc(n)}</button></li>`).join('')}</ol></div>`;
+    $$('[data-li]', out).forEach(b => b.addEventListener('click', () => { s = +b.dataset.li; info(); }));
+  }
+  $$('[data-v]', el).forEach(b => b.addEventListener('click', () => { v = +b.dataset.v; s = 0; draw(); }));
+  draw();
+}
+WIDGETS.anatomy = wAnatomy;
+
+/* ---------- production line map ---------- */
+D.uni_line = {
+  title: 'Production line map · where each explored issue sits', tag: ['illus', 'Generalised line, illustrative'],
+  labels: ['What happens', 'Where issues can enter', 'Explored in the internship'],
+  hint: 'Dots show how closely each station relates to the dispensing problem. A generalised filling line, not this site\'s exact layout.',
+  steps: [
+    { t: 'Empty bottles in', p: 1, pain: 'Bottles arrive and are fed onto the line.', fix: 'Variation between bottle formats means different set-ups downstream.', pillar: 'Standardisation of formats' },
+    { t: 'Filling', p: 2, pain: 'Product is filled into each bottle.', fix: 'Product thickness affects flow; a seasonal effect is an unverified hypothesis.', pillar: 'Temperature hypothesis' },
+    { t: 'Cap & pump fitting', p: 3, pain: 'Caps or pumps are fitted, partly by hand.', fix: 'Grooved threads and spring pumps need precise alignment; manual fitting adds time and variability.', pillar: 'Cap-fitting labour · mechanisms' },
+    { t: 'Machine adjustment', p: 3, pain: 'Machines are configured for each bottle and closure format.', fix: 'Frequent changeovers and adjustments introduce error.', pillar: 'Machinery configurations' },
+    { t: 'Inspection', p: 2, pain: 'Defective units are identified.', fix: 'Defects caught here were often created earlier on the line or in the design.', pillar: 'Defects in production & packaging' },
+    { t: 'Packing & dispatch', p: 1, pain: 'Units are packed and sent to market.', fix: 'Anything missed reaches the consumer as a dispensing problem.', pillar: 'Link to consumer experience' }
+  ]
+};
+
+/* ---------- hypothesis register ---------- */
+const UNI_HYP = [
+  ['Colder temperatures thicken the product and make dispensing harder.', 'Viscosity of many lotions changes with temperature.', 'Dispense trials at controlled temperatures, measuring force and output per press.'],
+  ['Removing the spring reduces failure points and assembly effort.', 'Fewer parts generally means fewer ways to fail and fewer fitting steps.', 'Prototype through the product design team; cycle-test against the current pump.'],
+  ['Standardising bottle and cap formats reduces machine adjustments.', 'Each format needs its own set-up.', 'Compare changeover frequency and time before and after a format reduction.'],
+  ['Bottle-emptying duration indicates when a consumer repurchases.', 'A bottle that lasts longer delays the next purchase.', 'Match usage-duration estimates against purchase-cycle data, if available.']
+];
+function hypHTML() {
+  return `<div class="hyp-tbl"><div class="hyp-h"><span>#</span><span>Hypothesis</span><span>Why it's plausible</span><span>Proposed test</span><span>Status</span></div>${UNI_HYP.map(([h, w, t], i) => `<div class="hyp-r rv"><span class="hyp-n">H${i + 1}</span><strong>${esc(h)}</strong><span>${esc(w)}</span><span>${esc(t)}</span><span>${tag('hyp', 'Untested')}</span></div>`).join('')}</div>`;
+}
+
+/* ---------- options evaluation ---------- */
+D.uni_options = {
+  crit: ['Ease for consumer', 'Fewer parts', 'Less fitting labour', 'Ease of change', 'Evidence today'],
+  rows: [
+    ['Keep the spring pump, tighten tolerances', [2, 1, 1, 3, 2], 'Lowest disruption, but keeps every existing part and fitting step.'],
+    ['Switch to flip-top caps', [1, 3, 3, 2, 2], 'Simple and quick to fit, but thick products are slower to dispense.'],
+    ['Standardise formats across lines', [2, 2, 2, 1, 2], 'Helps machines, labour and quality together; a bigger organisational change.'],
+    ['Spring-free vacuum concept', [3, 3, 2, 1, 1], 'Promising on ease and part count, but untested. Needs design work and trials.']
+  ]
+};
+function wOptions(el, cfg) {
+  let sel = null;
+  const dots = n => `<span class="op-d" aria-label="${n} of 3">${'●'.repeat(n)}<i>${'●'.repeat(3 - n)}</i></span>`;
+  el.innerHTML = frame('Options evaluated · dispensing direction', tag('illus', 'Qualitative judgement'), `<div class="op-wrap"><table class="op"><thead><tr><th scope="col">Option</th>${cfg.crit.map(c => `<th scope="col">${esc(c)}</th>`).join('')}</tr></thead><tbody>${cfg.rows.map(([o, sc], k) => `<tr data-k="${k}" tabindex="0" ${o.includes('vacuum') ? 'class="op-us"' : ''}><th scope="row">${esc(o)}</th>${sc.map(dots).join('')}</tr>`).join('')}</tbody></table></div><div class="g-panel" aria-live="polite"></div>`,
+    '<span>●●● favourable · ●○○ weak. Select a row for the reasoning.</span><span>A judgement aid, not measured scores.</span>');
+  const panel = $('.g-panel', el);
+  const r = () => { $$('tbody tr', el).forEach(tr => tr.classList.toggle('on', +tr.dataset.k === sel)); if (sel === null) { panel.innerHTML = '<div><span class="t-label">Why compare</span><p style="margin-top:8px">A concept only matters next to the alternatives. Each option trades consumer ease against parts, labour and how hard it is to change.</p></div>'; return; } const [o, sc, why] = cfg.rows[sel]; panel.innerHTML = `<div class="fp-anim"><h4>${esc(o)}</h4><p style="margin-top:6px">${esc(why)}</p></div>`; };
+  $$('tbody tr', el).forEach(tr => { tr.addEventListener('click', () => { sel = +tr.dataset.k; r(); }); tr.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sel = +tr.dataset.k; r(); } }); });
+  r();
+}
+WIDGETS.options = wOptions;
+
+/* ---------- measurement plan ---------- */
+D.uni_kpis = {
+  goal: 'Know whether dispensing and production are actually improving',
+  levers: [
+    { t: 'Product quality', a: [['Defect rate on bottle & closure', 'rec'], ['Dispense consistency per press', 'rec']] },
+    { t: 'Operations', a: [['Changeovers per week and time per changeover', 'rec'], ['Cap-fitting time per unit', 'rec']] },
+    { t: 'Consumer signal', a: [['Dispensing-related complaints', 'rec'], ['Bottle-emptying duration', 'hyp']] }
+  ]
+};
+
+/* ---------- skills + glossary ---------- */
+const UNI_SKILLS = [['Systems thinking', '#/capabilities'], ['Root-cause analysis', '#/system-map'], ['Hypothesis framing', '#/system-map'], ['Consumer journey mapping', '#/system-map'], ['Operational thinking', '#/capabilities'], ['Concept development', '#/capabilities'], ['Honest reporting', '#/work/unilever/7']];
+const UNI_GLOSS = [
+  ['Actuator', 'The part of a pump the consumer presses.'],
+  ['Dip tube', 'The straw inside a pump bottle that draws product up from the bottom.'],
+  ['Airless / vacuum dispenser', 'A design where a rising disc pushes product up instead of drawing it through a tube.'],
+  ['Viscosity', 'How thick a liquid is, and how easily it flows.'],
+  ['Changeover', 'Re-setting a production line or machine for a different product or format.'],
+  ['Standardisation', 'Reducing the number of different formats so parts and processes can be shared.'],
+  ['FMCG', 'Fast-moving consumer goods: everyday products bought often, like shampoo and lotion.']
+];
+function learnHTML() {
+  return `<div class="grid g-2" style="gap:16px;margin-top:24px">
+    <div class="card"><span class="t-label">Skills demonstrated</span><div class="chips" style="margin-top:10px">${UNI_SKILLS.map(([s, h]) => `<a class="chip" href="${h}" style="display:inline-flex;align-items:center;text-decoration:none">${s}</a>`).join('')}</div>
+      <span class="t-label" style="display:block;margin-top:18px">If I did it again</span><p style="margin-top:6px">${ph('ADD WHAT YOU WOULD DO DIFFERENTLY, IN YOUR OWN WORDS')}</p></div>
+    <div class="card"><span class="t-label">Glossary for non-specialists</span>${UNI_GLOSS.map(([t, d]) => `<details class="gl"><summary>${t}</summary><p>${d}</p></details>`).join('')}</div>
+  </div>`;
+}

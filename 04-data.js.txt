@@ -1,0 +1,505 @@
+/* =========================================================
+   CONTENT DATA
+   Everything that is not a documented fact is marked with a
+   status tag or an editable [PLACEHOLDER]. Replace placeholders
+   with approved material before publishing.
+   ========================================================= */
+const D = {};
+
+/* ---------- HOME: how disciplines combine ---------- */
+D.lenses = { items: [
+  { t: 'Research', d: '<strong style="color:#fff">Research finds the truth of the situation.</strong> Who the customer is, what the market already wants, where the friction sits. Nothing gets designed before this is understood.' },
+  { t: 'Strategy', d: '<strong style="color:#fff">Strategy decides the direction.</strong> Where to enter, how to position, which model makes the effort worth it, and what not to do.' },
+  { t: 'Design', d: '<strong style="color:#fff">Design gives the strategy a form people can use.</strong> A journey, a service, a package, a process. Human-centred, because businesses run on people.' },
+  { t: 'Communication', d: '<strong style="color:#fff">Communication makes the idea travel.</strong> Positioning, persuasion and relationships with the decision-makers who open doors.' },
+  { t: 'Technology', d: '<strong style="color:#fff">Technology makes the system repeatable.</strong> Dashboards, databases and workflows that let the business keep working without everything depending on one person.' }
+]};
+
+/* ---------- HOME: how an invasion is planned ---------- */
+D.scan = {
+  steps: [
+    { t: 'Existing markets', d: 'Start where demand is already proven instead of creating a market from nothing.' },
+    { t: 'Consumer needs', d: 'Look for what people already want but are not being served well.' },
+    { t: 'Overlooked opportunities', d: 'Notice the gaps established players walk past every day.' },
+    { t: 'Strategic entry points', d: 'Find the specific door in: a campus shelf, a counter, a decision-maker.' }
+  ],
+  examples: [
+    { name: 'In general', how: 'This grid is one market. Every square is a group of customers in it.',
+      steps: ['People are already buying here, so the demand is proven. Grey squares are customers that existing businesses already serve.',
+        'Inside that market, some customers want something nobody gives them well. Those unmet needs are in orange.',
+        'Look closer and there is a whole area the big players ignore. That overlooked gap is outlined in blue.',
+        'You don\'t need to invent a new market. You need one precise way into this one, marked in solid blue.'] },
+    { name: 'Example: Hydra on campus', how: 'This grid is drinks bought on a university campus. Every square is a group of students.',
+      steps: ['Students already buy drinks on campus every day. The market exists; Hydra did not have to create it.',
+        'Some are active, health-conscious students who want hydration without sugar. That need is not served well.',
+        'Campus counters and fridges near active students had no real hydration-first option. That is the gap.',
+        'The way in: the canteen or café operator who decides what is stocked. Placements followed at Nirma University and a few other universities.'] },
+    { name: 'Example: CLIQUE', how: 'This grid is people buying food at a university. Every square is a group of customers.',
+      steps: ['Students and visitors already buy food on campus. Demand is proven.',
+        'Many would like more variety and to know who made their food (a hypothesis to validate).',
+        'Independent food creators with good dishes but no kitchen, packaging or venue access are the overlooked gap.',
+        'The way in: an operating counter. Taco Tango at Nirma University became the starting point for CLIQUE.'] }
+  ]
+};
+
+/* ---------- THINKING: the ecosystem ---------- */
+D.eco = {
+  title: 'The business ecosystem · 6 connected forces', h: 560, mh: 600, panelLabel: 'How to use this',
+  intro: 'Every business decision lands somewhere in this system. Select a force to see what it covers and what it pulls on. Changing one always moves the others.',
+  nodes: [
+    { id: 'core', label: 'The business', sub: 'a system', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'Not a list of departments. A set of relationships. When one connection is weak, the whole system feels it.' },
+    { id: 'people', label: 'People', sub: '01', x: 50, y: 11, m: [50, 9], body: 'Founders, employees, customers and stakeholders. Every system is ultimately run by and for people, so understanding their motivations comes first.', tags: [['done', 'Seen in: CLIQUE founder collaboration']] },
+    { id: 'market', label: 'Market', sub: '02', x: 83, y: 29, m: [83, 29], body: 'Consumers, competitors, demand and opportunities. The starting point for "invading" rather than inventing: what already exists, and where the gap is.', tags: [['done', 'Seen in: Hydra campus research']] },
+    { id: 'strategy', label: 'Strategy', sub: '03', x: 83, y: 71, m: [83, 71], body: 'Direction, positioning and business models. Strategy is the set of choices that decide how the rest of the system should be configured.', tags: [['done', 'Seen in: Hydra positioning']] },
+    { id: 'ops', label: 'Operations', sub: '04', x: 50, y: 89, m: [50, 91], body: 'Processes, resources and workflows. Where ideas meet reality: machinery, labour, kitchens, schedules and inventory.', tags: [['done', 'Seen in: Unilever factory work']] },
+    { id: 'comms', label: 'Communication', sub: '05', x: 17, y: 71, m: [17, 71], body: 'Branding, messaging and relationships. How the business explains itself to customers, partners and the institutions that let it in.', tags: [['done', 'Seen in: CLIQUE institutional outreach']] },
+    { id: 'growth', label: 'Growth', sub: '06', x: 17, y: 29, m: [17, 29], body: 'Business development, expansion and improvement. Growth is the output of the other five working together, not a separate activity.', tags: [['done', 'Seen in: Hydra placements']] }
+  ],
+  edges: [
+    ['core', 'people', '', 1], ['core', 'market', '', 1], ['core', 'strategy', '', 1], ['core', 'ops', '', 1], ['core', 'comms', '', 1], ['core', 'growth', '', 1],
+    ['people', 'market', 'customers'], ['market', 'strategy', 'demand → direction'], ['strategy', 'ops', 'choices → process'],
+    ['ops', 'comms', 'delivery → promise'], ['comms', 'growth', 'reach'], ['growth', 'people', 'new relationships'],
+    ['strategy', 'comms', 'positioning'], ['market', 'growth', 'opportunity']
+  ]
+};
+
+/* ---------- THINKING: the 7-stage framework ---------- */
+D.framework = {
+  title: 'Discover → Improve · a framework that adapts', adaptLabel: 'Adapt to',
+  steps: [
+    { t: 'Discover', b: 'Understand the business before trying to change it. Walk the floor, talk to the people, observe the customer, read the market. The aim is to see how things actually work, not how they are described.', meta: { 'Key question': 'What is really happening here?', 'Typical methods': 'Observation, conversations, desk research, site visits', 'Output': 'A shared picture of the current system' } },
+    { t: 'Diagnose', b: 'Separate symptoms from causes. A defective bottle, an empty counter or a slow sale is usually the visible end of a deeper chain.', meta: { 'Key question': 'Why is it happening?', 'Typical methods': 'Problem trees, causal mapping, stakeholder mapping', 'Output': 'Root causes and the opportunities they open' } },
+    { t: 'Design', b: 'Shape a response: a position, a model, a service, a mechanism or a journey. Design here means designing how the business works, not only how it looks.', meta: { 'Key question': 'What should change?', 'Typical methods': 'Journeys, service blueprints, business model canvas', 'Output': 'A proposed direction with clear trade-offs' } },
+    { t: 'Structure', b: 'Turn the idea into roles, processes and resources. Who does what, in which order, with which tools.', meta: { 'Key question': 'How will it work every day?', 'Typical methods': 'Process maps, workflows, resource plans', 'Output': 'An operating structure' } },
+    { t: 'Connect', b: 'Bring in the people, partners and institutions the plan depends on. Most opportunities open through the right conversation with the right decision-maker.', meta: { 'Key question': 'Who needs to be involved?', 'Typical methods': 'Outreach, partnerships, stakeholder communication', 'Output': 'Relationships and agreements' } },
+    { t: 'Execute', b: 'Launch in a way that can be observed. Start small enough to learn and visible enough to matter.', meta: { 'Key question': 'Is it working in the real world?', 'Typical methods': 'Pilots, placements, campaigns', 'Output': 'Real activity and real feedback' } },
+    { t: 'Improve', b: 'Collect feedback, compare it with the intent, and refine. The framework loops: every improvement is a new discovery.', meta: { 'Key question': 'What did we learn?', 'Typical methods': 'Surveys, seller feedback, reviews', 'Output': 'Refined strategy and the next cycle' } }
+  ],
+  adapt: [
+    { name: 'A neighbourhood café', notes: ['Sit in the café at different hours. Note who comes, what they order and what they skip.', 'Is low footfall about location, menu, price or visibility? Trace it back.', 'Rework the menu story or a signature item around what regulars already love.', 'Simplify prep and ordering so the change is repeatable on a busy day.', 'Approach nearby offices, colleges or clubs for steady demand.', 'Run the change for a defined period with a clear thing to watch.', 'Ask regulars and staff what changed. Keep what worked.'] },
+    { name: 'An FMCG manufacturer', notes: ['Understand the factory, hierarchy and functions before forming opinions.', 'Trace a defect through design, machinery, labour and packaging.', 'Explore mechanism or packaging alternatives as concepts.', 'Consider what standardisation would mean for machines and line workers.', 'Involve the functions that own design, production and quality.', 'Test through the company\'s own validation process, not assumptions.', 'Use consumer signals, such as how long a bottle lasts, to inform the next iteration.'] },
+    { name: 'A food-creator platform', notes: ['Meet independent food creators and understand what stops them from scaling.', 'Is the barrier infrastructure, identity, business skills or access to customers?', 'Design shared infrastructure, creator branding and the supporting technology.', 'Define onboarding, kitchen scheduling, inventory and quality steps.', 'Secure venues and institutional partners where creators can sell.', 'Start with one operating brand before the wider ecosystem.', 'Use customer feedback per creator to improve recipes and the platform.'] }
+  ]
+};
+
+/* ---------- CAPABILITIES matrix ---------- */
+D.capmx = {
+  title: 'Capability × evidence · where each skill was used',
+  cols: ['Unilever', 'CLIQUE', 'Hydra', 'DraftDigger', 'Early ventures'],
+  links: ['#/work/unilever/8', '#/work/clique/8', '#/work/hydra/8', '#/draftdigger', '#/about/0'],
+  rows: [
+    { name: 'Business Strategy', cells: [{ l: 'l1', e: 'Explored standardisation and manufacturing simplification as recommendations linked to a production problem.' }, { l: 'l2', e: 'Co-created the CLIQUE business concept and its creator-first ecosystem model with Taco Tango\'s founder.' }, { l: 'l1', e: 'Shaped the placement strategy that took Hydra into campus environments.' }, { l: 'lc', e: 'Strategy and execution partnering is the core service of the consultancy now in development.' }, { l: 'l1', e: 'Regal Vibes, a festival beverage venture, was not profitable. A first-hand lesson in business models.' }] },
+    { name: 'Business Systems Design', cells: [{ l: 'l2', e: 'Mapped how product design, machinery, labour and consumer experience connect around defective bottles.' }, { l: 'lc', e: 'Designed the proposed three-pillar ecosystem, creator and consumer journeys, and a five-layer service blueprint. Concept stage.' }, { l: 'l1', e: 'Connected brand strategy, outreach, placement and feedback into one loop.' }, { l: 'lc', e: 'Operational structure and workflow design are planned services.' }, null] },
+    { name: 'Research & Consumer Insights', cells: [{ l: 'l2', e: 'Factory familiarisation and exploration of packaging and dispensing issues, including bottle-emptying duration as a possible usage indicator.' }, { l: 'l1', e: 'Problem framing around independent food creators. ' + ph('ADD ACTUAL CLIQUE RESEARCH') }, { l: 'l2', e: 'Conducted surveys, collected seller feedback and shared recommendations.' }, { l: 'lc', e: 'Business research and consumer insights are planned services.' }, { l: 'l1', e: 'In Grade 9, approached nearby cafés, hotels and restaurants with observations.' }] },
+    { name: 'Brand & Market Strategy', cells: [null, { l: 'l2', e: 'Institutional positioning and persuasive communication for CLIQUE and Taco Tango.' }, { l: 'l2', e: 'Brand positioning, personality, core promise, packaging, campaigns, storytelling, tagline concepts and jingles as CMO.' }, { l: 'lc', e: 'Positioning and market entry are planned services.' }, { l: 'l1', e: 'In Grade 8, repackaged chocolates and goodies with stickers and better presentation.' }] },
+    { name: 'Business Development', cells: [null, { l: 'l2', e: 'Approached universities, malls and public-premise decision-makers. His co-founder handled subsequent negotiation and closure.' }, { l: 'l2', e: 'Personally approached institutions and helped secure placements at Nirma University and a few other universities.' }, null, { l: 'l1', e: 'Early outreach to local food businesses with suggestions.' }] },
+    { name: 'Entrepreneurship', cells: [null, { l: 'l2', e: 'Co-founded CLIQUE FOODOVATION after establishing the collaboration with Taco Tango.' }, { l: 'l1', e: 'CMO role within Hydra Enterprise.' }, { l: 'lc', e: 'Founded DraftDigger, a strategy and execution partner now in development.' }, { l: 'l2', e: 'Grade 8 selling experiment, Regal Vibes and an independent café experiment.' }] }
+  ]
+};
+
+/* ---------- ABOUT: journey ---------- */
+D.journey = {
+  title: 'Personal journey · from a school experiment to a way of thinking', start: 0,
+  items: [
+    { when: 'Grade 8', what: 'The first selling experiment', tag: 'done', body: '<p>An informal experiment selling chocolates and goodies. The product stayed the same; the repackaging, stickers and presentation changed. Earnings were small, roughly ₹5–₹10, and that was never the point.</p>', side: { 'Scale': 'Informal and very small', 'Thread to today': 'Presentation and perception → Brand & market strategy' } },
+    { when: 'Grade 9', what: 'Walking into local businesses', tag: 'done', body: '<p>Approached nearby cafés, hotels and restaurants with observations about their business and suggestions for what could be better.</p>', side: { 'Thread to today': 'Observation and outreach → Consumer insights & business development' } },
+    { when: 'First year, college', what: 'Regal Vibes', tag: 'done', body: '<p>A cocoa, cold cocoa and milkshake venture set up for a college festival. It was not profitable.</p><p>' + ph('ADD YOUR KEY LEARNING FROM REGAL VIBES') + '</p>', side: { 'Outcome': 'Not profitable', 'Thread to today': 'Venture building and business models' } },
+    { when: 'College years', what: 'An independent café experiment', tag: 'done', body: '<p>A separate café experiment, independent of CLIQUE and Taco Tango.</p><p>' + ph('ADD WHAT THE CAFÉ EXPERIMENT WAS, WHAT YOU TRIED AND WHAT YOU LEARNED') + '</p>', side: { 'Note': 'Not connected to CLIQUE or Taco Tango' } },
+    { when: 'Nirma University', what: 'Bachelor of Communication Design', tag: 'done', body: '<p>Communication Design at Nirma University, Ahmedabad, built the human-centred side of the thinking: understanding people, telling stories, communicating clearly and solving problems with structure.</p>', side: { 'Gave me': 'Human-centred thinking, storytelling, communication, problem-solving' } },
+    { when: 'Now', what: 'Professional evolution', tag: 'ongoing', body: '<p>A growing focus on market research, business strategy, systems thinking and entrepreneurship, through a Unilever project internship, the CMO role at Hydra Enterprise, co-founding CLIQUE FOODOVATION and building DraftDigger. Next: an upcoming Consumer Market Insights internship at Britannia Industries.</p>', side: { 'Next': 'Britannia Industries · CMI internship (upcoming)' } }
+  ]
+};
+
+/* ---------- ABOUT: brand architecture ---------- */
+D.arch = {
+  title: 'Brand architecture · keeping identities distinct', h: 500, mh: 600,
+  intro: 'Each identity has a different relationship to Jainil. Select one to see exactly what that relationship is.',
+  nodes: [
+    { id: 'js', label: 'Jainil Shukla', sub: 'personal identity', cls: 'hub', x: 50, y: 50, m: [50, 46], body: 'The personal identity. Business Systems Designer & Business Strategist.' },
+    { id: 'uni', label: 'Unilever', sub: 'project internship', x: 17, y: 22, m: [22, 10], body: 'A two-month project internship. Unilever is the host organisation, not a client or partner.', tags: ['done'] },
+    { id: 'hydra', label: 'Hydra Enterprise', sub: 'CMO experience', x: 50, y: 12, m: [78, 10], body: 'Jainil served as Chief Marketing Officer (CMO), leading marketing and institutional placement.', tags: ['done'] },
+    { id: 'clique', label: 'CLIQUE FOODOVATION', sub: 'co-founded venture', x: 83, y: 32, m: [80, 34], body: 'A food-entrepreneurship venture co-founded with Taco Tango\'s founder. Its wider creator ecosystem is still a proposal.', tags: ['done', ['concept', 'Ecosystem: proposed']] },
+    { id: 'taco', label: 'Taco Tango', sub: 'brand under CLIQUE', cls: 'c-blue', x: 83, y: 72, m: [80, 62], body: 'An independent Mexican-food venture founded by another person, now operating a counter at Nirma University and sitting under CLIQUE. Jainil did not found Taco Tango.', tags: [['done', 'Operating counter']] },
+    { id: 'dd', label: 'DraftDigger', sub: 'in development', cls: 'c-orange', x: 17, y: 75, m: [22, 86], body: 'Jainil\'s own consultancy venture: a business strategy and execution partner, currently in development.', tags: ['ongoing'] },
+    { id: 'brit', label: 'Britannia Industries', sub: 'upcoming internship', x: 50, y: 89, m: [70, 86], body: 'An upcoming Consumer Market Insights (CMI) internship.', tags: ['upcoming'] }
+  ],
+  edges: [['js', 'uni'], ['js', 'hydra'], ['js', 'clique', 'co-founded'], ['clique', 'taco', 'collaboration'], ['js', 'dd', 'founded'], ['js', 'brit', '', 1]]
+};
+
+/* =========================================================
+   UNILEVER
+   ========================================================= */
+D.uni_tl = {
+  title: 'Two-month project internship', start: 0,
+  items: [
+    { when: 'Month 1', what: 'Understanding the system', tag: 'done', body: '<p>Familiarisation with the factory premises, manufacturing environments, organisational hierarchy and the different functions that keep production running. The month was about learning how the whole operation fits together before looking for problems.</p>', side: { 'Focus': 'Premises, manufacturing environments, hierarchy, functions', 'Evidence': ph('ADD APPROVED NOTES OR PHOTOS') } },
+    { when: 'Month 2', what: 'Identifying the problem, exploring solutions', tag: 'done', body: '<p>Exploration of issues involving defective shampoo and body-lotion bottle production, packaging and dispensing. This included cap and pump mechanisms, labour, machinery and what standardisation might change.</p>', side: { 'Focus': 'Defects, mechanisms, labour, machinery, standardisation', 'Evidence': ph('ADD APPROVED SKETCHES OR PRESENTATION') } }
+  ]
+};
+
+D.fmcg_mm = {
+  title: 'FMCG ecosystem mind map', h: 600,
+  open: ['design', 'mfg'],
+  intro: 'A personal-care product connects far more than its formula. Orange-outlined branches were the internship\'s focus. The rest is general FMCG understanding.',
+  legend: '<span class="row" style="gap:6px"><span style="width:14px;height:14px;border-radius:4px;border:2px solid var(--orange-ink)"></span>Internship focus</span>',
+  data: { id: 'root', label: 'Personal-care product system', children: [
+    { id: 'consumer', label: 'Consumer', body: 'Needs, usage and perception. General FMCG understanding, not internship research.', tags: [['research', 'General FMCG research']], children: [
+      { id: 'c1', label: 'Needs & usage', body: 'How and where the product is used every day.' },
+      { id: 'c2', label: 'Perception', body: 'What the consumer believes about the brand and product.' },
+      { id: 'c3', label: 'Repurchase behaviour', body: 'When and why the consumer buys again. Linked to how long a bottle lasts.', tags: ['hyp'] } ] },
+    { id: 'design', label: 'Product design', focus: true, body: 'Bottle, closure and dispensing design. A core focus of month two.', tags: ['done'], children: [
+      { id: 'd1', label: 'Rotating / grooved caps', focus: true, body: 'Thread and groove mechanisms that must fit reliably every time.', tags: ['done'] },
+      { id: 'd2', label: 'Spring-loaded pumps', focus: true, body: 'Spring mechanisms add parts, assembly steps and possible failure points.', tags: ['done'] },
+      { id: 'd3', label: 'Vacuum dispensing concept', focus: true, body: 'A proposed spring-free, vacuum-based dispensing idea. Not prototyped.', tags: ['concept'] } ] },
+    { id: 'mfg', label: 'Manufacturing', focus: true, body: 'Machinery, labour and line configuration.', tags: ['done'], children: [
+      { id: 'm1', label: 'Machinery configuration', focus: true, body: 'How machines are set up and adjusted for different bottles and caps.', tags: ['done'] },
+      { id: 'm2', label: 'Cap-fitting labour', focus: true, body: 'The manual effort needed to fit caps and the variability it introduces.', tags: ['done'] },
+      { id: 'm3', label: 'Standardisation', focus: true, body: 'Fewer formats could simplify machine changeovers and assembly.', tags: ['rec'] } ] },
+    { id: 'pack', label: 'Packaging', focus: true, body: 'Where design meets the production line.', tags: ['done'], children: [
+      { id: 'p1', label: 'Production defects', focus: true, body: 'Defective shampoo and body-lotion bottles.', tags: ['done'] },
+      { id: 'p2', label: 'Bottle–closure fit', focus: true, body: 'Small mismatches here show up as leaks, poor dispensing or rework.', tags: ['research'] } ] },
+    { id: 'brand', label: 'Brand & marketing', body: 'General FMCG understanding.', tags: [['research', 'General FMCG research']], children: [
+      { id: 'b1', label: 'Positioning' }, { id: 'b2', label: 'Communication' } ] },
+    { id: 'dist', label: 'Distribution & retail', body: 'General FMCG understanding.', tags: [['research', 'General FMCG research']], children: [
+      { id: 'r1', label: 'Distributors' }, { id: 'r2', label: 'Retail visibility' }, { id: 'r3', label: 'Availability' } ] },
+    { id: 'org', label: 'Organisation', focus: true, body: 'Hierarchy and functions, the focus of month one.', tags: ['done'], children: [
+      { id: 'o1', label: 'Hierarchy', focus: true }, { id: 'o2', label: 'Functions', focus: true } ] }
+  ] }
+};
+
+D.uni_research = {
+  title: 'Research architecture · how the problem was approached', tag: 'done',
+  steps: [
+    { t: 'Observe', b: 'Walk the factory premises and manufacturing environments to see the operation as it is.', meta: { 'When': 'Month 1', 'Type': tag('done') } },
+    { t: 'Map the organisation', b: 'Understand the hierarchy and the functions that own design, production and quality, so later ideas reach the right people.', meta: { 'When': 'Month 1', 'Type': tag('done') } },
+    { t: 'Scope the problem', b: 'Focus on defects in shampoo and body-lotion bottle production, packaging and dispensing.', meta: { 'When': 'Month 2', 'Type': tag('done'), 'Finding': ph('ADD ACTUAL RESEARCH FINDING') } },
+    { t: 'Study mechanisms', b: 'Examine rotating and grooved caps and spring-loaded dispensing mechanisms, and where each might fail.', meta: { 'When': 'Month 2', 'Type': tag('done') } },
+    { t: 'Form a hypothesis', b: 'Consider whether colder temperatures could thicken the product and affect dispensing. This was never tested.', meta: { 'When': 'Month 2', 'Type': tag('hyp') } },
+    { t: 'Explore a concept', b: 'Propose a spring-free, vacuum-based dispensing mechanism as a direction worth investigating.', meta: { 'When': 'Month 2', 'Type': tag('concept') } },
+    { t: 'Trace the system', b: 'Follow the knock-on effects: cap-fitting labour, machinery configurations and adjustments, and the case for standardisation.', meta: { 'When': 'Month 2', 'Type': tag('rec') } },
+    { t: 'Link to the consumer', b: 'Raise bottle-emptying duration as a possible indicator of consumer usage and repurchase timing.', meta: { 'When': 'Month 2', 'Type': tag('hyp') } }
+  ]
+};
+
+D.uni_ptree = {
+  title: 'Problem tree · root causes → opportunities', note: 'Causes are explored, not verified.',
+  intro: 'Read left to right. Root causes lead to visible problems, problems create consequences, and each consequence points to an opportunity. Select any item to trace its chain.',
+  cols: [
+    { name: 'Root causes', items: [
+      { id: 'rc1', t: 'Complex cap and thread geometry', tag: 'research', links: ['pr1', 'pr3'], d: 'Rotating and grooved caps need precise alignment to seal and dispense well.' },
+      { id: 'rc2', t: 'Many parts in spring-loaded pumps', tag: 'research', links: ['pr2', 'pr3'], d: 'Springs add components and assembly steps, each a possible point of failure.' },
+      { id: 'rc3', t: 'Colder temperatures may thicken product', tag: 'hyp', links: ['pr2'], d: 'An unverified hypothesis that viscosity changes could affect dispensing.' },
+      { id: 'rc4', t: 'Varied machinery configurations', tag: 'research', links: ['pr1', 'pr4'], d: 'Different bottle and cap formats need different set-ups and adjustments.' } ] },
+    { name: 'Problems', items: [
+      { id: 'pr1', t: 'Defective bottles in production', tag: 'done', links: ['co1', 'co2'] },
+      { id: 'pr2', t: 'Inconsistent dispensing', tag: 'done', links: ['co3'] },
+      { id: 'pr3', t: 'Labour-heavy cap fitting', tag: 'done', links: ['co2'] },
+      { id: 'pr4', t: 'Frequent machine adjustment', tag: 'research', links: ['co2'] } ] },
+    { name: 'Consequences', items: [
+      { id: 'co1', t: 'Wastage and rework', tag: 'research', links: ['op2'], d: 'No cost figures were measured.' },
+      { id: 'co2', t: 'Lower operational efficiency', tag: 'research', links: ['op2', 'op3'] },
+      { id: 'co3', t: 'Uneven consumer experience', tag: 'hyp', links: ['op1', 'op4'] } ] },
+    { name: 'Opportunities', items: [
+      { id: 'op1', t: 'Spring-free vacuum dispensing', tag: 'concept' },
+      { id: 'op2', t: 'Standardise bottle and cap formats', tag: 'rec' },
+      { id: 'op3', t: 'Simplify machine set-ups', tag: 'rec' },
+      { id: 'op4', t: 'Track bottle-emptying duration', tag: 'hyp' } ] }
+  ]
+};
+
+D.uni_journey = {
+  title: 'Consumer journey · where packaging touches the experience', tag: ['research', 'General FMCG framework'],
+  steps: [
+    { t: 'Awareness', b: 'The consumer first meets the brand through communication and shelves.', meta: { 'Packaging role': 'Shelf presence and recognisable form', 'Owned by': 'Brand, retail' } },
+    { t: 'Consideration', b: 'Comparing options on the shelf or online.', meta: { 'Packaging role': 'Communicates quality and ease of use', 'Owned by': 'Brand, design' } },
+    { t: 'Purchase', b: 'Choosing one product over another.', meta: { 'Packaging role': 'A damaged or leaking pack can lose the sale', 'Owned by': 'Manufacturing, distribution' } },
+    { t: 'Experience', b: 'Daily use. This is where dispensing works, or does not.', meta: { 'Packaging role': 'Cap, pump and flow decide satisfaction', 'Owned by': 'Product design, manufacturing', 'Internship link': tag('done', 'Internship focus') } },
+    { t: 'Retention', b: 'Choosing the product again when the bottle runs out.', meta: { 'Packaging role': 'How long a bottle lasts may hint at repurchase timing', 'Internship link': tag('hyp') } },
+    { t: 'Advocacy', b: 'Recommending the product to others.', meta: { 'Packaging role': 'Frustration or delight is often about the dispenser, not the formula', 'Owned by': 'The whole system' } }
+  ]
+};
+
+D.causal = {
+  title: 'Causal relationship diagram · how demand is built', directed: true, curve: .12, h: 540, mh: 640,
+  panelLabel: 'Conceptual model',
+  intro: 'A conceptual model from industry research. "+" means the two move in the same direction. Use the buttons above to highlight each path.',
+  nodes: [
+    { id: 'pos', label: 'Positioning', x: 13, y: 22, m: [22, 9], body: 'How the brand frames the product in the consumer\'s mind.', tags: [['research', 'Industry research']] },
+    { id: 'perc', label: 'Perception', x: 42, y: 13, m: [72, 18], body: 'What consumers actually believe, shaped by positioning and by real product experience.', tags: [['research', 'Industry research']] },
+    { id: 'dem', label: 'Demand', x: 72, y: 28, m: [72, 44], body: 'How much consumers want the product. It feeds distribution and is fed back by visibility and repurchase.', tags: [['research', 'Industry research']] },
+    { id: 'dist', label: 'Distribution', x: 88, y: 66, m: [80, 70], body: 'Where the product is available. More demand tends to win wider distribution.', tags: [['research', 'Industry research']] },
+    { id: 'vis', label: 'Retail visibility', x: 60, y: 87, m: [48, 92], body: 'How noticeable the product is on the shelf. Wider distribution increases visibility, and visibility drives trial.', tags: [['research', 'Industry research']] },
+    { id: 'exp', label: 'Product experience', sub: 'dispensing', x: 13, y: 66, m: [20, 44], body: 'Whether the cap, pump and flow work as expected. This is where the internship problem enters the commercial system.', tags: [['done', 'Internship link']] },
+    { id: 'rep', label: 'Repurchase', x: 34, y: 88, m: [22, 74], body: 'Buying again. Bottle-emptying duration was raised as a possible indicator of when this happens.', tags: ['hyp'] }
+  ],
+  edges: [['pos', 'perc', '+'], ['perc', 'dem', '+'], ['dem', 'dist', '+'], ['dist', 'vis', '+'], ['vis', 'dem', '+'], ['exp', 'perc', '+'], ['exp', 'rep', '+'], ['rep', 'dem', '+']],
+  loops: [
+    { name: 'R1 · Visibility loop', nodes: ['dem', 'dist', 'vis'], edges: [2, 3, 4], desc: 'A reinforcing loop. Demand earns distribution, distribution creates retail visibility, and visibility brings new demand. Once it starts, it feeds itself.' },
+    { name: 'Perception path', nodes: ['pos', 'perc', 'dem'], edges: [0, 1], desc: 'Positioning shapes perception, which shapes demand. Communication can only promise what the product then has to deliver.' },
+    { name: 'Experience path', nodes: ['exp', 'perc', 'rep', 'dem'], edges: [5, 1, 6, 7], desc: 'Why a factory problem is a commercial problem. Poor dispensing weakens perception and repurchase, and both reduce demand.' }
+  ]
+};
+
+/* =========================================================
+   CLIQUE FOODOVATION
+   ========================================================= */
+D.clique_mm = {
+  title: 'CLIQUE ecosystem mind map', h: 640, open: ['taco'],
+  intro: 'The operating Taco Tango counter sits at the centre of a much wider envisioned ecosystem. Open each pillar to see the proposed features.',
+  data: { id: 'root', label: 'CLIQUE FOODOVATION', children: [
+    { id: 'taco', label: 'Taco Tango · operating', body: 'The part that exists today. An independent Mexican-food venture founded by another person, operating a counter at Nirma University.', tags: [['done', 'Operating']], children: [
+      { id: 't1', label: 'Mexican-food counter at Nirma University', tags: [['done', 'Operating']] },
+      { id: 't2', label: 'Founded independently by another person', tags: ['done'] },
+      { id: 't3', label: 'Brought into CLIQUE through collaboration', tags: ['done'] } ] },
+    { id: 'p1', label: 'Pillar 1 · Shared infrastructure', body: 'Resources creators would share instead of each buying their own.', tags: ['concept'], children: [
+      { id: 'p1a', label: 'Shared kitchens' }, { id: 'p1b', label: 'Mixers, grinders, microwaves, freezers' }, { id: 'p1c', label: 'Raw ingredients' }, { id: 'p1d', label: 'Storage & packaging resources' } ] },
+    { id: 'p2', label: 'Pillar 2 · Creator branding', body: 'Giving every dish a visible creator.', tags: ['concept'], children: [
+      { id: 'p2a', label: 'Individual chef identity' }, { id: 'p2b', label: 'Recipe naming' }, { id: 'p2c', label: 'Custom packaging' }, { id: 'p2d', label: 'Personal storytelling' }, { id: 'p2e', label: 'QR-enabled creator discovery' } ] },
+    { id: 'p3', label: 'Pillar 3 · Business & technology', body: 'The operating system behind the ecosystem.', tags: ['concept'], children: [
+      { id: 'p3a', label: 'Creator onboarding' }, { id: 'p3b', label: 'Recipe database' }, { id: 'p3c', label: 'Kitchen scheduling' }, { id: 'p3d', label: 'Inventory management' }, { id: 'p3e', label: 'Production & order management' }, { id: 'p3f', label: 'Quality control' }, { id: 'p3g', label: 'Creator dashboards' }, { id: 'p3h', label: 'Customer feedback' } ] },
+    { id: 'venues', label: 'Venues & institutions', body: 'Where the food reaches people. Jainil approached these decision-makers.', tags: ['done'], children: [
+      { id: 'v1', label: 'Universities' }, { id: 'v2', label: 'Malls' }, { id: 'v3', label: 'Public premises' } ] },
+    { id: 'people', label: 'Creators & consumers', body: 'The two sides the ecosystem serves.', tags: ['concept'], children: [
+      { id: 'pp1', label: 'Independent food creators' }, { id: 'pp2', label: 'Consumers who want to know who made their food' } ] }
+  ] }
+};
+
+D.creator_journey = {
+  title: 'Creator journey · envisioned', tag: 'concept',
+  steps: [
+    { t: 'Registration', b: 'An independent food creator applies to join CLIQUE.', meta: { 'Pillar': 'Business & technology', 'System needed': 'Creator onboarding' } },
+    { t: 'Identity creation', b: 'The creator\'s name, story and signature style become a visible identity.', meta: { 'Pillar': 'Creator branding', 'System needed': 'Chef identity, storytelling' } },
+    { t: 'Recipe submission', b: 'Recipes are submitted, named and documented.', meta: { 'Pillar': 'Business & technology', 'System needed': 'Recipe database' } },
+    { t: 'Kitchen access', b: 'The creator books time in a shared kitchen with shared equipment.', meta: { 'Pillar': 'Shared infrastructure', 'System needed': 'Kitchen scheduling' } },
+    { t: 'Production', b: 'Dishes are prepared using shared ingredients and equipment.', meta: { 'Pillar': 'Shared infrastructure', 'System needed': 'Inventory, quality control' } },
+    { t: 'Packaging', b: 'Food goes into custom packaging carrying the creator\'s identity and a QR code.', meta: { 'Pillar': 'Creator branding', 'System needed': 'Custom packaging, QR discovery' } },
+    { t: 'Fulfilment', b: 'Orders reach consumers through venues and counters.', meta: { 'Pillar': 'Business & technology', 'System needed': 'Production & order management' } },
+    { t: 'Feedback', b: 'Customer feedback is collected for each creator and dish.', meta: { 'Pillar': 'Business & technology', 'System needed': 'Customer feedback, creator dashboards' } },
+    { t: 'Growth', b: 'Creators refine recipes and grow a following under their own name.', meta: { 'Pillar': 'All three', 'System needed': 'Dashboards and support' } }
+  ]
+};
+
+D.consumer_journey = {
+  title: 'Consumer journey · envisioned', tag: 'concept',
+  steps: [
+    { t: 'Discover food', b: 'A consumer comes across CLIQUE food at a venue or counter.', meta: { 'Touchpoint': 'Counter, venue, word of mouth' } },
+    { t: 'Select dish', b: 'They choose a dish, each named by its creator.', meta: { 'Touchpoint': 'Menu with recipe names' } },
+    { t: 'Discover chef', b: 'They learn there is a real person behind the dish.', meta: { 'Touchpoint': 'Creator identity on menu and pack' } },
+    { t: 'Purchase', b: 'They buy the dish.', meta: { 'Touchpoint': 'Counter or order system' } },
+    { t: 'Receive packaging', b: 'The food arrives in packaging that carries the creator\'s identity.', meta: { 'Touchpoint': 'Custom packaging' } },
+    { t: 'Scan QR', b: 'A QR code on the pack opens the creator\'s page.', meta: { 'Touchpoint': 'QR-enabled discovery' } },
+    { t: 'Explore story', b: 'They read the creator\'s story and other dishes.', meta: { 'Touchpoint': 'Creator profile' } },
+    { t: 'Share feedback', b: 'They rate or comment, which goes back to the creator.', meta: { 'Touchpoint': 'Feedback form, creator dashboard' } }
+  ]
+};
+
+D.bmc = {
+  title: 'Business Model Canvas · CLIQUE (proposed)',
+  intro: 'A first structuring of the proposed model. Select any block for detail. Nothing here has been validated with live numbers.',
+  blocks: [
+    { cls: 'kp', t: 'Key partners', s: 'Venues, suppliers, packaging partners', d: ['Taco Tango\'s founder, as co-founder', 'Universities, malls and public premises that host counters', 'Ingredient suppliers', 'Packaging vendors', 'Technology partners or external specialists'] },
+    { cls: 'ka', t: 'Key activities', s: 'Onboard, produce, brand, sell', d: ['Creator onboarding and support', 'Kitchen scheduling and production', 'Creator branding and packaging', 'Institutional outreach for venues'] },
+    { cls: 'kr', t: 'Key resources', s: 'Kitchens, equipment, platform', d: ['Shared kitchens and equipment', 'Recipe database and dashboards', 'Venue relationships', 'An operating brand: Taco Tango'] },
+    { cls: 'vp2', t: 'Value propositions', s: 'Every dish has a creator', d: ['<strong>For creators:</strong> start without owning a kitchen, and build a name of their own', '<strong>For consumers:</strong> food with a face, a story and a way to give feedback', '<strong>For venues:</strong> varied, branded food offerings from one coordinated partner'] },
+    { cls: 'cr', t: 'Customer relationships', s: 'Story-led, feedback-driven', d: ['QR-led discovery of the creator', 'Direct feedback to creators', 'Creator community'] },
+    { cls: 'ch', t: 'Channels', s: 'Counters, venues, QR', d: ['Counters at institutions (Taco Tango at Nirma University today)', 'Malls and public premises', 'Packaging as a channel through QR'] },
+    { cls: 'cs', t: 'Customer segments', s: 'Two sides: creators and eaters', d: ['Independent food creators', 'Students and visitors at institutions', 'Venue operators and decision-makers'] },
+    { cls: 'co', t: 'Cost structure', s: 'Infrastructure-heavy', d: ['Kitchen space and equipment', 'Ingredients and packaging stock', 'Technology build and maintenance', ph('ADD COST ASSUMPTIONS WHEN AVAILABLE')] },
+    { cls: 'rs', t: 'Revenue streams', s: 'Multiple streams, all to be tested', d: ['Kitchen usage', 'Packaging', 'Branding services', 'Procurement support', 'Technology subscriptions', 'See the revenue explorer below. No projections are shown.'] }
+  ]
+};
+
+D.blueprint = {
+  title: 'Service blueprint · five layers (envisioned)',
+  steps: ['Discover', 'Select & discover chef', 'Purchase', 'Receive pack', 'Scan & explore', 'Feedback'],
+  layers: [
+    { name: 'Physical evidence', cells: ['Counter, signage at venue', 'Menu with creator names', 'Counter, payment point', 'Custom creator packaging', 'QR code, creator page', 'Feedback screen'] },
+    { name: 'Customer actions', cells: ['Notices the counter', 'Picks a dish, reads who made it', 'Pays', 'Receives food', 'Scans, reads the story', 'Rates the dish'] },
+    { name: 'Frontstage', cells: ['Counter staff greet', 'Staff explain the creator behind dishes', 'Order taken', 'Hand-over with packaging', 'Creator profile content', 'Thank-you and follow-up'] },
+    { name: 'Backstage', cells: ['Venue agreement in place', 'Creator branding prepared', 'Order routed to production', 'Packing to creator spec', 'Profiles kept up to date', 'Feedback routed to creator'] },
+    { name: 'Support processes', cells: ['Institutional outreach', 'Recipe database', 'Kitchen scheduling, inventory', 'Packaging supply, quality control', 'Platform and QR system', 'Creator dashboards'] }
+  ]
+};
+
+D.revenue = {
+  title: 'Revenue model exploration',
+  streams: [
+    { t: 'Kitchen usage', who: 'Creators', value: 'Access to shared kitchens and equipment without owning them', needs: ['Enough creator demand to fill kitchen time', 'Reliable scheduling'] },
+    { t: 'Packaging', who: 'Creators', value: 'Custom, branded packaging at shared-volume cost', needs: ['Packaging partners', 'Consistent creator branding'] },
+    { t: 'Branding services', who: 'Creators', value: 'Chef identity, recipe naming and storytelling', needs: ['Creators who value a personal brand'] },
+    { t: 'Procurement support', who: 'Creators', value: 'Raw ingredients sourced in bulk', needs: ['Supplier relationships', 'Inventory management'] },
+    { t: 'Technology subscriptions', who: 'Creators, possibly venues', value: 'Dashboards, order and inventory tools', needs: ['A built and maintained platform', 'Enough creators to justify it'] }
+  ]
+};
+
+D.clique_pos = {
+  id: 'clique', title: 'Competitive positioning matrix', tag: 'illus',
+  x: ['Creator does everything', 'Shared infrastructure'], y: ['Anonymous food', 'Named creator'],
+  q: ['Visible but unsupported', 'Supported and visible', 'Alone and anonymous', 'Supported but anonymous'],
+  intro: 'Categories, not named competitors. The aim is to show the gap CLIQUE wants to occupy: high support for creators and high visibility for who made the food. Drag markers to argue a different reading.',
+  points: [
+    { id: 'home', label: 'Home cooks selling via social media', x: 16, y: 70, desc: 'Personal and visible, but the creator carries the kitchen, sourcing, packaging and business work alone.' },
+    { id: 'cloud', label: 'Cloud kitchens', x: 78, y: 20, desc: 'Strong shared infrastructure, but the food is usually sold under brands that hide the person cooking it.' },
+    { id: 'agg', label: 'Delivery-app listings', x: 55, y: 34, desc: 'Reach and ordering technology, but little help with production and limited creator identity.' },
+    { id: 'campus', label: 'Typical campus counters', x: 24, y: 22, desc: 'Run independently with their own set-up. Rarely tell the story of who made the food.' },
+    { id: 'clique', label: 'CLIQUE (envisioned)', x: 82, y: 82, us: true, desc: 'Shared infrastructure plus a named creator on every dish. This is the intended position, not a proven one.' }
+  ]
+};
+
+D.clique_stake = {
+  title: 'Stakeholder ecosystem map', h: 560, mh: 640, curve: 0,
+  intro: 'Who CLIQUE depends on, and what each stakeholder gives and gets. Select one to see its relationships.',
+  nodes: [
+    { id: 'c', label: 'CLIQUE', sub: 'envisioned platform', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'The coordinator in the middle, connecting creators to infrastructure, venues and consumers.' },
+    { id: 'cr', label: 'Food creators', x: 22, y: 20, m: [22, 12], body: '<strong>Give:</strong> recipes, skill, personal story. <strong>Get:</strong> kitchen access, branding, business support, a route to customers.', tags: ['concept'] },
+    { id: 'cu', label: 'Consumers', x: 78, y: 20, m: [78, 12], body: '<strong>Give:</strong> purchases and feedback. <strong>Get:</strong> food with a known creator and story.', tags: ['concept'] },
+    { id: 'tt', label: 'Taco Tango', sub: 'operating', cls: 'c-blue', x: 88, y: 50, m: [80, 34], body: 'The operating brand under CLIQUE, with a counter at Nirma University. The proof point the ecosystem would grow from.', tags: [['done', 'Operating']] },
+    { id: 've', label: 'Venue decision-makers', x: 78, y: 82, m: [78, 70], body: 'Universities, malls and public premises. Jainil approached these decision-makers. <strong>Give:</strong> space and footfall. <strong>Get:</strong> a varied food offering.', tags: ['done'] },
+    { id: 'co', label: 'Co-founders', x: 50, y: 92, m: [50, 92], body: 'Jainil handled institutional positioning and persuasive communication. His co-founder handled subsequent commercial negotiations and final deal closure.', tags: ['done'] },
+    { id: 'su', label: 'Ingredient suppliers', x: 22, y: 82, m: [22, 70], body: '<strong>Give:</strong> raw ingredients. <strong>Get:</strong> pooled, predictable orders.', tags: ['concept'] },
+    { id: 'pk', label: 'Packaging partners', x: 12, y: 50, m: [20, 34], body: '<strong>Give:</strong> custom packaging. <strong>Get:</strong> repeat volume across many creators.', tags: ['concept'] }
+  ],
+  edges: [['c', 'cr'], ['c', 'cu'], ['c', 'tt', 'brand under'], ['c', 've'], ['c', 'co', '', 1], ['c', 'su'], ['c', 'pk'], ['cr', 'cu', 'food + story'], ['su', 'cr'], ['pk', 'cr'], ['ve', 'cu', 'footfall'], ['tt', 've']]
+};
+
+D.clique_swot = {
+  title: 'SWOT · CLIQUE as a concept', tag: 'rec', note: 'A strategic reflection. Edit to match your own assessment.',
+  s: [['A clear, human idea', 'Every dish has a creator is easy to explain and hard to forget.'], ['An operating proof point', 'Taco Tango already runs a counter at Nirma University.'], ['Institutional access', 'Experience approaching universities, malls and public premises.']],
+  w: [['Infrastructure-heavy model', 'Shared kitchens and equipment need capital before revenue arrives.'], ['Unvalidated revenue', 'None of the proposed streams have been tested with real pricing.'], ['Early stage', 'Most of the ecosystem exists only as a proposal.']],
+  o: [['Creators without kitchens', 'Independent food creators who want to sell but cannot set up alone.'], ['Story-led food', 'Packaging and QR can turn an anonymous meal into a relationship.'], ['Institutional demand', 'Campuses and public premises need varied food offerings.']],
+  t: [['Established food formats', 'Cloud kitchens and delivery apps already serve parts of the need.'], ['Quality consistency', 'Many creators in shared kitchens makes quality control harder.'], ['Venue dependence', 'Losing a venue agreement removes a channel.']]
+};
+
+/* =========================================================
+   HYDRA
+   ========================================================= */
+D.hydra_chain = {
+  title: 'The connected system · strategy to shelf to feedback', tag: 'done',
+  steps: [
+    { t: 'Brand strategy', b: 'Defining what Hydra stands for: positioning, personality and the core promise.', meta: { 'Jainil\'s role': 'Led as CMO', 'Status': tag('done') } },
+    { t: 'Product positioning', b: 'Placing each product, Hydra Zero Sugar Water, Chamkila and Mojito, in the consumer\'s mind.', meta: { 'Jainil\'s role': 'Led as CMO', 'Status': tag('done') } },
+    { t: 'Institutional outreach', b: 'Identifying colleges, universities, cafés, restaurants, clubs and fitness environments, then approaching decision-makers personally.', meta: { 'Jainil\'s role': 'Personally approached institutions', 'Status': tag('done') } },
+    { t: 'Placement', b: 'Securing product placements at Nirma University and a few other universities.', meta: { 'Jainil\'s role': 'Helped secure placements', 'Where': 'Nirma University, ' + ph('ADD OTHER UNIVERSITIES IF APPROVED'), 'Status': tag('done') } },
+    { t: 'Consumer discovery', b: 'Students and visitors meet the product where they already spend time.', meta: { 'Status': tag('done') } },
+    { t: 'Feedback', b: 'Maintaining communication with sellers, conducting surveys and collecting feedback.', meta: { 'Jainil\'s role': 'Ran surveys and seller conversations', 'Finding': ph('ADD ACTUAL SURVEY FINDING'), 'Status': tag('done') } },
+    { t: 'Strategic refinement', b: 'Sharing recommendations back into the strategy. Repeat purchase was not quantitatively measured.', meta: { 'Recommendation': ph('ADD THE RECOMMENDATION YOU SHARED'), 'Status': tag('rec') } }
+  ]
+};
+
+D.b2b = {
+  title: 'B2B business development framework', tag: ['illus', 'Illustrative framework'],
+  steps: [
+    { t: 'Industry research', b: 'Understand the sector: how institutions buy, who supplies them today and what they care about.', meta: { 'Output': 'Sector picture' } },
+    { t: 'Segmentation', b: 'Group prospects by type: universities, colleges, cafés, restaurants, clubs, fitness spaces.', meta: { 'Output': 'Priority segments' } },
+    { t: 'Prospect identification', b: 'List specific institutions within each segment worth approaching first.', meta: { 'Output': 'Target list (see the CRM below)' } },
+    { t: 'Decision-maker research', b: 'Find who actually decides: an administrator, a canteen contractor, an owner or a manager.', meta: { 'Output': 'Named role per prospect' } },
+    { t: 'Personalised outreach', b: 'Open with what matters to that person: student demand, health, margin, footfall.', meta: { 'Output': 'First conversation' } },
+    { t: 'Follow-up', b: 'Most conversations do not convert on the first contact. Follow up with something new each time.', meta: { 'Output': 'Continued conversation' } },
+    { t: 'Requirement discovery', b: 'Listen for constraints: shelf space, pricing, approvals, refrigeration.', meta: { 'Output': 'What a yes would require' } },
+    { t: 'Pitch', b: 'Present the product as the answer to their requirement, not as a product looking for a home.', meta: { 'Output': 'Tailored proposal' } },
+    { t: 'Negotiation', b: 'Agree on terms both sides can sustain.', meta: { 'Output': 'Agreed terms' } },
+    { t: 'Conversion', b: 'Placement happens. Keep the relationship alive for feedback and reorders.', meta: { 'Output': 'Placement and a relationship' } }
+  ]
+};
+
+D.funnel = {
+  id: 'hydra', title: 'Lead generation funnel',
+  intro: 'A structure for tracking institutional outreach. Counts are blank because they were not recorded. Enter real numbers to calculate stage-to-stage conversion.',
+  stages: [
+    { t: 'Prospects identified', d: 'Institutions that fit a target segment.' },
+    { t: 'Decision-makers reached', d: 'A real conversation with the person who can say yes.' },
+    { t: 'Interested', d: 'They want to know more or ask for terms.' },
+    { t: 'Pitch delivered', d: 'A tailored proposal has been presented.' },
+    { t: 'Placement secured', d: 'The product is on their shelf or counter.' }
+  ]
+};
+
+D.objections = {
+  title: 'Sales psychology · reading the objection',
+  items: [
+    { o: 'We already have a beverage supplier.', real: 'Switching feels like a risk with no clear upside.', p: 'Loss aversion', pd: 'People weigh what they might lose more heavily than what they might gain.', r: 'Do not ask them to replace anything. Propose a small addition that fills a gap, such as a zero-sugar option, so there is nothing to lose.' },
+    { o: 'Will students actually buy this?', real: 'They need evidence of demand before giving up shelf space.', p: 'Social proof', pd: 'People follow what others like them are already doing.', r: 'Point to other campuses where the product is placed and to feedback collected from students, using only real examples.' },
+    { o: 'We don\'t have space on the counter.', real: 'Space is their scarcest resource, so the question is about return on it.', p: 'Reciprocity and low commitment', pd: 'A small, easy first step lowers resistance to a bigger one.', r: 'Offer a short trial with a small footprint and agree in advance how both sides will judge it.' },
+    { o: 'Send me the details and I\'ll get back to you.', real: 'Not a no, but not enough urgency or clarity to act now.', p: 'Commitment and consistency', pd: 'A small agreed next step makes follow-through more likely.', r: 'Agree on one specific next step and a date before ending the conversation, then follow up with exactly what was promised.' }
+  ]
+};
+
+D.hydra_stake = {
+  id: 'hydra', title: 'Stakeholder mapping · power and interest', tag: 'illus',
+  x: ['Low interest', 'High interest'], y: ['Low influence', 'High influence'],
+  q: ['Keep satisfied', 'Manage closely', 'Monitor', 'Keep informed'],
+  intro: 'An illustrative map of who shapes a campus placement. Positions are a starting judgement, not research results. Drag to adjust.',
+  points: [
+    { id: 'admin', label: 'University administration', x: 30, y: 85, desc: 'Controls approvals and space. Interested mainly when something affects students or policy.' },
+    { id: 'canteen', label: 'Canteen / café operators', x: 80, y: 78, desc: 'Decide what goes on the counter and care about margin and sell-through. The key relationship.' },
+    { id: 'students', label: 'Students', x: 78, y: 28, desc: 'The end consumers. Very interested in what is available, little direct say in stocking decisions.' },
+    { id: 'gym', label: 'Gym & club owners', x: 35, y: 58, desc: 'Influential in their own spaces. Interest depends on fit with a health-conscious audience.' },
+    { id: 'events', label: 'Student event organisers', x: 64, y: 44, desc: 'Can create visibility moments, with limited influence on permanent placement.' }
+  ]
+};
+
+D.crm = {
+  title: 'Conceptual CRM dashboard · B2B outreach tracker',
+  stages: ['Researching', 'Contacted', 'In conversation', 'Pitch shared', 'Placed', 'Paused'],
+  responses: ['No response yet', 'Replied', 'Interested', 'Not now'],
+  rows: [
+    { id: 'd1', company: 'Example University A', industry: 'Education', stage: 'Placed', date: '2026-01-12', resp: 'Interested', follow: '2026-02-02', next: 'Collect seller feedback' },
+    { id: 'd2', company: 'Example College B', industry: 'Education', stage: 'Pitch shared', date: '2026-01-20', resp: 'Replied', follow: '2026-02-05', next: 'Confirm shelf space' },
+    { id: 'd3', company: 'Example Café C', industry: 'Food & beverage', stage: 'In conversation', date: '2026-01-24', resp: 'Interested', follow: '2026-02-01', next: 'Share trial terms' },
+    { id: 'd4', company: 'Example Fitness Studio D', industry: 'Fitness', stage: 'Contacted', date: '2026-01-28', resp: 'No response yet', follow: '2026-02-04', next: 'Follow up by phone' },
+    { id: 'd5', company: 'Example Sports Club E', industry: 'Clubs', stage: 'Researching', date: '', resp: 'No response yet', follow: '', next: 'Find decision-maker' },
+    { id: 'd6', company: 'Example Restaurant F', industry: 'Food & beverage', stage: 'Paused', date: '2026-01-15', resp: 'Not now', follow: '2026-03-01', next: 'Revisit next term' }
+  ]
+};
+
+D.kpi = {
+  title: 'Editable performance framework',
+  rows: [
+    { a: 'Outreach', m: 'Institutions approached', d: 'How wide the effort was' },
+    { a: 'Outreach', m: 'Decision-makers reached', d: 'Quality of access, not just volume' },
+    { a: 'Placement', m: 'Placements secured', d: 'Converted relationships' },
+    { a: 'Placement', m: 'Time from first contact to placement', d: 'Speed of the sales cycle' },
+    { a: 'Consumer', m: 'Survey responses collected', d: 'Size of the feedback base' },
+    { a: 'Consumer', m: 'Repeat purchase', d: 'Whether consumers come back', locked: 'Not quantitatively measured' },
+    { a: 'Seller', m: 'Seller feedback sessions', d: 'Strength of the retail relationship' }
+  ]
+};
+
+/* =========================================================
+   WORK: cross-project skill map
+   ========================================================= */
+D.skillmap = {
+  title: 'Interconnected skill map', h: 560, mh: 720,
+  intro: 'Three projects, ten skills. Select a project to see which skills it used, or a skill to see where it shows up.',
+  nodes: [
+    { id: 'U', label: 'Unilever', sub: 'case 01', cls: 'hub', x: 20, y: 50, m: [50, 22], body: 'Research → consumer understanding → business insights.' },
+    { id: 'C', label: 'CLIQUE', sub: 'case 02', cls: 'hub', x: 50, y: 50, m: [50, 50], body: 'Problem identification → ecosystem design → business model innovation.' },
+    { id: 'H', label: 'Hydra', sub: 'case 03', cls: 'hub', x: 80, y: 50, m: [50, 78], body: 'Market research → communication → business development.' },
+    { id: 'res', label: 'Research', x: 8, y: 13, m: [15, 6], body: 'Observation, surveys, desk research and field conversations.' },
+    { id: 'cb', label: 'Consumer behaviour', x: 29, y: 13, m: [15, 22], body: 'Why people buy, use, repurchase and recommend.' },
+    { id: 'sys', label: 'Systems thinking', x: 50, y: 13, m: [15, 38], body: 'Seeing how parts of a business affect each other.' },
+    { id: 'str', label: 'Strategy', x: 71, y: 13, m: [15, 54], body: 'Direction, positioning and choices.' },
+    { id: 'mkt', label: 'Marketing', x: 92, y: 13, m: [15, 70], body: 'Brand, campaigns and product positioning.' },
+    { id: 'com', label: 'Communication', x: 8, y: 87, m: [85, 6], body: 'Persuasive and institutional communication.' },
+    { id: 'neg', label: 'Negotiation', x: 29, y: 87, m: [85, 22], body: 'Working with decision-makers toward an agreement.' },
+    { id: 'sd', label: 'Service design', x: 50, y: 87, m: [85, 38], body: 'Journeys, blueprints and the experience around a service.' },
+    { id: 'ent', label: 'Entrepreneurship', x: 71, y: 87, m: [85, 54], body: 'Starting, testing and building ventures.' },
+    { id: 'tec', label: 'Technology', x: 92, y: 87, m: [85, 70], body: 'Proposed platforms, dashboards and data tools.' }
+  ],
+  edges: [['U', 'res'], ['U', 'cb'], ['U', 'sys'], ['U', 'str'], ['C', 'sys'], ['C', 'str'], ['C', 'com'], ['C', 'sd'], ['C', 'ent'], ['C', 'tec', '', 1], ['H', 'res'], ['H', 'cb'], ['H', 'mkt'], ['H', 'com'], ['H', 'neg'], ['H', 'str']]
+};
+
+/* =========================================================
+   DRAFTDIGGER
+   ========================================================= */
+D.dd_process = {
+  title: 'The DraftDigger process', tag: 'ongoing',
+  steps: [
+    { t: 'Understand', b: 'Get to know the founder, the business and what they are really trying to achieve.', meta: { 'You get': 'A clear brief and shared picture' } },
+    { t: 'Diagnose', b: 'Research the market, consumers and competitors. Find the real problem behind the visible one.', meta: { 'You get': 'Root causes and opportunities' } },
+    { t: 'Strategise', b: 'Choose a direction: positioning, market entry, business model and growth path.', meta: { 'You get': 'A strategy with clear trade-offs' } },
+    { t: 'Structure', b: 'Design the operational structure and workflows that make the strategy work every day.', meta: { 'You get': 'Processes, roles and workflows' } },
+    { t: 'Coordinate', b: 'Connect the people, resources and specialists the plan needs. External specialists are brought in where required.', meta: { 'You get': 'The right people, working together' } },
+    { t: 'Execute', b: 'Plan execution and stay alongside the founder as it happens.', meta: { 'You get': 'An execution plan and a partner' } }
+  ]
+};

@@ -1,0 +1,255 @@
+/* =========================================================
+   HOW I THOUGHT — per case study
+   Written from the documented work. Questions, insights and
+   patterns are framed as interpretation of that work; actual
+   findings stay as [ADD …] placeholders until approved.
+   ========================================================= */
+const THINK = {};
+
+THINK.uni = {
+  lens: 'Systems thinking on a factory floor',
+  standout: 'Most interns would have treated a defective bottle as a quality problem. I traced it as a system: from the cap mechanism to the machine setting, the labour on the line, and finally the consumer deciding whether to buy again.',
+  points: [['Immersion before opinion', 'A full month learning the factory, hierarchy and functions before forming a view.'], ['Followed the chain, not the symptom', 'Connected one packaging defect to design, machinery, labour and repurchase.'], ['Honest about evidence', 'Kept the temperature idea as a hypothesis and the vacuum mechanism as a concept.']],
+  pattern: [
+    ['Immerse', 'Walk the premises and manufacturing environments. Learn who does what.'],
+    ['Narrow', 'Pick one real problem: defective shampoo and body-lotion bottles.'],
+    ['Dissect', 'Study the mechanisms: grooved caps, spring-loaded pumps.'],
+    ['Question', 'Form hypotheses, such as the effect of colder temperatures.'],
+    ['Widen', 'Trace knock-on effects into labour, machinery and standardisation.'],
+    ['Connect', 'Link the factory problem to consumer usage and repurchase.']
+  ],
+  questions: [
+    ['Is this a quality-control problem, or a design problem?', 'A defect caught at the end of the line is often created much earlier.', 'Led the exploration back to cap and pump mechanisms.', 'done'],
+    ['Does the pump need a spring at all?', 'Every part added is a part that can fail, and a step someone has to assemble.', 'Led to the spring-free, vacuum-based dispensing concept.', 'concept'],
+    ['Could the season change the product?', 'If colder temperatures thicken the lotion, a mechanism that works in summer could struggle in winter.', 'Kept as an unverified hypothesis, not a finding.', 'hyp'],
+    ['What does this cost the people on the line?', 'A problem in the product shows up as effort on the shop floor.', 'Brought cap-fitting labour and machine adjustment into the picture.', 'done'],
+    ['What does a bottle\'s lifespan tell us about the consumer?', 'How long a bottle takes to empty could say when the next purchase happens.', 'Raised bottle-emptying duration as a possible repurchase indicator.', 'hyp']
+  ],
+  research: [
+    ['On-site observation', 'Walked factory premises and manufacturing environments.', 'How the operation actually runs, beyond the org chart.', 'done'],
+    ['Organisational mapping', 'Learned the hierarchy and the functions involved in production.', 'Who owns design, production and quality decisions.', 'done'],
+    ['Mechanism analysis', 'Examined grooved caps and spring-loaded pumps part by part.', 'Where complexity, and therefore failure, comes from.', 'done'],
+    ['Hypothesis framing', 'Stated ideas such as the temperature effect as testable questions.', 'What would need proper testing before anyone acts on it.', 'hyp'],
+    ['Systems tracing', 'Followed one defect into labour, machinery and standardisation.', 'That a local fix can have system-wide effects.', 'done']
+  ],
+  consumer: [
+    ['Dispensing is the experience', 'The consumer never sees the factory. They feel the cap and the pump every single day.', 'Product experience shapes perception more than the formula alone.', 'research'],
+    ['Usage leaves a signal', 'How fast a bottle empties reflects how the product is actually used.', 'A possible early indicator of repurchase timing.', 'hyp'],
+    ['Frustration travels', 'A pump that fails is the kind of thing people mention to others.', 'Links factory quality to advocacy in the consumer journey.', 'research']
+  ],
+  insights: [
+    ['A packaging defect is a system symptom.', 'Defects connected design, machinery set-ups and manual cap fitting.', 'Fixing only the end of the line treats the symptom.'],
+    ['Simplify upstream and the benefit compounds downstream.', 'Varied formats meant varied machine configurations and labour.', 'Standardisation could help machines, people and quality checks at once.'],
+    ['Fewer parts, fewer failure points.', 'Spring mechanisms added parts and assembly steps.', 'Worth exploring a spring-free vacuum mechanism, through proper testing.'],
+    ['The factory floor holds commercial signals.', 'Bottle-emptying duration relates to usage.', 'Operations data could inform consumer and repurchase thinking.']
+  ],
+  strategy: [
+    ['First', 'Validate', 'Test the temperature hypothesis through the company\'s own processes before acting on it.', 'rec'],
+    ['Then', 'Simplify', 'Evaluate standardising bottle and cap formats to reduce machine adjustments.', 'rec'],
+    ['In parallel', 'Explore', 'Assess the vacuum dispensing concept with the teams that own product design.', 'concept'],
+    ['Ongoing', 'Measure', 'Consider tracking bottle-emptying duration as a consumer signal.', 'hyp']
+  ],
+  solutions: [
+    ['Inconsistent dispensing', 'Spring-free vacuum-based dispensing mechanism', 'concept'],
+    ['Frequent machine adjustment', 'Standardise formats, simplify set-ups', 'rec'],
+    ['Labour-heavy cap fitting', 'Reduce closure complexity and variety', 'rec'],
+    ['No link to the consumer', 'Use emptying duration as a usage indicator', 'hyp']
+  ]
+};
+
+THINK.clq = {
+  lens: 'Entrepreneurial ecosystem design',
+  standout: 'I didn\'t start with a blank page. I saw an operating food counter, approached its founder, and turned one brand into a vision for a whole ecosystem, then walked into institutions to open the doors it would need.',
+  points: [['Built on something real', 'Started from Taco Tango, an operating counter, not a pitch deck.'], ['Designed both sides', 'Mapped the journey for creators and for consumers, then the service in between.'], ['Opened doors in person', 'Approached universities, malls and public-premise decision-makers myself.']],
+  pattern: [
+    ['Spot', 'Notice an independent venture with real customers: Taco Tango.'],
+    ['Partner', 'Approach its founder and establish the collaboration.'],
+    ['Reframe', 'Ask what one counter could become for many food creators.'],
+    ['Map', 'Lay out stakeholders, journeys, blueprint and business model.'],
+    ['Structure', 'Organise the idea into three pillars.'],
+    ['Open doors', 'Take the positioning to institutional decision-makers.']
+  ],
+  questions: [
+    ['Why is most food anonymous?', 'People remember who made something when they are told. Most food never tells them.', 'Became the philosophy: every dish has a creator.', 'concept'],
+    ['What stops a good cook from becoming a business?', 'Talent is not the barrier. Kitchens, equipment, packaging and business skills are.', 'Became Pillar 1 (shared infrastructure) and Pillar 3 (business and technology).', 'concept'],
+    ['What should be shared, and what must stay personal?', 'Share the expensive things, keep the identity individual.', 'Shared kitchens, but individual chef branding and recipe naming.', 'concept'],
+    ['Who has to say yes for this to exist?', 'Without venues there is no channel, however good the food.', 'Led to institutional outreach to universities, malls and public premises.', 'done'],
+    ['How could this earn without depending on food margin alone?', 'A platform can charge for the services it provides to creators.', 'Explored kitchen usage, packaging, branding, procurement and technology streams.', 'concept']
+  ],
+  research: [
+    ['Stakeholder mapping', 'Listed everyone the ecosystem depends on and what each gives and gets.', 'Venues and creators are the two relationships everything rests on.', 'done'],
+    ['Category positioning', 'Placed existing food formats on support vs visibility.', 'A gap where creators get both infrastructure and identity.', 'illus'],
+    ['Two-sided journey mapping', 'Mapped the creator journey and the consumer journey separately.', 'Where each side needs the platform to step in.', 'concept'],
+    ['Service blueprinting', 'Laid out five layers from physical evidence to support processes.', 'What has to run backstage for the front of house to work.', 'concept'],
+    ['Primary research', ph('ADD CONVERSATIONS WITH CREATORS OR CONSUMERS, IF ANY'), ph('ADD WHAT YOU LEARNED'), 'research']
+  ],
+  consumer: [
+    ['People connect with people', 'A dish with a named creator and a story gives the buyer someone to connect with.', 'Hypothesis behind creator branding and QR discovery. To be validated.', 'hyp'],
+    ['Packaging is a medium', 'The pack is the one thing every consumer holds.', 'Custom creator packaging and a QR code turn it into a channel.', 'concept'],
+    ['Feedback builds loyalty both ways', 'When feedback reaches the actual creator, both sides have a reason to return.', 'Customer feedback and creator dashboards in Pillar 3.', 'concept']
+  ],
+  insights: [
+    ['An operating brand is the strongest argument for an ecosystem.', 'Taco Tango already runs a counter at Nirma University.', 'Grow outward from proof, not from a slide.'],
+    ['Creators lack two things, not one.', 'Infrastructure and identity are separate barriers.', 'The model has to solve both, which is why there are three pillars.'],
+    ['Venues are the gatekeepers.', 'Channels exist only where institutions allow them.', 'Institutional communication is as important as the food.'],
+    ['Charge for the platform, not just the plate.', 'Creators need kitchens, packaging, branding, sourcing and tools.', 'Several possible revenue streams, all still to be tested.']
+  ],
+  strategy: [
+    ['Phase 1', 'Operating brand', 'Taco Tango counter at Nirma University.', 'done'],
+    ['Phase 2', 'Venue outreach', 'Approach universities, malls and public-premise decision-makers for locations.', 'done'],
+    ['Phase 3', 'Shared kitchen pilot', 'Test shared infrastructure with a first group of creators.', 'concept'],
+    ['Phase 4', 'Creator platform', 'Onboarding, scheduling, inventory, dashboards and feedback.', 'concept']
+  ],
+  solutions: [
+    ['Creators can\'t afford their own kitchens', 'Shared kitchens, equipment, ingredients and storage', 'concept'],
+    ['Food is anonymous', 'Chef identity, recipe naming, custom packaging, QR stories', 'concept'],
+    ['Creators lack business systems', 'Onboarding, scheduling, inventory, quality control, dashboards', 'concept'],
+    ['No channel to customers', 'Institutional outreach and the operating Taco Tango counter', 'done']
+  ]
+};
+
+THINK.hyd = {
+  lens: 'Brand strategy that reaches the shelf',
+  standout: 'As CMO I didn\'t stop at positioning. I took the brand to campuses myself, worked out who actually controlled the shelf, secured placements, and kept listening to sellers and consumers afterwards.',
+  points: [['Strategy and field work in one person', 'Defined the brand, then personally approached the institutions.'], ['Saw two customers', 'The student who drinks it and the operator who stocks it need different arguments.'], ['Closed the loop', 'Surveys and seller feedback went back into recommendations.']],
+  pattern: [
+    ['Position', 'Define Hydra as a hydration companion for active, health-conscious consumers.'],
+    ['Locate', 'Find where those consumers already are: campuses, cafés, clubs, gyms.'],
+    ['Identify', 'Work out who decides what goes on the shelf in each place.'],
+    ['Persuade', 'Approach each decision-maker with what matters to them.'],
+    ['Place', 'Secure placements at Nirma University and a few other universities.'],
+    ['Listen', 'Run surveys, collect seller feedback, share recommendations.']
+  ],
+  questions: [
+    ['Who is the real customer: the student or the canteen?', 'The student drinks it, but the operator decides whether it\'s there to drink.', 'Two audiences, two arguments: positioning for students, value for operators.', 'done'],
+    ['Where does an active, health-conscious person spend their day?', 'Distribution should follow the audience, not the other way round.', 'Prioritised colleges, universities, cafés, restaurants, clubs and fitness spaces.', 'done'],
+    ['Why would an operator give up shelf space?', 'Space is their scarcest resource.', 'Framed outreach around their needs, not the product\'s features.', 'done'],
+    ['How does each product earn its own place?', 'Three products under one brand can blur together.', 'Separate positioning for Hydra Zero Sugar Water, Chamkila and Mojito.', 'done'],
+    ['What can we honestly claim?', 'Repeat purchase wasn\'t quantitatively measured.', 'No repeat-purchase claims. The gap is stated openly.', 'done']
+  ],
+  research: [
+    ['Consumer surveys', 'Conducted surveys among consumers.', ph('ADD SURVEY FINDINGS'), 'done'],
+    ['Seller feedback', 'Kept regular communication with sellers and collected feedback.', 'Sellers see sell-through every day, so they are an early signal.', 'done'],
+    ['Environment mapping', 'Identified colleges, universities, cafés, restaurants, clubs and fitness spaces.', 'Where the target consumer already is.', 'done'],
+    ['Decision-maker research', 'Found who actually decides in each institution before approaching.', 'Outreach goes to the person who can say yes.', 'done'],
+    ['Influence mapping', 'Thought through who shapes a placement and how much.', 'Where to spend effort first.', 'illus']
+  ],
+  consumer: [
+    ['Discovery happens at availability', 'A new beverage is chosen where it is seen, at the counter or the fridge.', 'Placement is as much a brand decision as messaging.', 'research'],
+    ['Health is a reason to choose', 'Active, health-conscious consumers look for options that fit how they live.', 'Positioning Hydra as a hydration companion, with a zero-sugar product.', 'done'],
+    ['What students actually said', ph('ADD WHAT SURVEYS REVEALED ABOUT PREFERENCE, TASTE OR PRICE'), ph('ADD THE IMPLICATION YOU DREW'), 'research']
+  ],
+  insights: [
+    ['Every campus sale has two customers.', 'Students choose, operators stock.', 'Win the operator first, or the student never gets the chance.'],
+    ['Distribution is part of the brand.', 'Being where active people are reinforces the positioning.', 'Placement strategy follows positioning.'],
+    ['Sellers are the best field researchers.', 'They see what moves and hear what customers say.', 'Keep the seller relationship alive after placement.'],
+    ['Don\'t claim what you didn\'t measure.', 'Repeat purchase was not measured.', 'Credibility is a strategic asset too.']
+  ],
+  strategy: [
+    ['1', 'Positioning', 'Hydration companion for active, health-conscious consumers.', 'done'],
+    ['2', 'Product roles', 'A distinct place for each of the three products.', 'done'],
+    ['3', 'Target environments', 'Campuses first, then cafés, restaurants, clubs and fitness spaces.', 'done'],
+    ['4', 'Outreach & placement', 'Personal approaches to decision-makers; placements at Nirma and a few other universities.', 'done'],
+    ['5', 'Feedback & refinement', 'Surveys and seller feedback turned into recommendations.', 'done']
+  ],
+  solutions: [
+    ['A new brand nobody has heard of', 'Clear positioning, personality and core promise', 'done'],
+    ['No place on the shelf', 'Personal institutional outreach to decision-makers', 'done'],
+    ['Three products blurring together', 'Separate product positioning within one brand', 'done'],
+    ['No feedback after placement', 'Seller communication, surveys and recommendations', 'done']
+  ]
+};
+
+function thinkingModule(T, key) {
+  const qa = T.questions.map(([q, why, led, tg], i) => `<details class="tq"${i === 0 ? ' open' : ''}><summary><span class="tq-q">Q${i + 1}</span><span class="tq-t">${esc(q)}</span></summary><div class="tq-b"><div><span class="t-label">Why it mattered</span><p>${why}</p></div><div><span class="t-label">What it led to</span><p>${led}</p>${tag(tg)}</div></div></details>`).join('');
+  const cards = (arr, a, b) => `<div class="grid g-3 tk-grid">${arr.map(([t, x, y, tg]) => `<div class="card tk-card"><div class="row between" style="gap:8px;align-items:flex-start"><h4 class="t-h4">${esc(t)}</h4>${tag(tg)}</div><span class="t-label">${a}</span><p class="t-sm">${x}</p><span class="t-label">${b}</span><p class="t-sm ink2">${y}</p></div>`).join('')}</div>`;
+  const panels = [
+    { t: 'Working pattern', html: `<p class="tk-intro">The sequence I followed on this project.</p><ol class="pattern">${T.pattern.map(([a, b], i) => `<li><span class="pn">${String(i + 1).padStart(2, '0')}</span><strong>${esc(a)}</strong><span>${esc(b)}</span></li>`).join('')}</ol>` },
+    { t: 'Critical thinking', html: `<p class="tk-intro">The questions that shaped the work, and where each one led.</p>${qa}` },
+    { t: 'Research techniques', html: `<p class="tk-intro">How I gathered evidence, and what each method revealed.</p>${cards(T.research, 'How I used it', 'What it revealed')}` },
+    { t: 'Consumer behaviour', html: `<p class="tk-intro">What I paid attention to about the people at the end of the system.</p>${cards(T.consumer, 'Observation', 'Implication')}` },
+    { t: 'Insights', html: `<div class="ins-grid">${T.insights.map(([i, e, s], k) => `<article class="ins"><span class="ins-n">${String(k + 1).padStart(2, '0')}</span><p class="ins-t">${esc(i)}</p><dl><dt>Evidence</dt><dd>${esc(e)}</dd><dt>So what</dt><dd>${esc(s)}</dd></dl></article>`).join('')}</div>` },
+    { t: 'Strategy planning', html: `<p class="tk-intro">How the thinking was sequenced into a plan. Status shows what happened and what is still proposed.</p><ol class="road">${T.strategy.map(([w, t, d, tg]) => `<li class="road-${tg}"><span class="rw t-label">${esc(w)}</span><span class="rd" aria-hidden="true"></span><div><strong>${esc(t)}</strong><p class="t-sm ink2">${esc(d)}</p>${tag(tg)}</div></li>`).join('')}</ol>` },
+    { t: 'Solutions', html: `<div class="sol"><div class="sol-h t-label"><span>Problem</span><span></span><span>Solution</span><span>Status</span></div>${T.solutions.map(([p, s, tg]) => `<div class="sol-r"><span>${esc(p)}</span><span class="sol-a" aria-hidden="true">→</span><strong>${esc(s)}</strong><span>${tag(tg)}</span></div>`).join('')}</div>` }
+  ];
+  return `<div class="standout"><div><span class="t-label">How I stood out · ${esc(T.lens)}</span><p class="standout-t">${esc(T.standout)}</p></div><div class="standout-pts">${T.points.map(([a, b], i) => `<div><span class="t-label" style="color:var(--blue-ink)">0${i + 1}</span><h4 class="t-h4">${esc(a)}</h4><p class="t-sm ink2">${esc(b)}</p></div>`).join('')}</div></div>${tabs(panels, 'How I thought')}`;
+}
+function standoutStrip(T, key, idx) {
+  return `<div class="cs-standout"><div><span class="t-label">My unique contribution</span><p>${esc(T.standout)}</p></div><button class="btn btn-primary" data-scrollto="${key}-${idx}">See how I thought <span class="arrow" aria-hidden="true">↓</span></button></div>`;
+}
+
+/* =========================================================
+   SYSTEM MAP PAGE DATA
+   ========================================================= */
+D.sm_flow = {
+  title: 'The master workflow · every stage, every tool, every project',
+  steps: [
+    { t: 'Discover', b: 'Get close to the real situation before forming opinions.', meta: { 'Techniques': 'On-site observation, organisational mapping, environment mapping', 'Maps produced': 'Ecosystem mind map, stakeholder map', 'Unilever': 'Month 1 on the factory premises', 'CLIQUE': 'Spotting Taco Tango as an operating asset', 'Hydra': 'Finding where active consumers spend their day' } },
+    { t: 'Diagnose', b: 'Separate symptoms from root causes, and observations from hypotheses.', meta: { 'Techniques': 'Mechanism analysis, hypothesis framing, decision-maker research', 'Maps produced': 'Problem tree, causal diagram, power–interest map', 'Unilever': 'Tracing defects back to caps, pumps and machines', 'CLIQUE': 'Why food is anonymous; what stops creators', 'Hydra': 'Who actually controls the shelf' } },
+    { t: 'Design', b: 'Shape a response: a mechanism, a model, a position or a service.', meta: { 'Techniques': 'Journey mapping, service blueprinting, business model canvas', 'Maps produced': 'Creator & consumer journeys, blueprint, BMC', 'Unilever': 'Vacuum dispensing concept', 'CLIQUE': 'Three-pillar ecosystem', 'Hydra': 'Brand positioning and product roles' } },
+    { t: 'Structure', b: 'Turn the idea into processes, roles and resources.', meta: { 'Techniques': 'Process mapping, systems tracing, phasing', 'Maps produced': 'Roadmaps, B2B framework', 'Unilever': 'Standardisation and machine set-ups', 'CLIQUE': 'Phased plan from counter to platform', 'Hydra': 'Outreach system from research to conversion' } },
+    { t: 'Connect', b: 'Bring in the people and institutions the plan depends on.', meta: { 'Techniques': 'Personalised outreach, persuasive communication', 'Maps produced': 'Stakeholder maps, B2B communication by audience', 'Unilever': 'Linking design, production and quality functions', 'CLIQUE': 'Approaching universities, malls, public premises', 'Hydra': 'Approaching institutional decision-makers' } },
+    { t: 'Execute', b: 'Make it real in a way that can be observed.', meta: { 'Techniques': 'Placement, pilots, campaigns', 'Maps produced': 'Lead funnel, CRM tracker', 'Unilever': 'Recommendations shared within the internship', 'CLIQUE': 'Taco Tango counter at Nirma University', 'Hydra': 'Placements at Nirma and a few other universities' } },
+    { t: 'Improve', b: 'Listen, compare with intent, refine.', meta: { 'Techniques': 'Surveys, seller feedback, consumer signals', 'Maps produced': 'Performance framework', 'Unilever': 'Bottle-emptying duration as a possible signal', 'CLIQUE': 'Creator feedback loop (proposed)', 'Hydra': 'Recommendations from surveys and sellers' } }
+  ]
+};
+
+D.sm_tech = {
+  title: 'Research technique × project',
+  cols: ['Unilever', 'CLIQUE', 'Hydra'],
+  links: ['#/work/unilever/2', '#/work/clique/2', '#/work/hydra/2'],
+  rows: [
+    { name: 'On-site observation', cells: [{ l: 'l2', e: 'Walked factory premises and manufacturing environments in month one.' }, { l: 'l1', e: 'The operating Taco Tango counter at Nirma University.' }, { l: 'l1', e: 'Campus environments where the target consumer spends time.' }] },
+    { name: 'Organisational & stakeholder mapping', cells: [{ l: 'l2', e: 'Hierarchy and functions involved in production.' }, { l: 'l2', e: 'Everyone the ecosystem depends on, and what each gives and gets.' }, { l: 'l1', e: 'Who shapes a campus placement, and how much.' }] },
+    { name: 'Mechanism & root-cause analysis', cells: [{ l: 'l2', e: 'Grooved caps, spring pumps, labour and machinery behind defects.' }, null, null] },
+    { name: 'Hypothesis framing', cells: [{ l: 'l2', e: 'Temperature effect; emptying duration as a repurchase signal.' }, { l: 'l1', e: 'Story-led food as a reason to buy, to be validated.' }, null] },
+    { name: 'Journey & service mapping', cells: [{ l: 'l1', e: 'Where packaging touches the consumer journey (general FMCG).' }, { l: 'lc', e: 'Creator and consumer journeys, five-layer service blueprint.' }, null] },
+    { name: 'Competitive & category mapping', cells: [null, { l: 'lc', e: 'Food formats placed on support vs visibility.' }, { l: 'l1', e: 'Positioning against what operators already stock.' }] },
+    { name: 'Surveys', cells: [null, null, { l: 'l2', e: 'Conducted consumer surveys.' }] },
+    { name: 'Seller & field feedback', cells: [null, { l: 'l1', e: 'Conversations with institutional decision-makers.' }, { l: 'l2', e: 'Regular communication with sellers; feedback collected.' }] },
+    { name: 'Decision-maker research', cells: [null, { l: 'l2', e: 'Universities, malls and public premises approached directly.' }, { l: 'l2', e: 'Identifying who decides before each approach.' }] }
+  ]
+};
+
+D.sm_lib = {
+  items: [
+    ['Two-month timeline', 'Timeline', 'Unilever', 'How the internship moved from understanding to problem-solving.', '#/work/unilever/0'],
+    ['Research architecture', 'Research', 'Unilever', 'Each research step and what kind of evidence it produced.', '#/work/unilever/2'],
+    ['Mechanism explorer', 'Research', 'Unilever', 'Caps, pumps, temperature, vacuum, labour, machinery, standardisation.', '#/work/unilever/3'],
+    ['Problem tree', 'Systems', 'Unilever', 'Root causes → problems → consequences → opportunities.', '#/work/unilever/4'],
+    ['Consumer journey', 'Customer', 'Unilever', 'Where packaging and dispensing touch the experience.', '#/work/unilever/5'],
+    ['FMCG ecosystem mind map', 'Systems', 'Unilever', 'Everything a personal-care product connects to.', '#/work/unilever/6'],
+    ['Causal relationship diagram', 'Systems', 'Unilever', 'How positioning, perception, distribution and visibility build demand.', '#/work/unilever/6'],
+    ['Stakeholder ecosystem map', 'Systems', 'CLIQUE', 'Who CLIQUE depends on and what each gives and gets.', '#/work/clique/2'],
+    ['Competitive positioning matrix', 'Strategy', 'CLIQUE', 'Support vs visibility across food formats.', '#/work/clique/3'],
+    ['SWOT', 'Strategy', 'CLIQUE', 'Strengths, weaknesses, opportunities, threats.', '#/work/clique/4'],
+    ['Revenue model explorer', 'Strategy', 'CLIQUE', 'Who pays, for what, and what must be true first.', '#/work/clique/5'],
+    ['Ecosystem mind map', 'Systems', 'CLIQUE', 'The operating brand and the three proposed pillars.', '#/work/clique/6'],
+    ['Creator & consumer journeys', 'Customer', 'CLIQUE', 'Both sides of the platform, step by step.', '#/work/clique/6'],
+    ['Business Model Canvas', 'Strategy', 'CLIQUE', 'The proposed model in nine blocks.', '#/work/clique/6'],
+    ['Service blueprint', 'Customer', 'CLIQUE', 'Five layers from physical evidence to support processes.', '#/work/clique/6'],
+    ['Phased roadmap', 'Strategy', 'CLIQUE', 'From one counter to a creator platform.', '#/work/clique/8'],
+    ['Power–interest map', 'Sales', 'Hydra', 'Who shapes a campus placement.', '#/work/hydra/3'],
+    ['B2B communication by audience', 'Sales', 'Hydra', 'What each decision-maker cares about.', '#/work/hydra/4'],
+    ['Objection handler', 'Sales', 'Hydra', 'Sales psychology behind common objections.', '#/work/hydra/4'],
+    ['Brand strategy explorer', 'Strategy', 'Hydra', 'Positioning, personality, promise, tagline, placement.', '#/work/hydra/5'],
+    ['Strategy-to-shelf system', 'Systems', 'Hydra', 'Brand strategy → placement → feedback → refinement.', '#/work/hydra/6'],
+    ['B2B framework & funnel', 'Sales', 'Hydra', 'Ten-step outreach process and lead funnel.', '#/work/hydra/6'],
+    ['CRM dashboard & KPIs', 'Sales', 'Hydra', 'A working tracker and editable performance framework.', '#/work/hydra/9']
+  ]
+};
+
+D.sm_insights = {
+  items: [
+    ['A packaging defect is a system symptom.', 'Systems', 'Unilever'],
+    ['Simplify upstream and the benefit compounds downstream.', 'Operations', 'Unilever'],
+    ['The factory floor holds commercial signals.', 'Consumers', 'Unilever'],
+    ['An operating brand is the strongest argument for an ecosystem.', 'Ventures', 'CLIQUE'],
+    ['Creators lack two things, not one: infrastructure and identity.', 'Consumers', 'CLIQUE'],
+    ['Venues are the gatekeepers.', 'Markets', 'CLIQUE'],
+    ['Every campus sale has two customers.', 'Markets', 'Hydra'],
+    ['Distribution is part of the brand.', 'Markets', 'Hydra'],
+    ['Sellers are the best field researchers.', 'Consumers', 'Hydra'],
+    ['Don\'t claim what you didn\'t measure.', 'Ventures', 'Hydra']
+  ]
+};

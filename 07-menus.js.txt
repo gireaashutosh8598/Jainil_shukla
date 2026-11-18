@@ -1,0 +1,178 @@
+/* =========================================================
+   "LET'S TALK" AND "SEE THE WORK" MENUS
+   Slide-in panels opened by any element with data-open="talk"
+   or data-open="work". The underlying links still point to the
+   Contact and Work pages, so they also work without the panels.
+   ========================================================= */
+const WORKX = [
+  { key: 'unilever', sk: 'uni', n: '01', org: 'Unilever', role: 'Project internship · 2 months', title: 'Understanding the system. Identifying the problem. Exploring solutions.',
+    line: 'Traced defective shampoo and body-lotion bottles through caps, pumps, machinery and labour to the consumer.',
+    did: ['Learned the factory, hierarchy and functions in month one', 'Explored cap and spring-pump mechanisms behind defects', 'Proposed a spring-free vacuum dispensing concept', 'Linked bottle-emptying duration to repurchase (hypothesis)'],
+    tags: [['done'], ['hyp'], ['concept']] },
+  { key: 'clique', sk: 'clq', n: '02', org: 'CLIQUE FOODOVATION', role: 'Co-founder', title: 'Building a creator-first food entrepreneurship ecosystem.',
+    line: 'From an operating Taco Tango counter to a proposed ecosystem where every dish has a visible creator.',
+    did: ['Approached Taco Tango\'s founder and established the collaboration', 'Co-created CLIQUE FOODOVATION', 'Approached universities, malls and public-premise decision-makers', 'Designed the three-pillar ecosystem, journeys and blueprint'],
+    tags: [['done', 'Taco Tango: operating'], ['concept', 'Ecosystem: proposed']] },
+  { key: 'hydra', sk: 'hyd', n: '03', org: 'Hydra Enterprise', role: 'Chief Marketing Officer', title: 'From brand strategy to campus shelves.',
+    line: 'Brand positioning for a three-product beverage portfolio, and the outreach that put it on university shelves.',
+    did: ['Brand positioning, personality and product roles', 'Personally approached institutions and decision-makers', 'Helped secure placements at Nirma and a few other universities', 'Ran surveys and collected seller feedback'],
+    tags: [['done'], ['illus', 'Illustrative tools']] }
+];
+
+function workMenuHTML() {
+  return WORKX.map(w => `
+    <article class="wm-case">
+      <a class="wm-top" href="#/work/${w.key}">
+        <span class="wm-n">${w.n}</span>
+        <span class="wm-h"><span class="t-label">${esc(w.org)} · ${esc(w.role)}</span><strong>${esc(w.title)}</strong></span>
+        <span class="wm-go" aria-hidden="true">→</span>
+      </a>
+      <p class="wm-line">${esc(w.line)}</p>
+      <div class="legend">${w.tags.map(t => tag(...t)).join('')}</div>
+      <details class="wm-more">
+        <summary>Contributions, standout and all sections</summary>
+        <div class="wm-body">
+          <div><span class="t-label">What Jainil did</span><ul class="list-dash t-sm">${w.did.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div>
+          <div><span class="t-label">How he stood out</span><p class="t-sm">${esc(THINK[w.sk].standout)}</p></div>
+          <div class="wm-secs"><span class="t-label">Jump to a section</span><div class="wm-sec-grid">${CS_STEPS.map((s, i) => `<a href="#/work/${w.key}/${i}"><span>${String(i + 1).padStart(2, '0')}</span>${s}</a>`).join('')}</div></div>
+        </div>
+      </details>
+    </article>`).join('') + `
+    <div class="wm-ventures">
+      <a href="#/draftdigger" class="wm-v"><span class="t-label">Venture · in development</span><strong>DraftDigger</strong><span class="t-sm">Strategy &amp; execution partner for founders →</span></a>
+      <a href="#/about/5" class="wm-v"><span class="t-label">Next · upcoming</span><strong>Britannia Industries</strong><span class="t-sm">Consumer Market Insights internship →</span></a>
+      <a href="#/system-map" class="wm-v"><span class="t-label">Across all work</span><strong>The System Map</strong><span class="t-sm">Workflows, techniques, maps, insights →</span></a>
+    </div>`;
+}
+
+function talkMenuHTML() {
+  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL}&su=${encodeURIComponent("Let's talk")}`;
+  return `
+    <div class="tm-mail">
+      <span class="t-label">Email Jainil</span>
+      <a class="tm-email" href="mailto:${EMAIL}?subject=${encodeURIComponent("Let's talk")}">${EMAIL}</a>
+      <div class="row" style="gap:8px">
+        <a class="btn btn-primary btn-sm" href="mailto:${EMAIL}?subject=${encodeURIComponent("Let's talk")}">Write an email</a>
+        <a class="btn btn-secondary btn-sm" href="${gmail}" target="_blank" rel="noopener">Open in Gmail ↗</a>
+        <button class="btn btn-secondary btn-sm" type="button" data-copy-email>Copy email</button>
+        <span class="t-xs muted" data-copy-msg aria-live="polite"></span>
+      </div>
+    </div>
+    <div><span class="t-label">Or start with what brings you here</span>
+      <div class="tm-ints">${INTENTS.map((it, i) => `<a href="#/contact/${i}"><span class="t-label" style="color:var(--blue-ink)">0${i + 1}</span><strong>${it[0]}</strong><span>${it[2]}</span><span class="wm-go" aria-hidden="true">→</span></a>`).join('')}</div>
+    </div>
+    <div class="tm-foot">
+      <button class="btn btn-secondary" type="button" data-openbot-menu>Ask Assistant of JV</button>
+      <a class="btn btn-ink" href="#/contact">Open the contact page →</a>
+    </div>
+    <p class="t-xs muted" style="margin:0">Based in Bangalore, Karnataka, India.</p>`;
+}
+
+
+function thinkMenuHTML() {
+  const forces = D.eco.nodes.filter(n => n.id !== 'core');
+  const caseLink = { 'Unilever': '#/work/unilever/8', 'CLIQUE': '#/work/clique/8', 'Hydra': '#/work/hydra/8' };
+  const byType = {}; D.sm_lib.items.forEach(([n, t, p, d, h]) => (byType[t] = byType[t] || []).push([n, p, h]));
+  const tech = D.sm_tech.rows;
+  return `
+    <p class="tk-quote">Business is not a collection of activities. <em>It is a system of connections.</em></p>
+    <nav class="tk-nav" aria-label="Sections in this panel">${[['tk-forces', 'Six forces'], ['tk-stages', 'Seven stages'], ['tk-habits', 'Five habits'], ['tk-tech', 'Research techniques'], ['tk-maps', 'All maps'], ['tk-ins', 'Insights']].map(([id, t]) => `<button type="button" data-djump="${id}">${t}</button>`).join('')}</nav>
+
+    <section id="tk-forces" class="tk-sec"><h3 class="tk-h"><span>01</span>The six forces I map in every business</h3>
+      <div class="tk-forces">${forces.map(f => { const seen = [].concat(f.tags[0])[1] || ''; const href = /CLIQUE/.test(seen) ? '#/work/clique/8' : /Hydra/.test(seen) ? '#/work/hydra/8' : /Unilever/.test(seen) ? '#/work/unilever/8' : '#/thinking'; return `<a href="${href}" class="tk-force"><strong>${esc(f.label)}</strong><span>${f.body}</span>${seen ? `<em>${esc(seen)} →</em>` : ''}</a>`; }).join('')}</div>
+    </section>
+
+    <section id="tk-stages" class="tk-sec"><h3 class="tk-h"><span>02</span>The seven-stage framework, with proof from each project</h3>
+      ${D.framework.steps.map((st, i) => { const ev = D.sm_flow.steps[i].meta; return `<details class="tk-stage"${i === 0 ? ' open' : ''}><summary><span class="tk-sn">${String(i + 1).padStart(2, '0')}</span><strong>${esc(st.t)}</strong><span class="tk-sq">${esc(st.meta['Key question'])}</span></summary>
+        <div class="tk-sb"><p>${st.b}</p>
+          <dl class="kv"><dt>Methods</dt><dd>${esc(ev['Techniques'])}</dd><dt>Maps</dt><dd>${esc(ev['Maps produced'])}</dd><dt>Output</dt><dd>${esc(st.meta['Output'])}</dd></dl>
+          <div class="tk-ev">${['Unilever', 'CLIQUE', 'Hydra'].map(p => `<a href="${caseLink[p]}"><span class="lib-p lib-${p.toLowerCase()}">${p}</span><span>${esc(ev[p])}</span></a>`).join('')}</div>
+        </div></details>`; }).join('')}
+    </section>
+
+    <section id="tk-habits" class="tk-sec"><h3 class="tk-h"><span>03</span>Five habits that show up every time</h3>
+      <ol class="tk-habits">${HABITS.map(([a, b2]) => `<li><strong>${a}</strong><span>${b2}</span></li>`).join('')}</ol>
+    </section>
+
+    <section id="tk-tech" class="tk-sec"><h3 class="tk-h"><span>04</span>Research techniques and where I used them</h3>
+      <div class="tk-tech">${tech.map(r => `<div class="tk-tr"><strong>${esc(r.name)}</strong><span class="tk-dots">${['Unilever', 'CLIQUE', 'Hydra'].map((p, i) => r.cells[i] ? `<a href="${D.sm_tech.links[i]}" class="lib-p lib-${p.toLowerCase()}" title="${esc(r.cells[i].e)}">${p}</a>` : '').join('')}</span></div>`).join('')}</div>
+    </section>
+
+    <section id="tk-maps" class="tk-sec"><h3 class="tk-h"><span>05</span>Every map I built (${D.sm_lib.items.length}), one click away</h3>
+      ${Object.entries(byType).map(([t, list]) => `<div class="tk-mg"><span class="t-label">${esc(t)}</span><div class="tk-ml">${list.map(([n, p, h]) => `<a href="${h}">${esc(n)} <small>${esc(p)}</small></a>`).join('')}</div></div>`).join('')}
+    </section>
+
+    <section id="tk-ins" class="tk-sec"><h3 class="tk-h"><span>06</span>What the work taught me</h3>
+      <div class="tk-ins">${D.sm_insights.items.map(([i, t, p]) => `<a href="${caseLink[p]}"><span class="lib-p lib-${p.toLowerCase()}">${p}</span><span>${esc(i)}</span></a>`).join('')}</div>
+    </section>
+
+    <div class="tm-foot"><a class="btn btn-ink" href="#/thinking">Open My Thinking →</a><a class="btn btn-primary" href="#/system-map">Open the full System Map →</a></div>`;
+}
+
+(function () {
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `
+    <div class="drawer-bg" data-drawer-close hidden></div>
+    <aside class="drawer" id="drawer-talk" role="dialog" aria-modal="true" aria-labelledby="dt-talk" hidden>
+      <header class="drawer-h"><div><span class="t-label">Let's talk</span><h2 id="dt-talk">Got something in mind?</h2></div><button class="drawer-x" type="button" data-drawer-close aria-label="Close">×</button></header>
+      <div class="drawer-b">${talkMenuHTML()}</div>
+    </aside>
+    <aside class="drawer drawer-wide" id="drawer-story" role="dialog" aria-modal="true" aria-labelledby="dt-story" hidden>
+      <header class="drawer-h"><div><span class="t-label">The full story</span><h2 id="dt-story">From stickers on wrappers to systems.</h2></div><button class="drawer-x" type="button" data-drawer-close aria-label="Close">×</button></header>
+      <div class="drawer-b">${W('storyboard', 'storyboard')}<div class="tm-foot"><a class="btn btn-ink" href="#/about">Read the About page →</a><a class="btn btn-secondary" href="#/about/0">Open the timeline</a></div></div>
+    </aside>
+ <aside class="drawer drawer-wide" id="drawer-think" role="dialog" aria-modal="true" aria-labelledby="dt-think" hidden>
+      <header class="drawer-h"><div><span class="t-label">How I think</span><h2 id="dt-think">Designing the way business works.</h2></div><button class="drawer-x" type="button" data-drawer-close aria-label="Close">×</button></header>
+      <div class="drawer-b">${thinkMenuHTML()}</div>
+    </aside>
+    <aside class="drawer drawer-wide" id="drawer-work" role="dialog" aria-modal="true" aria-labelledby="dt-work" hidden>
+      <header class="drawer-h"><div><span class="t-label">See the work</span><h2 id="dt-work">Three projects. One way of thinking.</h2></div><button class="drawer-x" type="button" data-drawer-close aria-label="Close">×</button></header>
+      <div class="drawer-b">${workMenuHTML()}<a class="btn btn-ink" href="#/work" style="align-self:flex-start">Open the full Work page →</a></div>
+    </aside>`;
+  document.body.appendChild(wrap);
+  mountWidgets($('#drawer-story', wrap));
+  const bg = $('.drawer-bg', wrap);
+  let open = null, opener = null;
+  function show(name, from) {
+    hide(true);
+    const d = $('#drawer-' + name, wrap); if (!d) return;
+    opener = from || document.activeElement; open = d;
+    bg.hidden = false; d.hidden = false; document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => { bg.classList.add('on'); d.classList.add('on'); });
+    setTimeout(() => { const f = $('.drawer-x', d); if (f) f.focus(); }, 60);
+  }
+  function hide(silent) {
+    if (!open) return;
+    const d = open; open = null;
+    d.classList.remove('on'); bg.classList.remove('on');
+    const done = () => { d.hidden = true; bg.hidden = true; };
+    if (RM.matches || silent) done(); else setTimeout(done, 280);
+    if (!mnav.classList.contains('open')) document.body.style.overflow = '';
+    if (!silent && opener && opener.focus) opener.focus({ preventScroll: true });
+  }
+  window.openDrawer = show; window.closeDrawer = hide;
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-open]');
+    if (t && !e.metaKey && !e.ctrlKey && !e.shiftKey) { e.preventDefault(); closeMenu(); show(t.dataset.open, t); return; }
+    if (e.target.closest('[data-drawer-close]')) { hide(); return; }
+    if (open && e.target.closest('.drawer a[href^="#"]')) hide(true);
+  });
+  document.addEventListener('keydown', e => {
+    if (!open) return;
+    if (e.key === 'Escape') { hide(); return; }
+    if (e.key === 'Tab') {
+      const f = $$('a[href],button:not([disabled]),summary', open).filter(x => x.offsetParent !== null);
+      if (!f.length) return; const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  $$('[data-djump]', wrap).forEach(b => b.addEventListener('click', () => { const t = document.getElementById(b.dataset.djump); const body = t.closest('.drawer-b'); body.scrollTo({ top: t.offsetTop - body.offsetTop - 12, behavior: RM.matches ? 'auto' : 'smooth' }); }));
+  $('[data-copy-email]', wrap).addEventListener('click', async () => {
+    const m = $('[data-copy-msg]', wrap);
+    try { await navigator.clipboard.writeText(EMAIL); m.textContent = 'Copied'; } catch (_) { m.textContent = EMAIL; }
+    setTimeout(() => m.textContent = '', 2500);
+  });
+  $('[data-openbot-menu]', wrap).addEventListener('click', () => { hide(true); const l = document.querySelector('.jv-launch'); if (l && l.getAttribute('aria-expanded') !== 'true') l.click(); });
+  window.addEventListener('hashchange', () => hide(true));
+})();

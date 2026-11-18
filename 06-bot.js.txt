@@ -1,0 +1,126 @@
+/* =========================================================
+   ASSISTANT OF JV — guided chat that introduces Jainil
+   Answers are written from this portfolio's content and matched
+   to the visitor's question by keywords. No external service.
+   ========================================================= */
+(function () {
+  const L = (href, label) => ({ href, label });
+  const A = {
+    intro: { k: ['who', 'jainil', 'introduce', 'about him', 'yourself', 'tell me', 'jv', 'shukla', 'he is', 'summary', 'short'],
+      t: 'Jainil Shukla is a <b>Business Systems Designer and Business Strategist</b> based in Bangalore. In short: he studies how a business really works, finds the opportunity inside an existing market, and connects the people, resources and systems needed to act on it.',
+      l: [L('#/about', 'About Jainil'), L('#/work', 'See his work')] },
+    what: { k: ['what does', 'what do', 'do ', 'does', 'job', 'role', 'work as', 'services', 'offer', 'help', 'designer', 'strategist', 'business systems'],
+      t: 'He works on the <b>business side first</b>: market research, consumer insights, strategy, business development and venture building. Design is how he thinks, not what he sells. He maps the system (people, market, strategy, operations, communication, growth) and designs what should change.',
+      l: [L('#/capabilities', 'Capabilities'), L('#/thinking', 'How he thinks')] },
+    invade: { k: ['invade', 'invent', 'philosophy', 'motto', 'tagline', 'believe', 'belief'],
+      t: '"<b>I don\'t invent, I invade.</b>" He doesn\'t start by inventing new markets. He looks for existing markets, real consumer needs, overlooked gaps and the right way in: a shelf, a counter, a decision-maker.',
+      l: [L('#/', 'See the idea on the home page')] },
+    unilever: { k: ['unilever', 'internship', 'factory', 'fmcg', 'bottle', 'dove', 'shampoo', 'lotion', 'packaging', 'manufactur'],
+      t: '<b>Unilever, two-month project internship.</b> Month one: learning the factory, hierarchy and functions. Month two: exploring defective shampoo and body-lotion bottles. He traced the problem through caps, pumps, machinery and labour to the consumer, and proposed a spring-free vacuum dispensing concept. No prototypes or savings are claimed.',
+      l: [L('#/work/unilever', 'Open the case study'), L('#/work/unilever/8', 'How he thought')] },
+    clique: { k: ['clique', 'foodovation', 'taco', 'tango', 'food', 'creator', 'chef', 'kitchen', 'co-found', 'cofound'],
+      t: '<b>CLIQUE FOODOVATION, co-founder.</b> Taco Tango was an independent Mexican-food venture founded by someone else. Jainil approached its founder and they created CLIQUE together. Taco Tango runs a counter at Nirma University. CLIQUE\'s bigger idea, a creator-first food ecosystem, is still a proposal.',
+      l: [L('#/work/clique', 'Open the case study'), L('#/work/clique/8', 'How he thought')] },
+    hydra: { k: ['hydra', 'cmo', 'marketing', 'beverage', 'drink', 'water', 'chamkila', 'mojito', 'campus', 'placement', 'sales'],
+      t: '<b>Hydra Enterprise, CMO.</b> He shaped brand positioning for Hydra Zero Sugar Water, Chamkila and Mojito, then personally approached institutions and helped secure placements at Nirma University and a few other universities. He ran surveys and collected seller feedback.',
+      l: [L('#/work/hydra', 'Open the case study'), L('#/work/hydra/8', 'How he thought')] },
+    dd: { k: ['draftdigger', 'draft', 'digger', 'consult', 'agency', 'founder', 'startup', 'venture', 'hire him for'],
+      t: '<b>DraftDigger</b> is Jainil\'s strategy and execution partner for founders, now in development. "Digging to the roots. Your vision. Our strategy. Shared growth." It starts with food and beverage founders.',
+      l: [L('#/draftdigger', 'Meet DraftDigger')] },
+    brit: { k: ['britannia', 'next', 'upcoming', 'cmi'],
+      t: 'Next up: an upcoming <b>Consumer Market Insights (CMI) internship at Britannia Industries</b>.',
+      l: [L('#/about/5', 'See the journey')] },
+    skills: { k: ['skill', 'capabilit', 'strength', 'good at', 'expert', 'speciali'],
+      t: 'Six capabilities, each backed by a project: <b>Business Strategy, Business Systems Design, Research & Consumer Insights, Brand & Market Strategy, Business Development and Entrepreneurship</b>.',
+      l: [L('#/capabilities', 'See the evidence')] },
+    research: { k: ['research', 'insight', 'consumer', 'survey', 'behaviour', 'behavior', 'technique', 'method'],
+      t: 'His research mixes <b>on-site observation, stakeholder mapping, root-cause analysis, hypothesis framing, surveys and seller feedback</b>. He keeps hypotheses labelled as hypotheses, and every insight links back to evidence.',
+      l: [L('#/system-map', 'Research techniques & insights'), L('#/work/unilever/8', 'See it in a case study')] },
+    think: { k: ['think', 'approach', 'process', 'framework', 'method', 'system map', 'workflow', 'how does he', 'pattern'],
+      t: 'His framework: <b>Discover → Diagnose → Design → Structure → Connect → Execute → Improve</b>. Business is not a collection of activities, it is a system of connections.',
+      l: [L('#/system-map', 'Open the system map'), L('#/thinking', 'My Thinking')] },
+    edu: { k: ['study', 'studied', 'education', 'nirma', 'college', 'degree', 'university', 'communication design'],
+      t: 'He studied the <b>Bachelor of Communication Design at Nirma University, Ahmedabad</b>. It built his human-centred thinking, storytelling, communication and problem-solving.',
+      l: [L('#/about', 'About')] },
+    journey: { k: ['journey', 'start', 'began', 'school', 'grade', 'regal', 'cafe', 'café', 'story', 'history'],
+      t: 'It started in <b>Grade 8</b>, repackaging chocolates with stickers. In Grade 9 he walked into local cafés with suggestions. In first year of college he ran Regal Vibes, a festival drinks stall that wasn\'t profitable. Then an independent café experiment, Nirma, and today\'s ventures.',
+      l: [L('#/about/0', 'Walk the journey')] },
+    contact: { k: ['contact', 'email', 'mail', 'reach', 'hire', 'talk', 'connect', 'meet', 'call', 'collab'],
+      t: 'The best way is email: <a class="link" href="mailto:jainilvshukla@gmail.com">jainilvshukla@gmail.com</a>. Or use the contact form.',
+      l: [L('#/contact', "Let's talk")] },
+    where: { k: ['where', 'location', 'based', 'city', 'bangalore', 'bengaluru', 'india'],
+      t: 'He\'s based in <b>Bangalore, Karnataka, India</b>.',
+      l: [L('#/contact', 'Contact')] },
+    hi: { k: ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good evening', 'yo'],
+      t: 'Hi! Ask me anything about Jainil: what he does, his case studies, how he thinks, or how to reach him.', l: [] },
+    thanks: { k: ['thank', 'thanks', 'great', 'cool', 'nice', 'awesome', 'ok'],
+      t: 'Happy to help. Anything else you\'d like to know about Jainil?', l: [] }
+  };
+  const CHIPS = [['Who is Jainil?', 'intro'], ['What does he do?', 'what'], ['I don\'t invent, I invade?', 'invade'], ['Unilever', 'unilever'], ['CLIQUE', 'clique'], ['Hydra', 'hydra'], ['DraftDigger', 'dd'], ['How does he think?', 'think'], ['Contact', 'contact']];
+
+  function match(q) {
+    const s = ' ' + q.toLowerCase().replace(/[^\w\s'&-]/g, ' ') + ' ';
+    let best = null, score = 0;
+    for (const [id, a] of Object.entries(A)) {
+      let sc = 0;
+      a.k.forEach(k => { if (k.length <= 3 ? new RegExp('\\b' + k.trim() + '\\b').test(s) : s.includes(k)) sc += k.length > 4 ? 2 : 1; });
+      if (['hi', 'thanks', 'intro', 'what'].includes(id)) sc *= .6;
+      if (sc > score) { score = sc; best = id; }
+    }
+    return best;
+  }
+
+  const mark = document.querySelector('.brand-svg') ? document.querySelector('.brand-svg').outerHTML : '';
+  const root = document.createElement('div');
+  root.className = 'jvbot';
+  root.innerHTML = `
+    <button class="jv-launch" type="button" aria-expanded="false" aria-controls="jvPanel"><span class="jv-ava" aria-hidden="true">${mark}</span><span class="jv-launch-t">Ask <b>Assistant of JV</b></span></button>
+    <section class="jv-panel" id="jvPanel" role="dialog" aria-modal="false" aria-labelledby="jvTitle" hidden>
+      <header class="jv-head"><span class="jv-ava" aria-hidden="true">${mark}</span><div><h2 id="jvTitle">Assistant of JV</h2><p><span class="jv-dot" aria-hidden="true"></span>Introduces Jainil and his work</p></div><button class="jv-x" type="button" aria-label="Close assistant">×</button></header>
+      <div class="jv-log" role="log" aria-live="polite" aria-label="Conversation"></div>
+      <div class="jv-chips" role="group" aria-label="Suggested questions">${CHIPS.map(([t, id]) => `<button type="button" data-ask="${id}">${t}</button>`).join('')}</div>
+      <form class="jv-form" autocomplete="off"><label class="sr-only" for="jvIn">Ask about Jainil</label><input id="jvIn" class="jv-in" placeholder="Ask about Jainil's work…" maxlength="200"><button class="jv-send" type="submit" aria-label="Send">→</button></form>
+      <p class="jv-foot">Answers are drawn from this portfolio.</p>
+    </section>`;
+  document.body.appendChild(root);
+  const launch = $('.jv-launch', root), panel = $('.jv-panel', root), log = $('.jv-log', root), form = $('.jv-form', root), input = $('#jvIn', root);
+  let greeted = false, busy = false;
+
+  function add(html, who, links) {
+    const m = document.createElement('div'); m.className = 'jv-msg ' + who;
+    m.innerHTML = `<div class="jv-bub">${html}</div>${links && links.length ? `<div class="jv-links">${links.map(l => `<a href="${l.href}" class="jv-link">${esc(l.label)} <span aria-hidden="true">→</span></a>`).join('')}</div>` : ''}`;
+    log.appendChild(m); log.scrollTop = log.scrollHeight;
+    $$('.jv-link', m).forEach(a => a.addEventListener('click', () => { if (innerWidth < 640) close(); }));
+  }
+  function reply(id, delay) {
+    busy = true;
+    const t = document.createElement('div'); t.className = 'jv-msg bot jv-typing'; t.innerHTML = '<div class="jv-bub"><i></i><i></i><i></i></div>';
+    log.appendChild(t); log.scrollTop = log.scrollHeight;
+    setTimeout(() => {
+      t.remove(); busy = false;
+      if (id && A[id]) add(A[id].t, 'bot', A[id].l);
+      else add('I only know about Jainil and his work. Try asking what he does, about Unilever, CLIQUE, Hydra or DraftDigger, or how to reach him.', 'bot', [L('#/work', 'See all work')]);
+    }, RM.matches ? 80 : (delay || 650));
+  }
+  function ask(text, id) {
+    if (busy) return;
+    add(esc(text), 'me'); reply(id || match(text));
+  }
+  function open() {
+    panel.hidden = false; launch.setAttribute('aria-expanded', 'true'); root.classList.add('open');
+    if (!greeted) {
+      greeted = true;
+      add('Hi, I\'m the <b>Assistant of JV</b>.', 'bot');
+      setTimeout(() => add(A.intro.t + ' What would you like to know?', 'bot', A.intro.l), RM.matches ? 0 : 500);
+    }
+    setTimeout(() => input.focus({ preventScroll: true }), 60);
+  }
+  function close() { panel.hidden = true; launch.setAttribute('aria-expanded', 'false'); root.classList.remove('open'); }
+  launch.addEventListener('click', () => panel.hidden ? open() : close());
+  $('.jv-x', root).addEventListener('click', () => { close(); launch.focus(); });
+  panel.addEventListener('keydown', e => { if (e.key === 'Escape') { close(); launch.focus(); } });
+  form.addEventListener('submit', e => { e.preventDefault(); const v = input.value.trim(); if (!v) return; input.value = ''; ask(v); });
+  $$('[data-ask]', root).forEach(b => b.addEventListener('click', () => ask(b.textContent, b.dataset.ask)));
+  // hide launcher while the mobile menu is open
+  new MutationObserver(() => root.classList.toggle('menu-open', mnav.classList.contains('open'))).observe(mnav, { attributes: true, attributeFilter: ['class'] });
+})();

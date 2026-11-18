@@ -1,0 +1,821 @@
+/* =========================================================
+   CORE UTILITIES
+   ========================================================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const TAGS = {
+  done: 'Completed work', research: 'Research & observation', rec: 'Recommendation', concept: 'Conceptual proposal',
+  ongoing: 'In development', upcoming: 'Upcoming', ambition: 'Future ambition', illus: 'Illustrative', hyp: 'Unverified hypothesis'
+};
+const tag = (k, label) => `<span class="tag tag-${k}">${esc(label || TAGS[k])}</span>`;
+const ph = t => `<span class="ph">[${esc(t)}]</span>`;
+const legend = (keys = Object.keys(TAGS)) => `<div class="legend" role="list" aria-label="Evidence key">${keys.map(k => `<span role="listitem">${tag(k)}</span>`).join('')}</div>`;
+
+function frame(title, tools = '', body = '', hint = '') {
+  return `<div class="w-frame"><div class="w-bar"><span class="t-label">${title}</span><div class="w-tools">${tools}</div></div>${body}${hint ? `<div class="w-hint">${hint}</div>` : ''}</div>`;
+}
+
+/* =========================================================
+   PAN / ZOOM VIEWPORT
+   ========================================================= */
+function panZoom(vp, stage, opts = {}) {
+  let s = 1, x = 0, y = 0, fitS = 1;
+  let ptr = null, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  function apply(anim) {
+    stage.classList.toggle('anim', !!anim && !RM.matches);
+    stage.style.transform = `translate(${x}px,${y}px) scale(${s})`;
+    vp.classList.toggle('zoomed', s > fitS * 1.04);
+  }
+  function fit(anim) {
+    const r = vp.getBoundingClientRect();
+    const W = stage.offsetWidth || 1, H = stage.offsetHeight || 1;
+    fitS = Math.min(r.width / W, r.height / H, opts.maxFit ?? 1);
+    s = fitS; x = (r.width - W * s) / 2; y = (r.height - H * s) / 2;
+    apply(anim);
+  }
+  function zoomAt(f, cx, cy, anim) {
+    const ns = clamp(s * f, fitS * .7, Math.max(2.6, fitS * 4));
+    x = cx - (cx - x) * (ns / s); y = cy - (cy - y) * (ns / s); s = ns; apply(anim);
+  }
+  function zoomBy(f) { const r = vp.getBoundingClientRect(); zoomAt(f, r.width / 2, r.height / 2, true); }
+  vp.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    if (e.pointerType === 'touch' && s <= fitS * 1.04) return; // keep native page scroll on touch until zoomed
+    ptr = e.pointerId; moved = false; sx = e.clientX; sy = e.clientY; ox = x; oy = y;
+  });
+  vp.addEventListener('pointermove', e => {
+    if (ptr !== e.pointerId) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (!moved && Math.hypot(dx, dy) > 5) { moved = true; vp.classList.add('dragging'); try { vp.setPointerCapture(ptr); } catch (_) {} }
+    if (moved) { x = ox + dx; y = oy + dy; apply(false); }
+  });
+  const end = e => { if (ptr !== e.pointerId) return; ptr = null; vp.classList.remove('dragging'); setTimeout(() => moved = false, 0); };
+  vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
+  vp.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); } }, true);
+  vp.addEventListener('wheel', e => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault(); const r = vp.getBoundingClientRect();
+    zoomAt(Math.exp(-e.deltaY * .0025), e.clientX - r.left, e.clientY - r.top, false);
+  }, { passive: false });
+  return { fit, zoomIn: () => zoomBy(1.25), zoomOut: () => zoomBy(.8) };
+}
+const zoomTools = () => `<button class="btn btn-sm btn-icon" data-z="out" aria-label="Zoom out">−</button><button class="btn btn-sm btn-icon" data-z="in" aria-label="Zoom in">+</button><button class="btn btn-sm" data-z="fit">Fit</button>`;
+function bindZoom(root, pz) {
+  $$('[data-z]', root).forEach(b => b.addEventListener('click', () => { const z = b.dataset.z; z === 'in' ? pz.zoomIn() : z === 'out' ? pz.zoomOut() : pz.fit(true); }));
+}
+const ZOOM_HINT = '<span>Drag to pan · Ctrl/⌘ + scroll or the +/− buttons to zoom</span>';
+
+/* =========================================================
+   GRAPH — network / ecosystem / causal / stakeholder maps
+   ========================================================= */
+function wGraph(el, cfg) {
+  const id = 'g' + Math.random().toString(36).slice(2, 7);
+  const loops = cfg.loops ? cfg.loops.map((l, i) => `<button class="btn btn-sm" data-loop="${i}" aria-pressed="false">${esc(l.name)}</button>`).join('') : '';
+  el.innerHTML = frame(cfg.title, loops + zoomTools(),
+    `<div class="vp" style="height:var(--vh)"><div class="vp-stage"><svg class="vp-edges" aria-hidden="true"><defs><marker id="${id}a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs></svg></div></div>
+     <div class="chips-row"><div class="chips" role="group" aria-label="Nodes">${cfg.nodes.map(n => `<button class="chip" data-chip="${n.id}" aria-pressed="false">${esc(n.label)}</button>`).join('')}</div></div>
+     <div class="g-panel" aria-live="polite"></div>`, cfg.hint || ZOOM_HINT);
+  const vp = $('.vp', el), stage = $('.vp-stage', el), svg = $('svg', el), panel = $('.g-panel', el);
+  const nodeEls = {};
+  cfg.nodes.forEach(n => {
+    const b = document.createElement('button');
+    b.className = 'g-node ' + (n.cls || ''); b.dataset.id = n.id;
+    b.innerHTML = `${esc(n.label)}${n.sub ? `<small>${esc(n.sub)}</small>` : ''}`;
+    b.setAttribute('aria-label', n.label + (n.sub ? ', ' + n.sub : ''));
+    stage.appendChild(b); nodeEls[n.id] = b;
+  });
+  const edges = cfg.edges.map(e => ({ a: e[0], b: e[1], label: e[2] || '', dash: e[3] }));
+  let sel = null, loopSel = null;
+  const neighbors = idv => new Set(edges.filter(e => e.a === idv || e.b === idv).map(e => e.a === idv ? e.b : e.a));
+  function layout() {
+    const r = vp.getBoundingClientRect(); const mob = r.width < 640;
+    const H = mob ? (cfg.mh || 560) : (cfg.h || 520);
+    vp.style.setProperty('--vh', H + 'px');
+    const W = r.width;
+    stage.style.width = W + 'px'; stage.style.height = H + 'px';
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const P = {};
+    cfg.nodes.forEach(n => {
+      const px = (mob && n.m ? n.m[0] : n.x) / 100 * W, py = (mob && n.m ? n.m[1] : n.y) / 100 * H;
+      const e2 = nodeEls[n.id]; e2.style.left = px + 'px'; e2.style.top = py + 'px';
+      P[n.id] = { x: px, y: py, w: e2.offsetWidth / 2 + 4, h: e2.offsetHeight / 2 + 4 };
+    });
+    $$('path,text', svg).forEach(p => { if (!p.closest('marker')) p.remove(); });
+    edges.forEach((e, i) => {
+      const A = P[e.a], B = P[e.b]; if (!A || !B) return;
+      const dx = B.x - A.x, dy = B.y - A.y;
+      const tA = Math.min(A.w / Math.abs(dx || 1e-6), A.h / Math.abs(dy || 1e-6));
+      const tB = Math.min(B.w / Math.abs(dx || 1e-6), B.h / Math.abs(dy || 1e-6));
+      const x1 = A.x + dx * tA, y1 = A.y + dy * tA, x2 = B.x - dx * tB, y2 = B.y - dy * tB;
+      const curve = cfg.curve ? cfg.curve : 0;
+      const mx = (x1 + x2) / 2 - dy * curve, my = (y1 + y2) / 2 + dx * curve;
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', curve ? `M${x1},${y1} Q${mx},${my} ${x2},${y2}` : `M${x1},${y1} L${x2},${y2}`);
+      p.setAttribute('class', 'g-edge' + (e.dash ? ' dash' : '')); p.dataset.i = i;
+      if (cfg.directed) p.setAttribute('marker-end', `url(#${id}a)`);
+      svg.appendChild(p);
+      if (e.label) {
+        const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        const lx = curve ? (x1 + 2 * mx + x2) / 4 : (x1 + x2) / 2, ly = curve ? (y1 + 2 * my + y2) / 4 : (y1 + y2) / 2;
+        t.setAttribute('x', lx); t.setAttribute('y', ly + 4); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'g-elabel'); t.dataset.i = i; t.textContent = e.label;
+        svg.appendChild(t);
+      }
+    });
+    paint(); pz.fit(false);
+  }
+  function paint() {
+    let activeNodes = null, activeEdges = null;
+    if (loopSel !== null) {
+      const L = cfg.loops[loopSel]; activeNodes = new Set(L.nodes);
+      activeEdges = new Set(edges.map((e, i) => (activeNodes.has(e.a) && activeNodes.has(e.b) && (L.edges ? L.edges.includes(i) : true)) ? i : -1).filter(i => i >= 0));
+    } else if (sel) {
+      activeNodes = neighbors(sel); activeNodes.add(sel);
+      activeEdges = new Set(edges.map((e, i) => (e.a === sel || e.b === sel) ? i : -1).filter(i => i >= 0));
+    }
+    Object.entries(nodeEls).forEach(([k, b]) => {
+      b.classList.toggle('active', k === sel || (loopSel !== null && activeNodes.has(k) && false));
+      b.classList.toggle('dim', !!activeNodes && !activeNodes.has(k));
+      b.setAttribute('aria-pressed', k === sel ? 'true' : 'false');
+    });
+    $$('[data-chip]', el).forEach(c => c.setAttribute('aria-pressed', c.dataset.chip === sel ? 'true' : 'false'));
+    $$('.g-edge,.g-elabel', svg).forEach(p => {
+      const i = +p.dataset.i; p.classList.toggle('on', !!activeEdges && activeEdges.has(i)); p.classList.toggle('dim', !!activeEdges && !activeEdges.has(i));
+    });
+    $$('[data-loop]', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.loop === loopSel ? 'true' : 'false'));
+    // panel
+    let html;
+    if (loopSel !== null) {
+      const L = cfg.loops[loopSel];
+      html = `<div class="fp-anim"><span class="t-label">Loop</span><h4>${esc(L.name)}</h4><p>${L.desc}</p></div>`;
+    } else if (sel) {
+      const n = cfg.nodes.find(q => q.id === sel);
+      const nb = [...neighbors(sel)].map(k => cfg.nodes.find(q => q.id === k)).filter(Boolean);
+      html = `<div class="fp-anim"><div class="row between"><h4>${esc(n.label)}</h4><button class="btn btn-sm btn-secondary" data-clear>Clear</button></div>
+        <p style="margin-top:6px">${n.body || ''}</p>${n.tags ? `<div class="g-meta">${n.tags.map(t => tag(...[].concat(t))).join('')}</div>` : ''}
+        ${nb.length ? `<div class="g-meta" style="margin-top:12px"><span class="t-label" style="align-self:center;margin-right:4px">Connects to</span>${nb.map(m => `<button class="chip" data-go="${m.id}">${esc(m.label)}</button>`).join('')}</div>` : ''}</div>`;
+    } else {
+      html = `<div><span class="t-label">${esc(cfg.panelLabel || 'Explore')}</span><p style="margin-top:8px">${cfg.intro || 'Select any node to see what it does and how it connects.'}</p></div>`;
+    }
+    panel.innerHTML = html;
+    $$('[data-go]', panel).forEach(b => b.addEventListener('click', () => select(b.dataset.go)));
+    const c = $('[data-clear]', panel); if (c) c.addEventListener('click', () => select(null));
+  }
+  function select(k) { loopSel = null; sel = (k === sel) ? null : k; paint(); }
+  Object.values(nodeEls).forEach(b => b.addEventListener('click', () => select(b.dataset.id)));
+  $$('[data-chip]', el).forEach(c => c.addEventListener('click', () => select(c.dataset.chip)));
+  $$('[data-loop]', el).forEach(b => b.addEventListener('click', () => { sel = null; loopSel = loopSel === +b.dataset.loop ? null : +b.dataset.loop; paint(); }));
+  const pz = panZoom(vp, stage); bindZoom(el, pz);
+  new ResizeObserver(() => layout()).observe(el);
+  if (cfg.start) { sel = cfg.start; }
+  layout();
+}
+
+/* =========================================================
+   MIND MAP — expandable, two-sided, with list view
+   ========================================================= */
+function wMindmap(el, cfg) {
+  const root = cfg.data; const all = {};
+  (function walk(n, d, p) { n._d = d; n._p = p; all[n.id] = n; (n.children || []).forEach(c => walk(c, d + 1, n)); })(root, 0, null);
+  const expanded = new Set([root.id, ...(cfg.open || [])]);
+  let mode = null, selId = null;
+  el.innerHTML = frame(cfg.title,
+    `<button class="btn btn-sm" data-mm="expand">Expand all</button><button class="btn btn-sm" data-mm="collapse">Collapse</button><span style="width:6px"></span><button class="btn btn-sm" data-view="map" aria-pressed="true">Map</button><button class="btn btn-sm" data-view="list" aria-pressed="false">List</button><span class="mm-z" style="display:contents">${zoomTools()}</span>`,
+    `<div class="vp" style="height:${cfg.h || 560}px"><div class="vp-stage"><svg class="vp-edges" aria-hidden="true"></svg></div></div><div class="mm-list" hidden style="padding:8px 14px;max-height:620px;overflow:auto"></div><div class="g-panel" aria-live="polite"></div>`,
+    cfg.hint || '<span>Click a node to expand it and read the detail · Drag to pan · Ctrl/⌘ + scroll to zoom</span>' + (cfg.legend || ''));
+  const vp = $('.vp', el), stage = $('.vp-stage', el), svg = $('svg', el), list = $('.mm-list', el), panel = $('.g-panel', el);
+  const pz = panZoom(vp, stage, { maxFit: 1 }); bindZoom(el, pz);
+  const COL = 222, ROW = 48, OFF = 128;
+  function vis(n) { return expanded.has(n.id) ? (n.children || []) : []; }
+  function drawMap(newIds = new Set()) {
+    $$('.mm-node', stage).forEach(n => n.remove()); svg.innerHTML = '';
+    const kids = root.children || []; const half = Math.ceil(kids.length / 2);
+    const sides = [{ dir: 1, nodes: kids.slice(0, half) }, { dir: -1, nodes: kids.slice(half) }];
+    let maxDepth = { 1: 0, '-1': 0 };
+    sides.forEach(sd => {
+      let cur = 0;
+      const place = (n, d) => { n._dir = sd.dir; n._dd = d; maxDepth[sd.dir] = Math.max(maxDepth[sd.dir], d); const v = vis(n); if (!v.length) { n._y = cur * ROW; cur++; } else { v.forEach(c => place(c, d + 1)); n._y = (v[0]._y + v[v.length - 1]._y) / 2; } };
+      sd.nodes.forEach(n => { place(n, 1); cur += .35; });
+      sd.h = Math.max(ROW, (cur - .35) * ROW);
+    });
+    const H = Math.max(sides[0].h, sides[1].h) + 80;
+    const rootX = 40 + (maxDepth[-1] ? (maxDepth[-1] - 1) * COL + OFF + 200 : 110);
+    const W = rootX + (maxDepth[1] ? (maxDepth[1] - 1) * COL + OFF + 200 : 110) + 40;
+    const rootY = H / 2;
+    stage.style.width = W + 'px'; stage.style.height = H + 'px';
+    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    sides.forEach(sd => sd.off = rootY - sd.h / 2 + ROW / 2 - ROW / 2);
+    const made = [];
+    const mk = (n) => {
+      const b = document.createElement('button'); const has = (n.children || []).length;
+      b.className = 'mm-node' + (n._d === 0 ? ' root' : n._d === 1 ? ' l1' : '') + (n.focus ? ' focus' : '') + (n._dir === -1 && n._d > 0 ? ' left' : '') + (n.id === selId ? ' sel' : '') + (newIds.has(n.id) ? ' mm-new' : '');
+      b.innerHTML = `<span>${esc(n.label)}</span>${has && n._d > 0 ? `<span class="tog" aria-hidden="true">${expanded.has(n.id) ? '−' : '+'}</span>` : ''}`;
+      if (has) b.setAttribute('aria-expanded', expanded.has(n.id)); b.dataset.id = n.id;
+      stage.appendChild(b); made.push([n, b]);
+      return b;
+    };
+    const rb = mk(root); rb.style.left = rootX + 'px'; rb.style.top = rootY + 'px'; rb.style.transform = 'translate(-50%,-50%)';
+    root._ax = { r: rootX + rb.offsetWidth / 2, l: rootX - rb.offsetWidth / 2, y: rootY };
+    const placeEls = (n) => {
+      vis(n).forEach(c => {
+        const b = mk(c); const sd = sides.find(s => s.dir === c._dir);
+        const y = sd.off + c._y; let x;
+        if (c._dir === 1) { x = rootX + OFF + (c._dd - 1) * COL; b.style.left = x + 'px'; }
+        else { x = rootX - OFF - (c._dd - 1) * COL; b.style.left = x + 'px'; b.style.transform = 'translate(-100%,-50%)'; }
+        b.style.top = y + 'px';
+        const w = b.offsetWidth;
+        c._ax = c._dir === 1 ? { in: x, out: x + w, y } : { in: x, out: x - w, y };
+        const p = n._ax; const sx = n._d === 0 ? (c._dir === 1 ? p.r : p.l) : p.out, sy = p.y;
+        const ex = c._ax.in, ey = y, mx = (sx + ex) / 2;
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}`); path.setAttribute('class', 'mm-edge');
+        svg.appendChild(path);
+        placeEls(c);
+      });
+    };
+    placeEls(root);
+    made.forEach(([n, b]) => b.addEventListener('click', () => onNode(n)));
+    pz.fit(true);
+  }
+  function drawList() {
+    const li = n => {
+      const has = (n.children || []).length, open = expanded.has(n.id);
+      return `<li class="${has ? '' : 'leaf'}"><button data-id="${n.id}" ${has ? `aria-expanded="${open}"` : ''} aria-selected="${n.id === selId}"><span class="tw" aria-hidden="true">${has ? (open ? '−' : '+') : ''}</span><span>${esc(n.label)}</span>${n.focus ? ' <span class="tag tag-done" style="margin-left:auto">Internship focus</span>' : ''}</button>${has && open ? `<ul>${n.children.map(li).join('')}</ul>` : ''}</li>`;
+    };
+    list.innerHTML = `<ul class="tree" role="tree">${li(root)}</ul>`;
+    $$('button[data-id]', list).forEach(b => b.addEventListener('click', () => onNode(all[b.dataset.id])));
+  }
+  function showPanel(n) {
+    const path = []; let q = n; while (q) { path.unshift(q.label); q = q._p; }
+    panel.innerHTML = n ? `<div class="fp-anim"><span class="t-label">${esc(path.join(' → '))}</span><h4 style="margin-top:6px">${esc(n.label)}</h4>${n.body ? `<p style="margin-top:4px">${n.body}</p>` : ''}${n.tags ? `<div class="g-meta">${n.tags.map(t => tag(...[].concat(t))).join('')}</div>` : ''}</div>` : '';
+  }
+  function onNode(n) {
+    const before = new Set(Object.keys(all).filter(k => isVisible(all[k])));
+    if ((n.children || []).length && n._d > 0) { expanded.has(n.id) ? collapse(n) : expanded.add(n.id); }
+    selId = n.id; showPanel(n); render(before);
+  }
+  function collapse(n) { expanded.delete(n.id); (n.children || []).forEach(collapse); }
+  function isVisible(n) { let p = n._p; while (p) { if (!expanded.has(p.id)) return false; p = p._p; } return true; }
+  function render(before) {
+    if (mode === 'list') drawList();
+    else { const nw = before ? new Set(Object.keys(all).filter(k => isVisible(all[k]) && !before.has(k))) : new Set(); drawMap(nw); }
+  }
+  function setMode(m) {
+    mode = m; vp.hidden = m === 'list'; list.hidden = m !== 'list';
+    $$('[data-view]', el).forEach(b => b.setAttribute('aria-pressed', b.dataset.view === m));
+    $$('.mm-z button', el).forEach(b => b.disabled = m === 'list');
+    render();
+  }
+  $$('[data-view]', el).forEach(b => b.addEventListener('click', () => setMode(b.dataset.view)));
+  $('[data-mm="expand"]', el).addEventListener('click', () => { Object.values(all).forEach(n => (n.children || []).length && expanded.add(n.id)); render(); });
+  $('[data-mm="collapse"]', el).addEventListener('click', () => { expanded.clear(); expanded.add(root.id); render(); });
+  panel.innerHTML = `<div><span class="t-label">Explore</span><p style="margin-top:8px">${cfg.intro || 'Open a branch to see how the parts connect.'}</p></div>`;
+  let lastW = 0;
+  new ResizeObserver(() => { const w = el.offsetWidth; if (!w || Math.abs(w - lastW) < 2) return; const first = !lastW; lastW = w; if (first) setMode(w < 700 ? 'list' : 'map'); else if (mode === 'map') pz.fit(false); }).observe(el);
+}
+
+/* =========================================================
+   FLOW / STEPPER — frameworks, journeys, processes
+   ========================================================= */
+function wFlow(el, cfg) {
+  let i = cfg.start || 0, ad = 0;
+  const steps = cfg.steps;
+  const adapt = cfg.adapt ? `<div class="adapt-tabs"><span class="t-label" style="margin-right:6px">${esc(cfg.adaptLabel || 'Adapt to')}</span>${cfg.adapt.map((a, k) => `<button class="chip" data-ad="${k}" aria-pressed="${k === 0}">${esc(a.name)}</button>`).join('')}</div>` : '';
+  el.innerHTML = frame(cfg.title, cfg.tag ? tag(...[].concat(cfg.tag)) : '',
+    `<div class="flow-rail" role="tablist" aria-label="${esc(cfg.title)}">${steps.map((s, k) => `<button class="flow-step" role="tab" data-i="${k}" aria-selected="false" tabindex="-1"><span class="dotline"><span class="dotc">${String(k + 1).padStart(2, '0')}</span><span class="ln"></span></span><span class="lab">${esc(s.t)}</span></button>`).join('')}</div>${adapt}<div class="flow-panel" role="tabpanel" aria-live="polite"></div>
+     <div class="flow-nav"><button class="btn btn-sm btn-secondary" data-dir="-1">← Previous</button><span class="t-label fl-count"></span><button class="btn btn-sm btn-secondary" data-dir="1">Next →</button></div>`, cfg.hint || '');
+  const panel = $('.flow-panel', el), btns = $$('.flow-step', el);
+  function render() {
+    btns.forEach((b, k) => { b.classList.toggle('active', k === i); b.classList.toggle('done', k < i); b.setAttribute('aria-selected', k === i); b.tabIndex = k === i ? 0 : -1; });
+    const s = steps[i];
+    const side = [];
+    if (s.meta) Object.entries(s.meta).forEach(([k, v]) => side.push(`<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`));
+    if (cfg.adapt) side.push(`<div><dt>Applied to: ${esc(cfg.adapt[ad].name)}</dt><dd>${cfg.adapt[ad].notes[i]}</dd></div>`);
+    panel.innerHTML = `<div class="fp-anim"><span class="fp-n">${String(i + 1).padStart(2, '0')} / ${String(steps.length).padStart(2, '0')}${s.tag ? ' &nbsp;' + tag(...[].concat(s.tag)) : ''}</span><h4>${esc(s.t)}</h4><p>${s.b}</p></div>${side.length ? `<div class="fp-side fp-anim"><dl>${side.join('')}</dl></div>` : ''}`;
+    $('.fl-count', el).textContent = `Step ${i + 1} of ${steps.length}`;
+    $('[data-dir="-1"]', el).disabled = i === 0; $('[data-dir="1"]', el).disabled = i === steps.length - 1;
+    $('[data-dir="-1"]', el).style.opacity = i === 0 ? .45 : 1; $('[data-dir="1"]', el).style.opacity = i === steps.length - 1 ? .45 : 1;
+    const b = btns[i]; const rail = $('.flow-rail', el); const bl = b.offsetLeft, br = bl + b.offsetWidth;
+    if (bl < rail.scrollLeft || br > rail.scrollLeft + rail.clientWidth) rail.scrollTo({ left: bl - 18, behavior: RM.matches ? 'auto' : 'smooth' });
+  }
+  btns.forEach(b => b.addEventListener('click', () => { i = +b.dataset.i; render(); }));
+  $('.flow-rail', el).addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); i = clamp(i + (e.key === 'ArrowRight' ? 1 : -1), 0, steps.length - 1); render(); btns[i].focus(); }
+    if (e.key === 'Home') { i = 0; render(); btns[0].focus(); } if (e.key === 'End') { i = steps.length - 1; render(); btns[i].focus(); }
+  });
+  $$('[data-dir]', el).forEach(b => b.addEventListener('click', () => { i = clamp(i + +b.dataset.dir, 0, steps.length - 1); render(); }));
+  $$('[data-ad]', el).forEach(b => b.addEventListener('click', () => { ad = +b.dataset.ad; $$('[data-ad]', el).forEach(x => x.setAttribute('aria-pressed', x === b)); render(); }));
+  render();
+}
+
+/* =========================================================
+   TABS (markup helper + behaviour)
+   ========================================================= */
+let tabSeq = 0;
+function tabs(items, label = 'Tabs') {
+  const id = 't' + (++tabSeq);
+  return `<div class="tabs w-frame" data-tabs><div role="tablist" aria-label="${esc(label)}">${items.map((t, k) => `<button role="tab" id="${id}-t${k}" aria-controls="${id}-p${k}" aria-selected="${k === 0}" tabindex="${k === 0 ? 0 : -1}">${esc(t.t)}</button>`).join('')}</div>${items.map((t, k) => `<div role="tabpanel" id="${id}-p${k}" aria-labelledby="${id}-t${k}" ${k ? 'hidden' : ''} tabindex="0">${t.html}</div>`).join('')}</div>`;
+}
+function initTabs(root) {
+  $$('[data-tabs]', root).forEach(tb => {
+    const ts = $$(':scope > [role=tablist] > [role=tab]', tb), ps = $$(':scope > [role=tabpanel]', tb);
+    const go = k => { ts.forEach((t, j) => { t.setAttribute('aria-selected', j === k); t.tabIndex = j === k ? 0 : -1; ps[j].hidden = j !== k; }); };
+    ts.forEach((t, k) => {
+      t.addEventListener('click', () => go(k));
+      t.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const n = (k + (e.key === 'ArrowRight' ? 1 : -1) + ts.length) % ts.length; go(n); ts[n].focus(); } });
+    });
+  });
+}
+
+/* =========================================================
+   PROBLEM TREE
+   ========================================================= */
+function wProblemTree(el, cfg) {
+  const cols = cfg.cols; const items = {};
+  cols.forEach((c, ci) => c.items.forEach(it => { it._c = ci; items[it.id] = it; }));
+  // build adjacency
+  const adj = {}; Object.keys(items).forEach(k => adj[k] = new Set());
+  Object.values(items).forEach(it => (it.links || []).forEach(l => { if (items[l]) { adj[it.id].add(l); adj[l].add(it.id); } }));
+  el.innerHTML = frame(cfg.title, `<button class="btn btn-sm" data-pt-clear>Clear</button>`,
+    `<div class="ptree">${cols.map(c => `<div class="col"><h4>${esc(c.name)} <span>${c.items.length}</span></h4>${c.items.map(it => `<button class="pt-item" data-id="${it.id}" aria-pressed="false">${esc(it.t)}${it.tag ? `<br>${tag(...[].concat(it.tag))}` : ''}</button>`).join('')}</div>`).join('')}</div><div class="g-panel" aria-live="polite"></div>`,
+    '<span>Select any item to trace its causes and effects across the tree</span><span>' + esc(cfg.note || '') + '</span>');
+  const panel = $('.g-panel', el); let sel = null;
+  function chain(start) {
+    // traverse left (to lower column idx) and right separately so we follow a causal chain
+    const res = new Set([start]);
+    const walk = (k, dir) => adj[k].forEach(n => { if (!res.has(n) && Math.sign(items[n]._c - items[k]._c) === dir) { res.add(n); walk(n, dir); } });
+    walk(start, -1); walk(start, 1); return res;
+  }
+  function paint() {
+    const c = sel ? chain(sel) : null;
+    $$('.pt-item', el).forEach(b => { const k = b.dataset.id; b.classList.toggle('sel', k === sel); b.classList.toggle('on', !!c && c.has(k) && k !== sel); b.classList.toggle('dim', !!c && !c.has(k)); b.setAttribute('aria-pressed', k === sel); });
+    if (!sel) { panel.innerHTML = `<div><span class="t-label">How to read it</span><p style="margin-top:8px">${cfg.intro}</p></div>`; return; }
+    const it = items[sel];
+    const grouped = cols.map((col, ci) => ({ col, list: [...c].filter(k => items[k]._c === ci && k !== sel).map(k => items[k].t) })).filter(g => g.list.length);
+    panel.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(cols[it._c].name)}</span><h4 style="margin-top:6px">${esc(it.t)}</h4>${it.d ? `<p style="margin-top:4px">${it.d}</p>` : ''}<div class="grid g-3" style="margin-top:14px;gap:12px">${grouped.map(g => `<div><span class="t-label">${esc(g.col.name)}</span><ul class="list-dash t-sm" style="margin-top:6px">${g.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}</div></div>`;
+  }
+  $$('.pt-item', el).forEach(b => b.addEventListener('click', () => { sel = sel === b.dataset.id ? null : b.dataset.id; paint(); }));
+  $('[data-pt-clear]', el).addEventListener('click', () => { sel = null; paint(); });
+  paint();
+}
+
+/* =========================================================
+   BUSINESS MODEL CANVAS
+   ========================================================= */
+function wBMC(el, cfg) {
+  el.innerHTML = frame(cfg.title, tag('concept'), `<div class="bmc">${cfg.blocks.map((b, k) => `<button class="${b.cls}" data-k="${k}" aria-pressed="false"><span class="bt">${esc(b.t)}</span><span class="bs">${esc(b.s)}</span></button>`).join('')}</div><div class="g-panel" aria-live="polite"></div>`, '<span>Select a block to open its detail</span><span>Proposed model. Not validated with live financials.</span>');
+  const panel = $('.g-panel', el); let sel = null;
+  const paint = () => {
+    $$('.bmc button', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.k === sel));
+    if (sel === null) { panel.innerHTML = `<div><span class="t-label">Canvas</span><p style="margin-top:8px">${cfg.intro}</p></div>`; return; }
+    const b = cfg.blocks[sel];
+    panel.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(b.t)}</span><h4 style="margin-top:6px">${esc(b.s)}</h4><ul class="list-dash t-sm" style="margin-top:10px">${b.d.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+  };
+  $$('.bmc button', el).forEach(b => b.addEventListener('click', () => { sel = sel === +b.dataset.k ? null : +b.dataset.k; paint(); }));
+  paint();
+}
+
+/* =========================================================
+   SERVICE BLUEPRINT
+   ========================================================= */
+function wBlueprint(el, cfg) {
+  const n = cfg.steps.length; let sel = null;
+  const seps = { 1: 'Line of interaction', 2: 'Line of visibility', 3: 'Line of internal interaction' };
+  let grid = `<div class="bp" style="grid-template-columns:170px repeat(${n},minmax(130px,1fr))"><div class="bp-l" style="background:var(--bg-3)">Layer / Step</div>${cfg.steps.map((s, k) => `<button class="bp-h" data-col="${k}" aria-pressed="false">${String(k + 1).padStart(2, '0')} ${esc(s)}</button>`).join('')}`;
+  cfg.layers.forEach((L, li) => {
+    grid += `<div class="bp-l">${esc(L.name)}</div>${L.cells.map((c, k) => `<div class="bp-c" data-col="${k}">${esc(c)}</div>`).join('')}`;
+    if (seps[li]) grid += `<div class="line-sep">${seps[li]}</div>`;
+  });
+  grid += '</div>';
+  const mob = `<div class="bp-mobile"><div class="chips" style="padding:14px 18px" role="group" aria-label="Journey step">${cfg.steps.map((s, k) => `<button class="chip" data-mcol="${k}" aria-pressed="${k === 0}">${esc(s)}</button>`).join('')}</div><div class="bp-stack"></div></div>`;
+  el.innerHTML = frame(cfg.title, tag('concept'), `<div class="bp-wrap">${grid}</div>${mob}`, '<span>Select a step to trace it through all five layers</span><span>Envisioned service. Layers above the dashed lines are visible to the consumer.</span>');
+  const stack = $('.bp-stack', el);
+  const paintMob = k => { stack.innerHTML = cfg.layers.map(L => `<div class="fp-anim"><span class="t-label">${esc(L.name)}</span>${esc(L.cells[k])}</div>`).join(''); $$('[data-mcol]', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.mcol === k)); };
+  $$('[data-mcol]', el).forEach(b => b.addEventListener('click', () => paintMob(+b.dataset.mcol)));
+  paintMob(0);
+  $$('.bp-h', el).forEach(b => b.addEventListener('click', () => {
+    const k = +b.dataset.col; sel = sel === k ? null : k;
+    $$('.bp-h', el).forEach(h => h.setAttribute('aria-pressed', +h.dataset.col === sel));
+    $$('.bp-c', el).forEach(c => c.classList.toggle('on', +c.dataset.col === sel));
+  }));
+}
+
+/* =========================================================
+   POSITIONING / STAKEHOLDER MATRIX (draggable)
+   ========================================================= */
+function wMatrix(el, cfg) {
+  const key = 'jsPortfolio:mx:' + cfg.id;
+  const base = cfg.points.map(p => ({ ...p }));
+  let pts = store.get(key, null) || base.map(p => ({ id: p.id, x: p.x, y: p.y }));
+  const P = id => pts.find(p => p.id === id) || base.find(p => p.id === id);
+  let sel = null;
+  el.innerHTML = frame(cfg.title, `${tag(...[].concat(cfg.tag || 'illus'))}<button class="btn btn-sm" data-reset>Reset positions</button>`,
+    `<div style="padding:8px 8px 0"><div class="mx" role="group" aria-label="${esc(cfg.title)}">
+      <span class="mx-q" style="left:0;top:0">${esc(cfg.q[0])}</span><span class="mx-q" style="right:0;top:0;text-align:right">${esc(cfg.q[1])}</span>
+      <span class="mx-q" style="left:0;bottom:0">${esc(cfg.q[2])}</span><span class="mx-q" style="right:0;bottom:0;text-align:right">${esc(cfg.q[3])}</span>
+      <div class="mx-ax x"><span>← ${esc(cfg.x[0])}</span><span>${esc(cfg.x[1])} →</span></div>
+      <div class="mx-ax y"><span>← ${esc(cfg.y[0])}</span><span>${esc(cfg.y[1])} →</span></div>
+      ${base.map(p => `<button class="mx-pt${p.us ? ' us' : ''}" data-id="${p.id}" aria-label="${esc(p.label)}. Use arrow keys to move.">${esc(p.label)}</button>`).join('')}
+    </div></div><div class="g-panel" aria-live="polite"></div>`,
+    '<span>Drag any marker to test a different reading · Arrow keys move the selected marker</span><span>Positions are saved in this browser only.</span>');
+  const mx = $('.mx', el), panel = $('.g-panel', el);
+  const quad = p => (p.y >= 50 ? (p.x < 50 ? cfg.q[0] : cfg.q[1]) : (p.x < 50 ? cfg.q[2] : cfg.q[3]));
+  function place() { base.forEach(b => { const p = P(b.id); const e = $(`[data-id="${b.id}"]`, mx); e.style.left = p.x + '%'; e.style.top = (100 - p.y) + '%'; e.classList.toggle('active', b.id === sel); }); }
+  function info() {
+    if (!sel) { panel.innerHTML = `<div><span class="t-label">Reading the map</span><p style="margin-top:8px">${cfg.intro}</p></div>`; return; }
+    const b = base.find(q => q.id === sel), p = P(sel);
+    panel.innerHTML = `<div><span class="t-label">${esc(quad(p))}</span><h4 style="margin-top:6px">${esc(b.label)}</h4><p style="margin-top:4px">${b.desc}</p></div>`;
+  }
+  $$('.mx-pt', mx).forEach(e => {
+    let drag = false, moved = false;
+    e.addEventListener('pointerdown', ev => { drag = true; moved = false; e.setPointerCapture(ev.pointerId); e.classList.add('drag'); sel = e.dataset.id; place(); info(); });
+    e.addEventListener('pointermove', ev => {
+      if (!drag) return; moved = true; const r = mx.getBoundingClientRect();
+      const p = pts.find(q => q.id === e.dataset.id) || (pts.push({ id: e.dataset.id, x: 50, y: 50 }), pts[pts.length - 1]);
+      p.x = clamp((ev.clientX - r.left) / r.width * 100, 2, 98); p.y = clamp(100 - (ev.clientY - r.top) / r.height * 100, 2, 98); place();
+    });
+    const up = () => { if (!drag) return; drag = false; e.classList.remove('drag'); if (moved) { store.set(key, pts); info(); } };
+    e.addEventListener('pointerup', up); e.addEventListener('pointercancel', up);
+    e.addEventListener('click', () => { sel = e.dataset.id; place(); info(); });
+    e.addEventListener('keydown', ev => {
+      const d = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, 2], ArrowDown: [0, -2] }[ev.key]; if (!d) return;
+      ev.preventDefault(); const p = pts.find(q => q.id === e.dataset.id); p.x = clamp(p.x + d[0], 2, 98); p.y = clamp(p.y + d[1], 2, 98); sel = p.id; store.set(key, pts); place(); info();
+    });
+  });
+  $('[data-reset]', el).addEventListener('click', () => { pts = base.map(p => ({ id: p.id, x: p.x, y: p.y })); store.set(key, pts); place(); info(); });
+  place(); info();
+}
+
+/* =========================================================
+   SWOT
+   ========================================================= */
+function wSwot(el, cfg) {
+  const q = [['S', 'Strengths', 's'], ['W', 'Weaknesses', 'w'], ['O', 'Opportunities', 'o'], ['T', 'Threats', 't']];
+  el.innerHTML = frame(cfg.title, tag(...[].concat(cfg.tag || 'rec')), `<div class="swot">${q.map(([L, name, k]) => `<div class="q-${k}"><h4><b>${L}</b>${name}</h4>${cfg[k].map(it => `<details><summary>${esc(it[0])}</summary><p>${it[1]}</p></details>`).join('')}</div>`).join('')}</div>`, `<span>Open any line for the reasoning behind it</span><span>${esc(cfg.note || '')}</span>`);
+}
+
+/* =========================================================
+   FUNNEL (editable actuals, blank by default)
+   ========================================================= */
+function wFunnel(el, cfg) {
+  const key = 'jsPortfolio:funnel:' + cfg.id; let vals = store.get(key, cfg.stages.map(() => ''));
+  let sel = null;
+  el.innerHTML = frame(cfg.title, `${tag('illus', 'Framework')}<button class="btn btn-sm" data-clear>Clear numbers</button>`,
+    `<div class="funnel">${cfg.stages.map((s, k) => `<div class="fn-row"><button class="fn-bar" data-k="${k}" aria-pressed="false" style="width:${100 - k * (55 / cfg.stages.length)}%"><span>${esc(s.t)}</span><span class="conv" data-conv="${k}"></span></button><label class="sr-only" for="fn-${cfg.id}-${k}">Actual count for ${esc(s.t)}</label><input class="fn-in" id="fn-${cfg.id}-${k}" inputmode="numeric" placeholder="—" data-in="${k}" value="${esc(vals[k])}"></div>`).join('')}</div><div class="g-panel" aria-live="polite"></div>`,
+    '<span>Select a stage for its purpose · Enter real counts on the right to calculate stage conversion</span><span>Actual figures are intentionally left blank.</span>');
+  const panel = $('.g-panel', el);
+  const calc = () => {
+    cfg.stages.forEach((s, k) => {
+      const c = $(`[data-conv="${k}"]`, el); const a = parseFloat(vals[k - 1]), b = parseFloat(vals[k]);
+      c.textContent = k > 0 && a > 0 && !isNaN(b) ? Math.round(b / a * 100) + '% of previous' : '';
+    });
+  };
+  const info = () => {
+    if (sel === null) { panel.innerHTML = `<div><span class="t-label">Purpose</span><p style="margin-top:8px">${cfg.intro}</p></div>`; return; }
+    const s = cfg.stages[sel]; panel.innerHTML = `<div class="fp-anim"><span class="t-label">Stage ${sel + 1}</span><h4 style="margin-top:6px">${esc(s.t)}</h4><p style="margin-top:4px">${s.d}</p></div>`;
+  };
+  $$('.fn-bar', el).forEach(b => b.addEventListener('click', () => { sel = sel === +b.dataset.k ? null : +b.dataset.k; $$('.fn-bar', el).forEach(x => x.setAttribute('aria-pressed', +x.dataset.k === sel)); info(); }));
+  $$('.fn-in', el).forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/[^\d.]/g, ''); vals[+i.dataset.in] = i.value; store.set(key, vals); calc(); }));
+  $('[data-clear]', el).addEventListener('click', () => { vals = cfg.stages.map(() => ''); store.set(key, vals); $$('.fn-in', el).forEach(i => i.value = ''); calc(); });
+  calc(); info();
+}
+
+/* =========================================================
+   CRM DASHBOARD (conceptual, illustrative data, editable)
+   ========================================================= */
+function wCRM(el, cfg) {
+  const key = 'jsPortfolio:crm:v1';
+  const STAGES = cfg.stages, RESP = cfg.responses;
+  let rows = store.get(key, null) || cfg.rows.map(r => ({ ...r }));
+  let filter = 'All', q = '';
+  const save = () => store.set(key, rows);
+  const stCol = s => ({ 'Researching': 'var(--bg-3);color:var(--ink-2)', 'Contacted': 'var(--blue-50);color:var(--blue-ink)', 'In conversation': 'var(--blue-100);color:var(--blue-ink)', 'Pitch shared': 'var(--orange-50);color:var(--orange-ink)', 'Placed': 'var(--blue);color:var(--on-accent)', 'Paused': 'var(--bg-2);color:var(--ink-3)' }[s] || 'var(--bg-2)');
+  el.innerHTML = frame(cfg.title, `${tag('illus', 'Illustrative data')}<button class="btn btn-sm" data-export>Export CSV</button><button class="btn btn-sm" data-empty>Start empty</button><button class="btn btn-sm" data-reset>Reset demo</button>`,
+    `<div class="crm-stats" role="group" aria-label="Filter by stage"></div>
+     <form class="crm-tools" data-add autocomplete="off">
+       <label class="sr-only" for="crm-q">Search</label><input class="input" id="crm-q" placeholder="Search company or industry" style="flex:1 1 180px" data-q>
+       <span style="flex-basis:100%;height:0" class="crm-br"></span>
+       <label class="sr-only" for="crm-c">Company</label><input class="input" id="crm-c" placeholder="Company" required style="flex:1 1 150px">
+       <label class="sr-only" for="crm-i">Industry</label><input class="input" id="crm-i" placeholder="Industry" style="flex:1 1 120px">
+       <label class="sr-only" for="crm-s">Stage</label><select class="select" id="crm-s">${STAGES.map(s => `<option>${s}</option>`).join('')}</select>
+       <label class="sr-only" for="crm-n">Next action</label><input class="input" id="crm-n" placeholder="Next action" style="flex:2 1 160px">
+       <button class="btn btn-primary btn-sm" type="submit">Add lead</button>
+     </form>
+     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Company</th><th>Industry</th><th>Contact stage</th><th>Outreach date</th><th>Response status</th><th>Follow-up</th><th>Next action</th><th><span class="sr-only">Remove</span></th></tr></thead><tbody></tbody></table></div>`,
+    '<span>Click any text cell to edit · Changes stay in this browser</span><span>A conceptual tool to show the workflow. These rows are not real leads or results.</span>');
+  const tb = $('tbody', el), stats = $('.crm-stats', el);
+  function drawStats() {
+    const counts = Object.fromEntries(STAGES.map(s => [s, rows.filter(r => r.stage === s).length]));
+    const keys = ['All', ...STAGES.filter(s => s !== 'Paused')];
+    stats.innerHTML = keys.map(k => `<button data-f="${k}" aria-pressed="${filter === k}"><span class="v">${k === 'All' ? rows.length : counts[k]}</span><span class="k">${k}</span></button>`).join('');
+    $$('[data-f]', stats).forEach(b => b.addEventListener('click', () => { filter = filter === b.dataset.f ? 'All' : b.dataset.f; draw(); }));
+  }
+  function draw(newId) {
+    drawStats();
+    const list = rows.filter(r => (filter === 'All' || r.stage === filter) && (!q || (r.company + ' ' + r.industry).toLowerCase().includes(q)));
+    tb.innerHTML = list.length ? list.map((r, k) => `<tr data-id="${r.id}" class="${r.id === newId ? 'row-in' : ''}">
+      <td class="mono">${String(k + 1).padStart(2, '0')}</td>
+      <td contenteditable="true" data-f="company" style="font-weight:500">${esc(r.company)}</td>
+      <td contenteditable="true" data-f="industry">${esc(r.industry)}</td>
+      <td><label class="sr-only">Stage for ${esc(r.company)}</label><select class="select" data-f="stage" style="background:${stCol(r.stage)}">${STAGES.map(s => `<option ${s === r.stage ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+      <td><label class="sr-only">Outreach date</label><input type="date" class="input" style="height:32px;font-size:.8125rem" data-f="date" value="${esc(r.date)}"></td>
+      <td><label class="sr-only">Response</label><select class="select" data-f="resp">${RESP.map(s => `<option ${s === r.resp ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+      <td><label class="sr-only">Follow-up date</label><input type="date" class="input" style="height:32px;font-size:.8125rem" data-f="follow" value="${esc(r.follow)}"></td>
+      <td contenteditable="true" data-f="next">${esc(r.next)}</td>
+      <td><button class="btn btn-sm btn-icon" data-del aria-label="Remove ${esc(r.company)}" title="Remove">×</button></td></tr>`).join('')
+      : `<tr><td colspan="9"><div class="empty">No leads in this view. Add one above.</div></td></tr>`;
+    $$('tr[data-id]', tb).forEach(tr => {
+      const r = rows.find(x => x.id === tr.dataset.id);
+      $$('[contenteditable]', tr).forEach(c => { c.addEventListener('blur', () => { r[c.dataset.f] = c.textContent.trim(); save(); }); c.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); c.blur(); } }); });
+      $$('select,input', tr).forEach(c => c.addEventListener('change', () => { r[c.dataset.f] = c.value; save(); if (c.dataset.f === 'stage') draw(); }));
+      $('[data-del]', tr).addEventListener('click', () => { rows = rows.filter(x => x.id !== r.id); save(); draw(); });
+    });
+  }
+  $('[data-add]', el).addEventListener('submit', e => {
+    e.preventDefault(); const c = $('#crm-c', el); if (!c.value.trim()) { c.focus(); return; }
+    const today = new Date().toISOString().slice(0, 10);
+    const r = { id: 'r' + Date.now(), company: c.value.trim(), industry: $('#crm-i', el).value.trim(), stage: $('#crm-s', el).value, date: today, resp: RESP[0], follow: '', next: $('#crm-n', el).value.trim() };
+    rows.unshift(r); save(); filter = 'All'; ['#crm-c', '#crm-i', '#crm-n'].forEach(s => $(s, el).value = ''); draw(r.id); c.focus();
+  });
+  $('[data-q]', el).addEventListener('input', e => { q = e.target.value.toLowerCase().trim(); draw(); });
+  $('[data-q]', el).addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+  $('[data-reset]', el).addEventListener('click', () => { rows = cfg.rows.map(r => ({ ...r })); save(); filter = 'All'; draw(); });
+  $('[data-empty]', el).addEventListener('click', () => { rows = []; save(); filter = 'All'; draw(); });
+  $('[data-export]', el).addEventListener('click', () => {
+    const head = ['Company', 'Industry', 'Contact stage', 'Outreach date', 'Response status', 'Follow-up', 'Next action'];
+    const csv = [head, ...rows.map(r => [r.company, r.industry, r.stage, r.date, r.resp, r.follow, r.next])].map(a => a.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'b2b-outreach-tracker.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  });
+  draw();
+}
+
+/* =========================================================
+   KPI / PERFORMANCE FRAMEWORK (editable, blank actuals)
+   ========================================================= */
+function wKPI(el, cfg) {
+  const key = 'jsPortfolio:kpi:v1'; let v = store.get(key, {});
+  el.innerHTML = frame(cfg.title, `${tag('illus', 'Editable framework')}<button class="btn btn-sm" data-clear>Clear entries</button>`,
+    `<div class="tbl-wrap"><table class="tbl" style="min-width:760px"><thead><tr><th>Area</th><th>Metric</th><th>What it tells you</th><th class="num">Target</th><th class="num">Actual</th><th>Source / note</th></tr></thead><tbody>${cfg.rows.map((r, k) => `<tr>
+      <td class="mono">${esc(r.a)}</td><td style="font-weight:500">${esc(r.m)}</td><td class="t-xs ink2" style="max-width:30ch">${esc(r.d)}</td>
+      ${r.locked ? `<td colspan="3"><span class="tag tag-hyp">${esc(r.locked)}</span></td>` : `
+      <td><label class="sr-only" for="kt${k}">Target for ${esc(r.m)}</label><input class="input" id="kt${k}" style="height:32px;width:90px;text-align:right" placeholder="—" data-k="t${k}" value="${esc(v['t' + k] || '')}"></td>
+      <td><label class="sr-only" for="ka${k}">Actual for ${esc(r.m)}</label><input class="input" id="ka${k}" style="height:32px;width:90px;text-align:right" placeholder="—" data-k="a${k}" value="${esc(v['a' + k] || '')}"></td>
+      <td><label class="sr-only" for="kn${k}">Note for ${esc(r.m)}</label><input class="input" id="kn${k}" style="height:32px;width:100%" placeholder="Add source" data-k="n${k}" value="${esc(v['n' + k] || '')}"></td>`}
+    </tr>`).join('')}</tbody></table></div>`,
+    '<span>Fill in only what was actually measured · Saved in this browser</span><span>No figures are pre-filled on purpose.</span>');
+  $$('[data-k]', el).forEach(i => i.addEventListener('input', () => { v[i.dataset.k] = i.value; store.set(key, v); }));
+  $('[data-clear]', el).addEventListener('click', () => { v = {}; store.set(key, v); $$('[data-k]', el).forEach(i => i.value = ''); });
+}
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+function wTimeline(el, cfg) {
+  let i = cfg.start ?? 0; const it = cfg.items;
+  el.innerHTML = frame(cfg.title, '', `<div class="tl"><div class="tl-rail" style="--n:${it.length}" role="tablist" aria-label="${esc(cfg.title)}"><span class="tl-prog"></span>${it.map((x, k) => `<button class="tl-pt" role="tab" data-i="${k}" aria-selected="false" tabindex="-1"><span class="d" aria-hidden="true"></span><span><span class="when">${esc(x.when)}</span><br><span class="what">${esc(x.what)}</span></span></button>`).join('')}</div></div><div class="flow-panel" role="tabpanel" aria-live="polite"></div><div class="flow-nav"><button class="btn btn-sm btn-secondary" data-dir="-1">← Earlier</button><span class="t-label tl-c"></span><button class="btn btn-sm btn-secondary" data-dir="1">Later →</button></div>`);
+  const pts = $$('.tl-pt', el), panel = $('.flow-panel', el), prog = $('.tl-prog', el);
+  function render() {
+    pts.forEach((p, k) => { p.classList.toggle('active', k === i); p.classList.toggle('past', k < i); p.setAttribute('aria-selected', k === i); p.tabIndex = k === i ? 0 : -1; });
+    const rail = $('.tl-rail', el); const first = pts[0].querySelector('.d'), cur = pts[i].querySelector('.d');
+    prog.style.width = Math.max(0, cur.getBoundingClientRect().left - first.getBoundingClientRect().left) + 'px';
+    const x = it[i];
+    panel.innerHTML = `<div class="fp-anim"><span class="fp-n">${esc(x.when)} ${x.tag ? '&nbsp;' + tag(...[].concat(x.tag)) : ''}</span><h4>${esc(x.what)}</h4>${x.body}</div>${x.side ? `<div class="fp-side fp-anim"><dl>${Object.entries(x.side).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join('')}</dl></div>` : ''}`;
+    $('.tl-c', el).textContent = `${i + 1} / ${it.length}`;
+    $('[data-dir="-1"]', el).style.opacity = i === 0 ? .45 : 1; $('[data-dir="1"]', el).style.opacity = i === it.length - 1 ? .45 : 1;
+  }
+  pts.forEach(p => p.addEventListener('click', () => { i = +p.dataset.i; render(); }));
+  $('.tl-rail', el).addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); i = clamp(i + ((e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1), 0, it.length - 1); render(); pts[i].focus(); } });
+  $$('[data-dir]', el).forEach(b => b.addEventListener('click', () => { i = clamp(i + +b.dataset.dir, 0, it.length - 1); render(); }));
+  new ResizeObserver(() => render()).observe(el);
+  render();
+}
+
+/* =========================================================
+   OBJECTION HANDLER (sales psychology)
+   ========================================================= */
+function wObjections(el, cfg) {
+  let i = 0;
+  el.innerHTML = frame(cfg.title, tag('illus', 'Illustrative framework'), `<div class="obj"><div class="obj-list" role="group" aria-label="Objections">${cfg.items.map((o, k) => `<button data-k="${k}" aria-pressed="${k === 0}">“${esc(o.o)}”</button>`).join('')}</div><div class="obj-out" aria-live="polite"></div></div>`, '<span>Pick what a decision-maker might say to see the thinking behind a response</span>');
+  const out = $('.obj-out', el);
+  const render = () => { const o = cfg.items[i]; $$('.obj-list button', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.k === i)); out.innerHTML = `<div class="fp-anim"><span class="t-label">What's really being asked</span><p style="margin-top:6px;font-size:1.0625rem">${o.real}</p><span class="t-label" style="display:block;margin-top:18px">Principle</span><p style="margin-top:6px"><strong>${esc(o.p)}</strong>. ${o.pd}</p><span class="t-label" style="display:block;margin-top:18px">Response approach</span><p style="margin-top:6px;margin-bottom:0">${o.r}</p></div>`; };
+  $$('.obj-list button', el).forEach(b => b.addEventListener('click', () => { i = +b.dataset.k; render(); }));
+  render();
+}
+
+/* =========================================================
+   REVENUE MODEL EXPLORER
+   ========================================================= */
+function wRevenue(el, cfg) {
+  let on = new Set([0]);
+  el.innerHTML = frame(cfg.title, tag('concept', 'To be validated'), `<div class="rev" role="group" aria-label="Revenue streams">${cfg.streams.map((s, k) => `<button data-k="${k}" aria-pressed="${on.has(k)}"><span class="chk" aria-hidden="true"></span><strong style="font-size:.9375rem;line-height:1.25">${esc(s.t)}</strong><span class="t-xs muted">${esc(s.who)}</span></button>`).join('')}</div><div class="rev-out" aria-live="polite"></div>`, '<span>Toggle streams to see what each mix asks of the business</span><span>No pricing or projections are shown because none have been validated.</span>');
+  const out = $('.rev-out', el);
+  const render = () => {
+    $$('.rev button', el).forEach(b => b.setAttribute('aria-pressed', on.has(+b.dataset.k)));
+    const S = [...on].map(k => cfg.streams[k]);
+    if (!S.length) { out.innerHTML = '<div style="grid-column:1/-1"><p class="t-sm muted" style="margin:0">Select at least one stream.</p></div>'; return; }
+    const uniq = a => [...new Set(a)];
+    out.innerHTML = `<div class="fp-anim"><span class="t-label">Who pays</span><ul class="list-dash t-sm" style="margin-top:8px">${uniq(S.map(s => s.who)).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="fp-anim"><span class="t-label">Value exchanged</span><ul class="list-dash t-sm" style="margin-top:8px">${S.map(s => `<li>${esc(s.value)}</li>`).join('')}</ul></div>
+      <div class="fp-anim"><span class="t-label">What must be true first</span><ul class="list-dash t-sm" style="margin-top:8px">${uniq(S.flatMap(s => s.needs)).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+  };
+  $$('.rev button', el).forEach(b => b.addEventListener('click', () => { const k = +b.dataset.k; on.has(k) ? on.delete(k) : on.add(k); render(); }));
+  render();
+}
+
+/* =========================================================
+   CAPABILITY × EVIDENCE MATRIX
+   ========================================================= */
+function wCapMatrix(el, cfg) {
+  let sel = null;
+  el.innerHTML = frame(cfg.title, '', `<div class="cap-mx"><table class="cap-tbl"><thead><tr><th style="text-align:left;padding-left:16px">Capability</th>${cfg.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${cfg.rows.map((r, ri) => `<tr><th scope="row">${esc(r.name)}</th>${r.cells.map((c, ci) => `<td>${c ? `<button class="cap-cell" data-r="${ri}" data-c="${ci}" aria-pressed="false" aria-label="${esc(r.name)} in ${esc(cfg.cols[ci])}"><span class="dot-l ${c.l}"></span></button>` : '<span class="cap-cell" aria-hidden="true"><span style="width:6px;height:1px;background:var(--line-2)"></span></span>'}</td>`).join('')}</tr>`).join('')}</tbody></table></div><div class="g-panel" aria-live="polite"></div>`,
+    '<span class="legend"><span class="row" style="gap:6px"><span class="dot-l l2"></span>Hands-on work</span><span class="row" style="gap:6px"><span class="dot-l l1"></span>Supporting role or research</span><span class="row" style="gap:6px"><span class="dot-l lc"></span>Conceptual / in development</span></span>');
+  const panel = $('.g-panel', el);
+  const render = () => {
+    $$('.cap-cell[data-r]', el).forEach(b => b.setAttribute('aria-pressed', sel && +b.dataset.r === sel[0] && +b.dataset.c === sel[1]));
+    if (!sel) { panel.innerHTML = `<div><span class="t-label">Evidence</span><p style="margin-top:8px">Select a dot to see exactly what supports that capability in that project.</p></div>`; return; }
+    const r = cfg.rows[sel[0]], c = r.cells[sel[1]];
+    panel.innerHTML = `<div class="fp-anim"><span class="t-label">${esc(r.name)} × ${esc(cfg.cols[sel[1]])}</span><p style="margin-top:8px;color:var(--ink)">${c.e}</p>${cfg.links[sel[1]] ? `<a class="link t-sm" href="${cfg.links[sel[1]]}" style="display:inline-block;margin-top:10px">Open ${esc(cfg.cols[sel[1]])} →</a>` : ''}</div>`;
+  };
+  $$('.cap-cell[data-r]', el).forEach(b => b.addEventListener('click', () => { sel = [+b.dataset.r, +b.dataset.c]; render(); }));
+  render();
+}
+
+/* =========================================================
+   LENSES (business thinking, then design it)
+   ========================================================= */
+function wLenses(el, cfg) {
+  let i = 0;
+  el.innerHTML = `<div class="lenses" role="group" aria-label="Disciplines">${cfg.items.map((x, k) => `<button class="lens" data-k="${k}" aria-pressed="${k === 0}"><span class="t-label">0${k + 1}</span><br><strong style="font-size:1rem">${esc(x.t)}</strong></button>`).join('')}</div><p class="lens-out" aria-live="polite"></p>`;
+  const out = $('.lens-out', el);
+  const r = () => { $$('.lens', el).forEach(b => b.setAttribute('aria-pressed', +b.dataset.k === i)); out.innerHTML = cfg.items[i].d; };
+  $$('.lens', el).forEach(b => b.addEventListener('click', () => { i = +b.dataset.k; r(); }));
+  r();
+}
+
+
+/* =========================================================
+   OPPORTUNITY SCANNER — how an "invasion" is planned
+   ========================================================= */
+function wScanner(el, cfg) {
+  const COLS = 14, ROWS = 8;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const key = (c, r) => r * COLS + c;
+  const gap = new Set([[9, 2], [10, 2], [9, 3], [10, 3], [11, 3], [10, 4], [11, 4], [12, 4], [11, 5]].map(([c, r]) => key(c, r)));
+  const entry = key(9, 2);
+  const cells = [];
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const k = key(c, r); const isGap = gap.has(k);
+    const srv = !isGap && rnd() > .1;
+    cells.push({ k, c, r, cls: isGap ? 'gap' + (k === entry ? ' entry' : '') : srv ? 'srv' : 'emp' });
+  }
+  const srvCells = cells.filter(x => x.cls === 'srv'); const needs = new Set();
+  while (needs.size < 9) needs.add(srvCells[Math.floor(rnd() * srvCells.length)].k);
+  cells.forEach(x => { if (needs.has(x.k)) x.cls += ' need'; });
+  const counts = { srv: srvCells.length, need: needs.size, gap: gap.size, all: cells.length };
+  const stats = [
+    [[counts.all, 'customer groups'], [counts.srv, 'already served']],
+    [[counts.srv, 'already served'], [counts.need, 'unmet needs']],
+    [[counts.need, 'unmet needs'], [counts.gap, 'in an overlooked gap']],
+    [[counts.gap, 'in the gap'], [1, 'precise way in']]
+  ];
+  let i = 0, ex = 0, playing = !RM.matches, timer = null, visible = false;
+  const EX = cfg.examples;
+  el.innerHTML = `<div class="scan" data-s="0">
+    <div class="scan-steps" role="tablist" aria-label="Steps of an invasion">${cfg.steps.map((st, k) => `<button class="scan-step" role="tab" aria-selected="${k === 0}" tabindex="${k === 0 ? 0 : -1}" data-k="${k}"><span class="n">0${k + 1}</span><span class="tt">${esc(st.t)}</span><span class="dd"><span>${esc(st.d)}</span></span><span class="bar" aria-hidden="true"></span></button>`).join('')}</div>
+    <div class="scan-vis" role="tabpanel">
+      <div class="row between" style="gap:8px"><div class="chips scan-ex" role="group" aria-label="View as">${EX.map((e, k) => `<button class="chip" data-ex="${k}" aria-pressed="${k === 0}">${esc(e.name)}</button>`).join('')}</div><button class="btn btn-sm btn-secondary scan-play" type="button" aria-pressed="true">Pause</button></div>
+      <p class="scan-how"><b>How to read it.</b> <span class="scan-how-t"></span></p>
+      <div class="scan-grid" aria-hidden="true">${cells.map(x => `<span class="c ${x.cls}" style="--d:${(x.c + x.r) * 18}ms"></span>`).join('')}<span class="scan-pin">Way in</span><span class="scan-zone">Overlooked gap</span><svg class="scan-arrow" aria-hidden="true"><defs><marker id="scanAh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--blue)"/></marker></defs><path class="sa-line" marker-end="url(#scanAh)"/></svg></div>
+      <div class="scan-stats" aria-live="polite"></div>
+      <div class="scan-cap" aria-live="polite"></div>
+      <div class="scan-key t-xs"><span data-key="0"><i class="k srv"></i>Customers already served</span><span data-key="1"><i class="k need"></i>Unmet need</span><span data-key="2"><i class="k gap"></i>Overlooked gap</span><span data-key="3"><i class="k entry"></i>The way in</span></div>
+    </div></div>`;
+  const root = $('.scan', el), steps = $$('.scan-step', el), cap = $('.scan-cap', el), playBtn = $('.scan-play', el), grid = $('.scan-grid', el);
+  function placeLabels() {
+    const e = $('.c.entry', grid), pin = $('.scan-pin', grid), z = $('.scan-zone', grid), g = $$('.c.gap', grid), svg = $('.scan-arrow', grid);
+    if (!e) return;
+    pin.style.left = (e.offsetLeft + e.offsetWidth / 2) + 'px'; pin.style.top = e.offsetTop + 'px';
+    const last = g[g.length - 1]; z.style.left = (last.offsetLeft + last.offsetWidth / 2) + 'px'; z.style.top = (last.offsetTop + last.offsetHeight + 6) + 'px';
+    const W = grid.offsetWidth, H = grid.offsetHeight; svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('width', W); svg.setAttribute('height', H);
+    const ex2 = e.offsetLeft, ey = e.offsetTop + e.offsetHeight / 2;
+    $('.sa-line', svg).setAttribute('d', `M${-6},${ey} L${ex2 - 4},${ey}`);
+  }
+  function caption() {
+    const E = EX[ex], st = cfg.steps[i];
+    $('.scan-how-t', el).textContent = E.how;
+    $('.scan-stats', el).innerHTML = stats[i].map(([n, l]) => `<span><b>${n}</b> ${l}</span>`).join('');
+    cap.innerHTML = `<span class="t-label">Step ${i + 1} · ${esc(st.t)}</span><p>${esc(E.steps[i])}</p>`;
+    $$('.scan-key [data-key]', el).forEach(k => k.classList.toggle('on', +k.dataset.key === i));
+  }
+  function show(k, fromUser) {
+    i = k; root.dataset.s = k;
+    steps.forEach((b, j) => { b.setAttribute('aria-selected', j === k); b.tabIndex = j === k ? 0 : -1; b.classList.remove('run'); });
+    caption();
+    if (playing) { void steps[k].offsetWidth; steps[k].classList.add('run'); }
+    if (fromUser) setPlay(false);
+  }
+  function tick() { clearTimeout(timer); if (!playing || !visible) return; timer = setTimeout(() => { show((i + 1) % cfg.steps.length); tick(); }, 4200); }
+  function setPlay(v) { playing = v; playBtn.setAttribute('aria-pressed', v); playBtn.textContent = v ? 'Pause' : 'Play'; steps.forEach(b => b.classList.remove('run')); if (v) { void steps[i].offsetWidth; steps[i].classList.add('run'); tick(); } else clearTimeout(timer); }
+  steps.forEach(b => b.addEventListener('click', () => show(+b.dataset.k, true)));
+  $('.scan-steps', el).addEventListener('keydown', e => { if (!['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(e.key)) return; e.preventDefault(); const n = (i + ((e.key === 'ArrowDown' || e.key === 'ArrowRight') ? 1 : -1) + steps.length) % steps.length; show(n, true); steps[n].focus(); });
+  $$('[data-ex]', el).forEach(b => b.addEventListener('click', () => { ex = +b.dataset.ex; $$('[data-ex]', el).forEach(x => x.setAttribute('aria-pressed', x === b)); caption(); }));
+  playBtn.addEventListener('click', () => setPlay(!playing));
+  if (RM.matches) { playBtn.textContent = 'Play'; playBtn.setAttribute('aria-pressed', 'false'); }
+  new ResizeObserver(placeLabels).observe(grid);
+  const io = new IntersectionObserver(es => es.forEach(en => { visible = en.isIntersecting; if (visible && playing) { show(i); tick(); } else clearTimeout(timer); }), { threshold: .35 });
+  io.observe(el);
+  show(0); steps[0].classList.remove('run'); placeLabels();
+}
+
+/* =========================================================
+   CAROUSELS (scroll-snap, buttons, keyboard, mouse drag)
+   ========================================================= */
+function initCarousels(root) {
+  $$('[data-car]', root).forEach(c => {
+    const tr = $('.car-track', c), slides = $$('.car-slide', c), n = slides.length, cnt = $('.car-count', c), prog = $('.car-prog span', c);
+    const prev = $('[data-prev]', c), next = $('[data-next]', c);
+    const step = () => slides.length > 1 ? slides[1].offsetLeft - slides[0].offsetLeft : tr.clientWidth;
+    const max = () => tr.scrollWidth - tr.clientWidth;
+    const idx = () => tr.scrollLeft >= max() - 4 ? n - 1 : clamp(Math.round(tr.scrollLeft / step()), 0, n - 1);
+    const go = k => tr.scrollTo({ left: clamp(k, 0, n - 1) * step(), behavior: RM.matches ? 'auto' : 'smooth' });
+    let raf = 0;
+    const update = () => {
+      raf = 0; const k = idx(); const p = max() > 0 ? tr.scrollLeft / max() : 1;
+      cnt.textContent = `${String(k + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`;
+      prog.style.transform = `scaleX(${Math.max(.04, p)})`;
+      prev.disabled = tr.scrollLeft <= 4; next.disabled = tr.scrollLeft >= max() - 4;
+      slides.forEach((s, j) => s.classList.toggle('is-active', j === k));
+    };
+    tr.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
+    prev.addEventListener('click', () => go(idx() - 1)); next.addEventListener('click', () => go(idx() + 1));
+    tr.addEventListener('keydown', e => { if (e.target !== tr) return; if (e.key === 'ArrowRight') { e.preventDefault(); go(idx() + 1); } if (e.key === 'ArrowLeft') { e.preventDefault(); go(idx() - 1); } });
+    let down = false, moved = false, sx = 0, sl = 0;
+    tr.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.button !== 0) return; down = true; moved = false; sx = e.clientX; sl = tr.scrollLeft; });
+    window.addEventListener('pointermove', e => { if (!down) return; const dx = e.clientX - sx; if (!moved && Math.abs(dx) > 6) { moved = true; tr.classList.add('dragging'); } if (moved) tr.scrollLeft = sl - dx; });
+    window.addEventListener('pointerup', () => { if (!down) return; down = false; if (moved) { const v = tr.scrollLeft - sl; tr.classList.remove('dragging'); go(idx() + (Math.abs(v) > 40 && Math.round(tr.scrollLeft / step()) === Math.round(sl / step()) ? Math.sign(v) : 0)); } });
+    tr.addEventListener('click', e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+    new ResizeObserver(update).observe(tr);
+    update();
+  });
+}
+
+/* ---------- marquee pause + hero lockup replay ---------- */
+function initMarquee(root) {
+  $$('.marquee', root).forEach(m => { const b = $('.mq-btn', m); b.addEventListener('click', () => { const p = m.classList.toggle('paused'); b.setAttribute('aria-pressed', p); b.textContent = p ? 'Play' : 'Pause'; b.setAttribute('aria-label', p ? 'Play moving text' : 'Pause moving text'); }); });
+}
+function initLockup(root) {
+  const l = $('.hero-h', root); if (!l) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => l.classList.add('played')));
+  l.addEventListener('click', () => { l.classList.remove('played'); void l.offsetWidth; l.classList.add('played'); });
+}
+
+/* =========================================================
+   MAP LIBRARY (filterable) + INSIGHT WALL
+   ========================================================= */
+function wLibrary(el, cfg) {
+  const types = ['All', ...new Set(cfg.items.map(x => x[1]))], projs = ['All projects', 'Unilever', 'CLIQUE', 'Hydra'];
+  let t = 'All', pj = 'All projects';
+  el.innerHTML = `<div class="lib-filters"><div class="chips" role="group" aria-label="Filter by type">${types.map(x => `<button class="chip" data-t="${x}" aria-pressed="${x === t}">${x}</button>`).join('')}</div><div class="chips" role="group" aria-label="Filter by project">${projs.map(x => `<button class="chip" data-p="${x}" aria-pressed="${x === pj}">${x}</button>`).join('')}</div></div><p class="t-label lib-count" aria-live="polite"></p><div class="lib-grid"></div>`;
+  const grid = $('.lib-grid', el);
+  const draw = () => {
+    const list = cfg.items.filter(x => (t === 'All' || x[1] === t) && (pj === 'All projects' || x[2] === pj));
+    $('.lib-count', el).textContent = `${list.length} interactive map${list.length === 1 ? '' : 's'}`;
+    grid.innerHTML = list.map(([n, ty, p, d, href]) => `<a class="lib-card fp-anim" href="${href}"><span class="row between" style="gap:8px"><span class="t-label">${esc(ty)}</span><span class="lib-p lib-${p.toLowerCase()}">${esc(p)}</span></span><h3 class="t-h4">${esc(n)}</h3><p class="t-sm ink2">${esc(d)}</p><span class="lib-go">Open the map <span class="arrow" aria-hidden="true">→</span></span></a>`).join('');
+    $$('[data-t]', el).forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t)); $$('[data-p]', el).forEach(b => b.setAttribute('aria-pressed', b.dataset.p === pj));
+  };
+  $$('[data-t]', el).forEach(b => b.addEventListener('click', () => { t = b.dataset.t; draw(); }));
+  $$('[data-p]', el).forEach(b => b.addEventListener('click', () => { pj = b.dataset.p; draw(); }));
+  draw();
+}
+function wInsightWall(el, cfg) {
+  const themes = ['All', ...new Set(cfg.items.map(x => x[1]))]; let th = 'All';
+  el.innerHTML = `<div class="chips" role="group" aria-label="Filter insights by theme" style="margin-bottom:16px">${themes.map(x => `<button class="chip" data-th="${x}" aria-pressed="${x === th}">${x}</button>`).join('')}</div><div class="iw"></div>`;
+  const keyOf = { Unilever: 'unilever', CLIQUE: 'clique', Hydra: 'hydra' };
+  const draw = () => {
+    $('.iw', el).innerHTML = cfg.items.filter(x => th === 'All' || x[1] === th).map(([i, t, p], k) => `<a class="iw-card fp-anim" href="#/work/${keyOf[p]}/8"><span class="row between"><span class="t-label">${esc(t)}</span><span class="lib-p lib-${p.toLowerCase()}">${esc(p)}</span></span><p class="iw-t">${esc(i)}</p><span class="lib-go">See the evidence <span class="arrow" aria-hidden="true">→</span></span></a>`).join('');
+    $$('[data-th]', el).forEach(b => b.setAttribute('aria-pressed', b.dataset.th === th));
+  };
+  $$('[data-th]', el).forEach(b => b.addEventListener('click', () => { th = b.dataset.th; draw(); }));
+  draw();
+}
+
+const WIDGETS = { library: wLibrary, insights: wInsightWall, scanner: wScanner, graph: wGraph, mindmap: wMindmap, flow: wFlow, ptree: wProblemTree, bmc: wBMC, blueprint: wBlueprint, matrix: wMatrix, swot: wSwot, funnel: wFunnel, crm: wCRM, kpi: wKPI, timeline: wTimeline, objections: wObjections, revenue: wRevenue, capmx: wCapMatrix, lenses: wLenses };
+function mountWidgets(root) {
+  $$('[data-w]', root).forEach(el => {
+    const fn = WIDGETS[el.dataset.w], cfg = D[el.dataset.k];
+    if (!fn || !cfg) { console.warn('Missing widget', el.dataset.w, el.dataset.k); return; }
+    el.classList.add('widget');
+    try { fn(el, cfg); } catch (err) { console.error('Widget failed', el.dataset.k, err); }
+  });
+  initTabs(root);
+  initCarousels(root);
+  initMarquee(root);
+  initLockup(root);
+}
+const W = (type, key) => `<div data-w="${type}" data-k="${key}"></div>`;

@@ -1,0 +1,60 @@
+/* =========================================================
+   DRAFTDIGGER DEEP DIVE (in development: plans, not results)
+   ========================================================= */
+D.dd_plan = {
+  title: 'Mapping plan · how DraftDigger maps a founder\'s business',
+  cols: ['Understand the founder', 'Diagnose the market', 'Design the path', 'Run it together'],
+  when: ['Weeks of listening', 'Research', 'Strategy & structure', 'Execution'],
+  rows: [
+    { name: 'Key question', cells: ['What is the founder really trying to build?', 'Who is the customer, who else serves them, where is the gap?', 'Which direction, and what structure makes it run?', 'What happens first, and is it working?'] },
+    { name: 'Method', cells: ['Conversations, business walk-through, stakeholder mapping', 'Consumer insights, competitor analysis, problem trees', 'Positioning, business model, process and workflow design', 'Execution planning, coordination, feedback loops'] },
+    { name: 'Map produced', cells: ['Business ecosystem map', 'Positioning matrix, causal map', 'Business Model Canvas, service blueprint', 'Roadmap, tracker, performance framework'] },
+    { name: 'Founder gets', cells: ['A shared brief', 'Root causes and opportunities', 'A strategy with structure', 'Progress, measured honestly'] },
+    { name: 'Status', cells: ['ongoing', 'ongoing', 'ongoing', 'ongoing'] }
+  ]
+};
+D.dd_market = {
+  id: 'dd_market', title: 'Market research lens · food & beverage founders', tag: ['illus', 'Illustrative'],
+  x: ['Little access to strategic help', 'Easy access to strategic help'], y: ['Lower need for structure', 'Higher need for structure'],
+  q: ['DraftDigger\'s focus', 'Well served', 'Self-managing', 'Optional help'],
+  intro: 'Founder segments placed by judgement, not data. DraftDigger starts where the need for structured strategy is high but access to help is low.',
+  points: [
+    { id: 'home', label: 'Home food creators', x: 14, y: 60, desc: 'Strong product, little structure. Close to the creators CLIQUE was designed for.' },
+    { id: 'kiosk', label: 'Campus counters & kiosks', x: 24, y: 78, us: true, desc: 'The world of Taco Tango and Hydra placements: venues, decision-makers, tight operations.' },
+    { id: 'cafe', label: 'Independent cafés', x: 34, y: 70, us: true, desc: 'Founder-led, often stretched. A natural fit for positioning, structure and growth planning.' },
+    { id: 'bev', label: 'Beverage start-ups', x: 40, y: 84, us: true, desc: 'Brand, product roles and getting onto shelves: the Hydra playbook.' },
+    { id: 'cloud', label: 'Cloud-kitchen brands', x: 62, y: 56, desc: 'More systems in place; may need sharper positioning.' },
+    { id: 'group', label: 'Restaurant groups', x: 86, y: 40, desc: 'Usually have in-house teams or established advisers.' }
+  ]
+};
+D.dd_vpc = {
+  title: 'Founder insights · what founders need (hypotheses)',
+  sides: [{ name: 'Food & beverage founders', intro: 'What founders are trying to do, what gets in the way, and how DraftDigger intends to help. Hypotheses to test with the first founders.',
+    jobs: ['Turn a vision into a working business', 'Reach the right customers and channels', 'Grow without everything depending on them'],
+    pains: [['No clear direction on what to do next', 'Research, diagnosis and positioning'], ['Everything runs through the founder', 'Operational structure and workflow design'], ['Advice that stops at a report', 'Staying alongside through execution'], ['Doors that are hard to open', 'Coordination with partners, venues and specialists']],
+    gains: [['Clarity the whole team shares', 'A shared brief and strategy'], ['A business that runs on systems', 'Processes, roles and trackers'], ['Growth that is measured honestly', 'Execution plans and feedback loops']],
+    prod: ['Insight services', 'Direction services', 'Structure services', 'Growth services'] }]
+};
+D.dd_tree = {
+  goal: 'Become the partner food & beverage founders call first',
+  levers: [
+    { t: 'Proof', a: [['Case work at Unilever, CLIQUE and Hydra', 'done']] },
+    { t: 'Offer', a: [['Eleven services, six-stage process', 'ongoing']] },
+    { t: 'Network', a: [['External specialists to bring in', 'concept']] },
+    { t: 'Reach', a: [['First food & beverage founders', 'concept'], ['Other industries', 'ambition']] }
+  ]
+};
+const DD_HELP = [
+  ['Find the real problem', 'Research the market, the customer and the operation before advising anything.', 'Founders stop solving symptoms.'],
+  ['Pick a direction', 'Turn options into a positioning, an entry point and a business model.', 'One clear choice the team can rally around.'],
+  ['Build the structure', 'Design roles, processes and workflows that run without the founder in every decision.', 'Time back for the founder.'],
+  ['Open the right doors', 'Coordinate venues, partners and specialists, the way CLIQUE and Hydra were taken to institutions.', 'Access a young business rarely gets alone.'],
+  ['Stay for execution', 'Plan the first steps and stay alongside as they happen.', 'Strategy that actually reaches the customer.']
+];
+const DD_VS = [
+  ['Hand over a report', 'Stay through execution'],
+  ['Start with frameworks', 'Start with the founder\'s vision'],
+  ['Claim every skill in-house', 'Bring in specialists when needed'],
+  ['Serve every industry generically', 'Start with food & beverage, where the work has been done'],
+  ['Advise from the outside', 'Dig to the roots, together']
+];
